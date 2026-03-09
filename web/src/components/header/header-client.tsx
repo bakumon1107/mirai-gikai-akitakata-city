@@ -7,6 +7,7 @@ import { DifficultySelector } from "@/features/bill-difficulty/client/components
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import { InterviewHeaderActions } from "@/features/interview-session/client/components/interview-header-actions";
 import { isInterviewPage, isMainPage } from "@/lib/page-layout-utils";
+import { siteConfig } from "@/config/site.config";
 import { HamburgerMenu } from "./hamburger-menu";
 
 interface HeaderClientProps {
@@ -29,13 +30,15 @@ export function HeaderClient({ difficultyLevel }: HeaderClientProps) {
               className="flex items-center space-x-2"
               aria-label="ホーム"
             >
-              <Image
-                src="/img/logo.svg"
-                alt="みらい議会"
-                width={42}
-                height={36}
-              />
-              <div className="text-xl font-bold">みらい議会</div>
+              {siteConfig.features.showTeamMiraiSection && (
+                <Image
+                  src="/img/logo.svg"
+                  alt={siteConfig.siteName}
+                  width={42}
+                  height={36}
+                />
+              )}
+              <div className="text-xl font-bold">{siteConfig.siteName}</div>
             </Link>
           </div>
 

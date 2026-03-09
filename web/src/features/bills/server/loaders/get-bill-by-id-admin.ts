@@ -1,6 +1,6 @@
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
-import type { BillWithContent } from "../../shared/types";
+import type { BillWithContent, FactionStance } from "../../shared/types";
 import { getBillContentWithDifficulty } from "./helpers/get-bill-content";
 
 /**
@@ -14,12 +14,17 @@ export async function getBillByIdAdmin(
   const difficultyLevel = await getDifficultyLevel();
   const supabase = createAdminClient();
 
-  // 基本的なbill情報、見解、コンテンツ、タグを並列取得
+  // 基本的なbill情報、会派見解、コンテンツ、タグを並列取得
   // ステータスに関係なく取得（管理者用）
-  const [billResult, miraiStanceResult, billContent, tagsResult] =
+  const [billResult, factionStancesResult, billContent, tagsResult] =
     await Promise.all([
       supabase.from("bills").select("*").eq("id", id).single(),
-      supabase.from("mirai_stances").select("*").eq("bill_id", id).single(),
+      supabase
+        .from("faction_stances")
+        .select(
+          "id, type, comment, faction_id, factions(id, name, display_name, sort_order)"
+        )
+        .eq("bill_id", id),
       getBillContentWithDifficulty(id, difficultyLevel),
       supabase.from("bills_tags").select("tags(id, label)").eq("bill_id", id),
     ]);
@@ -30,8 +35,23 @@ export async function getBillByIdAdmin(
     return null;
   }
 
-  const { data: miraiStance } = miraiStanceResult;
+  const { data: stancesData } = factionStancesResult;
   const { data: billTags } = tagsResult;
+
+  // 会派見解データを整形（sort_order順）
+  const factionStances: FactionStance[] = (stancesData ?? [])
+    .map((s) => ({
+      id: s.id,
+      stance: s.type,
+      comment: s.comment ?? null,
+      faction: s.factions as unknown as {
+        id: string;
+        name: string;
+        display_name: string;
+        sort_order: number;
+      },
+    }))
+    .sort((a, b) => a.faction.sort_order - b.faction.sort_order);
 
   // タグデータを整形
   const tags =
@@ -42,7 +62,7 @@ export async function getBillByIdAdmin(
 
   return {
     ...bill,
-    mirai_stance: miraiStance || undefined,
+    faction_stances: factionStances.length > 0 ? factionStances : undefined,
     bill_content: billContent || undefined,
     tags,
   };

@@ -46,7 +46,7 @@ export async function handleInterviewChatRequest({
   currentStage,
   isRetry = false,
 }: InterviewChatRequestParams) {
-  // インタビュー設定と法案情報を取得
+  // インタビュー設定と議案情報を取得
   const [interviewConfig, bill] = await Promise.all([
     getInterviewConfigAdmin(billId),
     getBillByIdAdmin(billId),
@@ -196,13 +196,28 @@ async function determinNextStage({
     .join("\n");
 
   logger.debug("Facilitator Prompt:", facilitatorPrompt);
-  const result = await generateText({
-    model: AI_MODELS.gpt4o_mini,
-    prompt: `${facilitatorPrompt}\n\n# 会話履歴\n${conversationText}`,
-    output: Output.object({ schema: facilitatorResultSchema }),
-  });
+  try {
+    const result = await generateText({
+      model: AI_MODELS.gpt4o_mini,
+      prompt: `${facilitatorPrompt}\n\n# 会話履歴\n${conversationText}`,
+      output: Output.object({ schema: facilitatorResultSchema }),
+    });
 
-  return result.output.nextStage;
+    if (!result.output) {
+      logger.debug(
+        "Facilitator returned undefined output, falling back to currentStage"
+      );
+      return currentStage;
+    }
+
+    return result.output.nextStage;
+  } catch (error) {
+    logger.debug(
+      "Facilitator LLM call failed, falling back to currentStage:",
+      error
+    );
+    return currentStage;
+  }
 }
 
 /**

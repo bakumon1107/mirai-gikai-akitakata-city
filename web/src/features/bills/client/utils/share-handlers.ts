@@ -1,3 +1,5 @@
+import { siteConfig } from "@/config/site.config";
+
 export function shareOnTwitter(message: string, url: string) {
   const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     message
@@ -31,7 +33,7 @@ export async function shareNative(message: string, url: string) {
   if (navigator.share) {
     try {
       await navigator.share({
-        title: "みらい議会",
+        title: siteConfig.siteName,
         text: message,
         url: url,
       });

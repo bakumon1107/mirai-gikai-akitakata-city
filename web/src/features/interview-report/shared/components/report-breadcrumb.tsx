@@ -18,7 +18,7 @@ export function ReportBreadcrumb({
 }: ReportBreadcrumbProps) {
   const baseItems: BreadcrumbItem[] = [
     { label: "TOP", href: "/" },
-    { label: "法案詳細", href: getBillDetailLink(billId) },
+    { label: "議案詳細", href: getBillDetailLink(billId) },
     { label: "AIインタビュー" },
     { label: "レポート" },
   ];

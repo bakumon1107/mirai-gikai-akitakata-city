@@ -37,7 +37,7 @@ export async function ReportCompletePage({
 
   const billId = report.bill_id;
 
-  // 法案とメッセージを並列取得
+  // 議案とメッセージを並列取得
   const [bill, messages] = await Promise.all([
     getBillById(billId),
     getInterviewMessages(report.interview_session_id),
@@ -58,7 +58,7 @@ export async function ReportCompletePage({
 
   return (
     <div className="min-h-screen bg-[#F7F4F0]">
-      {/* 法案サムネイル画像 */}
+      {/* 議案サムネイル画像 */}
       {bill.thumbnail_url && (
         <div className="relative w-full h-[320px]">
           <Image
@@ -88,7 +88,7 @@ export async function ReportCompletePage({
             ご協力ありがとうございました
           </h1>
 
-          {/* 法案名 */}
+          {/* 議案名 */}
           <div className="bg-[#F2F2F7] rounded-xl px-4 py-2">
             <p className="text-sm text-gray-800">
               {bill.bill_content?.title || bill.name}
@@ -160,7 +160,7 @@ export async function ReportCompletePage({
               }
             />
 
-            {/* 法案の記事に戻るボタン */}
+            {/* 議案の記事に戻るボタン */}
             <div className="flex flex-col gap-3">
               <BackToBillButton billId={billId} />
             </div>

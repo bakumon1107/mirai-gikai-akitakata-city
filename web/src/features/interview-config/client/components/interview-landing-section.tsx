@@ -2,6 +2,7 @@ import { ArrowRight, Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/site.config";
 
 interface InterviewLandingSectionProps {
   billId: string;
@@ -10,15 +11,17 @@ interface InterviewLandingSectionProps {
 const CHECK_POINTS = [
   "所要時間は約5分〜",
   "AIがあなたのご意見を深掘り",
-  "チームみらいの政策検討に活用",
-] as const;
+  siteConfig.managingParty
+    ? `${siteConfig.managingParty}の政策検討に活用`
+    : "政策検討に活用",
+];
 
 function _InterviewBadge() {
   return (
     <div className="flex">
       <div className="inline-flex items-center justify-center gap-2 px-3 py-1 bg-[#E8E8E8] rounded-2xl">
         <span className="text-[11px] font-medium text-black leading-[1.09]">
-          法案の当事者の方へ
+          議案の当事者の方へ
         </span>
       </div>
     </div>
@@ -81,7 +84,7 @@ export function InterviewLandingSection({
 
         <div className="space-y-2">
           <h2 className="text-lg font-bold leading-[1.67]">
-            本法案についてのご意見を
+            本議案についてのご意見を
             <br className="pc:hidden" />
             お聞かせください
           </h2>

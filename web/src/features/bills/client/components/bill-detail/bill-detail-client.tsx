@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { siteConfig } from "@/config/site.config";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import { TextSelectionWrapper } from "@/features/bills/client/components/text-selection-tooltip/text-selection-wrapper";
 import {
@@ -33,6 +34,10 @@ export function BillDetailClient({
   const handleOpenChat = (selectedText: string) => {
     chatButtonRef.current?.openWithText(selectedText);
   };
+
+  if (!siteConfig.features.aiChat) {
+    return <>{children}</>;
+  }
 
   return (
     <>

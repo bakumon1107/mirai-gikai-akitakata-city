@@ -1,8 +1,7 @@
-import type { BillStatusEnum, HouseEnum } from "../../../shared/types";
+import type { BillStatusEnum } from "../../../shared/types";
 
 interface BillStatusProgressProps {
   status: BillStatusEnum;
-  originatingHouse: HouseEnum;
   statusNote?: string | null;
 }
 
@@ -18,21 +17,31 @@ interface ProgressStepProps {
   isPreparing: boolean;
 }
 
-// 基本ステップ定義
+// 基本ステップ定義（川崎市議会: 一院制）
 const BASE_STEPS = [
-  { label: "法案\n提出" },
-  { label: "衆議院\n審議" },
-  { label: "参議院\n審議" },
-  { label: "法案\n成立" },
+  { label: "議案\n上程" },
+  { label: "委員会\n審査" },
+  { label: "本会議\n採決" },
+  { label: "可決\n/否決" },
 ] as const;
+
+// ステータスラベル
+const STATUS_LABELS: Record<BillStatusEnum, string> = {
+  preparing: "議案上程前",
+  submitted: "上程済み",
+  in_committee: "委員会審査中",
+  plenary_session: "本会議採決中",
+  approved: "可決",
+  rejected: "否決",
+};
 
 // ステップ番号マッピング
 const STATUS_TO_STEP: Record<BillStatusEnum, number> = {
   preparing: 0,
-  introduced: 1,
-  in_originating_house: 2,
-  in_receiving_house: 3,
-  enacted: 4,
+  submitted: 1,
+  in_committee: 2,
+  plenary_session: 3,
+  approved: 4,
   rejected: 4,
 } as const;
 
@@ -101,15 +110,13 @@ function ProgressStep({
 
 export function BillStatusProgress({
   status,
-  originatingHouse,
   statusNote,
 }: BillStatusProgressProps) {
   const isPreparing = status === "preparing";
   const currentStep = STATUS_TO_STEP[status] ?? 0;
 
   const getStatusMessage = (): string => {
-    if (isPreparing) return "法案提出前";
-    return statusNote || "";
+    return STATUS_LABELS[status] ?? "";
   };
 
   const getStepState = (stepNumber: number): "active" | "inactive" => {
@@ -117,16 +124,7 @@ export function BillStatusProgress({
     return stepNumber <= currentStep ? "active" : "inactive";
   };
 
-  // 発議院に応じてステップ順序を調整
-  const getOrderedSteps = () => {
-    const steps = [...BASE_STEPS];
-    if (originatingHouse === "HC") {
-      [steps[1], steps[2]] = [steps[2], steps[1]];
-    }
-    return steps;
-  };
-
-  const orderedSteps = getOrderedSteps();
+  const orderedSteps = [...BASE_STEPS];
   const progressWidth = PROGRESS_RATIOS[currentStep] * 100;
 
   const statusMessage = getStatusMessage();
@@ -138,6 +136,12 @@ export function BillStatusProgress({
         <div className="flex flex-col items-center gap-7">
           {/* ステータスメッセージバッジ */}
           <StatusBadge message={statusMessage} />
+          {/* ステータス備考 */}
+          {statusNote && (
+            <p className="text-sm text-gray-600 text-center -mt-4">
+              {statusNote}
+            </p>
+          )}
 
           {/* プログレスライン */}
           <div className="relative w-full max-w-md">

@@ -19,41 +19,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  type BillStatus,
-  HOUSE_LABELS,
-  type OriginatingHouse,
-} from "@/features/bills/types";
-import type { DietSession } from "@/features/diet-sessions/types";
+import type { BillStatus } from "@/features/bills/types";
+import type { Committee } from "@/features/committees/types";
+import type { CouncilSession } from "@/features/council-sessions/types";
 import type { BillCreateInput } from "../types";
 import { ThumbnailUpload } from "./thumbnail-upload";
 
 const BILL_STATUS_OPTIONS: Array<{ value: BillStatus; label: string }> = [
-  { value: "preparing", label: "準備中" },
-  { value: "introduced", label: "提出済み" },
-  { value: "in_originating_house", label: "審議中（提出院）" },
-  { value: "in_receiving_house", label: "審議中（送付院）" },
-  { value: "enacted", label: "成立" },
+  { value: "preparing", label: "議案上程前" },
+  { value: "submitted", label: "上程済み" },
+  { value: "in_committee", label: "委員会審査中" },
+  { value: "plenary_session", label: "本会議採決中" },
+  { value: "approved", label: "可決" },
   { value: "rejected", label: "否決" },
 ];
-
-const ORIGINATING_HOUSE_OPTIONS = Object.entries(HOUSE_LABELS).map(
-  ([value, label]) => ({
-    value: value as OriginatingHouse,
-    label,
-  })
-);
 
 interface BillFormFieldsProps {
   control: Control<BillCreateInput>;
   billId?: string;
-  dietSessions: DietSession[];
+  councilSessions: CouncilSession[];
+  committees: Committee[];
 }
 
 export function BillFormFields({
   control,
   billId,
-  dietSessions,
+  councilSessions,
+  committees,
 }: BillFormFieldsProps) {
   return (
     <>
@@ -74,63 +66,31 @@ export function BillFormFields({
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField
-          control={control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ステータス *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="ステータスを選択" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {BILL_STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                現在の審議状況を選択してください
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="originating_house"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>提出院 *</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="提出院を選択" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {ORIGINATING_HOUSE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                議案を提出した議院を選択してください
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      <FormField
+        control={control}
+        name="status"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>ステータス *</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="ステータスを選択" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {BILL_STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormDescription>現在の審議状況を選択してください</FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       <FormField
         control={control}
@@ -215,19 +175,32 @@ export function BillFormFields({
 
       <FormField
         control={control}
-        name="shugiin_url"
+        name="committee_id"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>衆議院URL</FormLabel>
-            <FormControl>
-              <Input
-                {...field}
-                value={field.value || ""}
-                placeholder="https://www.shugiin.go.jp/..."
-              />
-            </FormControl>
+            <FormLabel>委員会</FormLabel>
+            <Select
+              onValueChange={(v) => field.onChange(v === "__none__" ? null : v)}
+              value={field.value ?? "__none__"}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="委員会を選択" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                <SelectItem value="__none__">なし</SelectItem>
+                {committees
+                  .filter((c) => c.is_active)
+                  .map((committee) => (
+                    <SelectItem key={committee.id} value={committee.id}>
+                      {committee.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
             <FormDescription>
-              衆議院の議案ページURLを入力してください（「これから掲載される法案」表示時に外部リンクとして使用）
+              審査を担当する委員会を選択してください（任意）
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -236,21 +209,21 @@ export function BillFormFields({
 
       <FormField
         control={control}
-        name="diet_session_id"
+        name="council_session_id"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>国会会期</FormLabel>
+            <FormLabel>定例会</FormLabel>
             <Select
               onValueChange={field.onChange}
               value={field.value ?? undefined}
             >
               <FormControl>
                 <SelectTrigger>
-                  <SelectValue placeholder="国会会期を選択" />
+                  <SelectValue placeholder="定例会を選択" />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                {dietSessions.map((session) => (
+                {councilSessions.map((session) => (
                   <SelectItem key={session.id} value={session.id}>
                     {session.name}（{session.start_date}〜{session.end_date}）
                   </SelectItem>
@@ -258,7 +231,7 @@ export function BillFormFields({
               </SelectContent>
             </Select>
             <FormDescription>
-              議案が提出された国会会期を選択してください
+              議案が上程された定例会を選択してください
             </FormDescription>
             <FormMessage />
           </FormItem>

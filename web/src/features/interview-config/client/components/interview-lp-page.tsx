@@ -2,6 +2,7 @@ import { ArrowRight, Undo2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/site.config";
 import type { BillWithContent } from "@/features/bills/shared/types";
 import { InterviewStatusBadge } from "@/features/interview-session/client/components/interview-status-badge";
 import type { LatestInterviewSession } from "@/features/interview-session/server/loaders/get-latest-interview-session";
@@ -25,14 +26,20 @@ const FEATURES = [
   {
     icon: "/icons/interview-icon-2.svg",
     iconWidth: 16,
-    text: "ご意見はチームみらいの\n政策検討に活かします",
+    text: siteConfig.managingParty
+      ? `ご意見は${siteConfig.managingParty}の\n政策検討に活かします`
+      : "ご意見は\n政策検討に活かします",
   },
-  {
-    icon: "/icons/interview-icon-3.svg",
-    iconWidth: 24,
-    text: "あなたの声がチームみらいを通じて国会に届けられる可能性があります",
-  },
-] as const;
+  ...(siteConfig.managingParty
+    ? [
+        {
+          icon: "/icons/interview-icon-3.svg",
+          iconWidth: 24,
+          text: `あなたの声が${siteConfig.managingParty}を通じて${siteConfig.councilName}に届けられる可能性があります`,
+        },
+      ]
+    : []),
+];
 
 function _InterviewLPHeader({ bill }: { bill: BillWithContent }) {
   return (
@@ -71,11 +78,11 @@ function _InterviewLPHero({
       <div className="flex flex-col items-center gap-3">
         <div className="inline-flex items-center justify-center gap-2 px-6 py-2 mb-3 bg-primary rounded-2xl">
           <span className="text-[15px] font-medium text-white leading-tight">
-            法案の当事者の方へ
+            議案の当事者の方へ
           </span>
         </div>
         <h1 className="text-2xl font-bold text-center leading-[1.5]">
-          法案についてのAIインタビュー
+          議案についてのAIインタビュー
         </h1>
         <Link href={billLink}>
           <div className="inline-flex items-center justify-center gap-2.5 px-4 py-2 bg-white rounded-xl hover:bg-gray-50 transition-opacity cursor-pointer">
@@ -135,7 +142,7 @@ function _InterviewOverviewSection({
       </h2>
       <div className="space-y-4 text-[15px] font-normal text-black leading-[1.87]">
         <p>
-          国会で検討されている
+          {siteConfig.councilName}で検討されている
           <Link
             href={billLink}
             className="text-primary underline underline-offset-2 hover:opacity-70 transition-opacity"
@@ -145,7 +152,8 @@ function _InterviewOverviewSection({
           について、AIがあなたの考えを深堀りするチャット型インタビューです
         </p>
         <p>
-          いただいたご意見は、政策研究や国会での審議に活用し、みらい議会上に公開される可能性があります。
+          いただいたご意見は、政策検討や市議会での審議に活用し、
+          {siteConfig.siteName}上に公開される可能性があります。
         </p>
       </div>
       <div>
@@ -154,7 +162,7 @@ function _InterviewOverviewSection({
             variant="outline"
             className="w-full border border-black rounded-[100px] h-[48px] px-6 font-bold text-[15px] hover:opacity-90 transition-opacity flex items-center justify-center gap-4"
           >
-            <span>法案詳細はこちら</span>
+            <span>議案詳細はこちら</span>
             <ArrowRight className="size-4" />
           </Button>
         </Link>
@@ -252,7 +260,7 @@ function _InterviewFooterActions({
       <Link href={billLink}>
         <Button variant="outline" className="w-full">
           <Undo2 className="size-5" />
-          <span>法案詳細に戻る</span>
+          <span>議案詳細に戻る</span>
         </Button>
       </Link>
     </div>

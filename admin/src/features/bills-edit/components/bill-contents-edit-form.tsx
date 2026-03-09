@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -21,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
+import { enrichBillContents } from "../actions/enrich-bill-contents";
 import { updateBillContents } from "../actions/update-bill-contents";
 import type { Bill } from "../types";
 import type {
@@ -44,6 +46,7 @@ export function BillContentsEditForm({
 }: BillContentsEditFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isEnriching, setIsEnriching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // BillContent配列を難易度別のオブジェクトに変換
@@ -73,6 +76,46 @@ export function BillContentsEditForm({
     defaultValues,
   });
 
+  async function handleEnrich() {
+    setIsEnriching(true);
+    setError(null);
+
+    const existingHardTitle = form.getValues("hard.title") ?? "";
+
+    try {
+      const result = await enrichBillContents(
+        bill.id,
+        bill.name,
+        existingHardTitle
+      );
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      if (!result.foundNewInfo) {
+        toast.info("新しい情報は見つかりませんでした");
+        return;
+      }
+
+      form.setValue("hard.content", result.content.hard.content);
+      form.setValue("hard.summary", result.content.hard.summary);
+      form.setValue("normal.title", result.content.normal.title);
+      form.setValue("normal.content", result.content.normal.content);
+      form.setValue("normal.summary", result.content.normal.summary);
+
+      toast.success(
+        "コンテンツを補完しました。内容を確認して保存してください。"
+      );
+    } catch (err) {
+      console.error("Enrich error:", err);
+      toast.error("補完中にエラーが発生しました");
+    } finally {
+      setIsEnriching(false);
+    }
+  }
+
   async function onSubmit(data: BillContentsUpdateInput) {
     setIsSubmitting(true);
     setError(null);
@@ -92,8 +135,36 @@ export function BillContentsEditForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>議案コンテンツ編集</CardTitle>
-        <p className="text-sm text-gray-600">{bill.name}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <CardTitle>議案コンテンツ編集</CardTitle>
+            <p className="text-sm text-gray-600 mt-1">{bill.name}</p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleEnrich}
+            disabled={isEnriching || isSubmitting}
+            className="shrink-0"
+          >
+            {isEnriching ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Web検索中...
+              </>
+            ) : (
+              <>
+                <Search className="mr-2 h-4 w-4" />
+                Web検索で補完
+              </>
+            )}
+          </Button>
+        </div>
+        {isEnriching && (
+          <p className="text-xs text-gray-500 mt-2">
+            Webを検索してコンテンツを生成しています。数分かかる場合があります...
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         <Form {...form}>

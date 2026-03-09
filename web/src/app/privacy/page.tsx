@@ -6,10 +6,11 @@ import {
   LegalParagraph,
   LegalSectionTitle,
 } from "@/components/layouts/legal-page-layout";
+import { siteConfig } from "@/config/site.config";
 
 export const metadata: Metadata = {
-  title: "プライバシーポリシー | みらい議会",
-  description: "みらい議会のプライバシーポリシー",
+  title: `プライバシーポリシー | ${siteConfig.siteName}`,
+  description: `${siteConfig.siteName}のプライバシーポリシー`,
 };
 
 export default function PrivacyPage() {
@@ -17,7 +18,7 @@ export default function PrivacyPage() {
     <LegalPageLayout
       className="bg-transparent pt-24 md:pt-12"
       title="プライバシーポリシー"
-      description="みらい議会における個人情報の取り扱いについてご説明します。"
+      description={`${siteConfig.siteName}における個人情報の取り扱いについてご説明します。`}
     >
       <Container className="space-y-8">
         <section className="space-y-4">
@@ -100,8 +101,19 @@ export default function PrivacyPage() {
             個人情報の確認・修正・削除・利用停止等をご希望される場合は、下記のお問い合わせ窓口までご連絡ください。なお、ご請求内容がご本人によるものであることが確認できた場合に限り、必要な調査を行い、その結果に基づき適切な対応を行います。
           </LegalParagraph>
           <LegalParagraph>お問い合わせ窓口</LegalParagraph>
-          <LegalParagraph>チームみらい 個人情報保護管理責任者</LegalParagraph>
-          <LegalParagraph>support@team-mir.ai</LegalParagraph>
+          <LegalParagraph>
+            {siteConfig.operator.name} 個人情報保護管理責任者
+          </LegalParagraph>
+          <LegalParagraph>
+            <a
+              href={siteConfig.operator.contactUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-2"
+            >
+              {siteConfig.operator.contactUrl}
+            </a>
+          </LegalParagraph>
         </section>
       </Container>
     </LegalPageLayout>

@@ -64,11 +64,11 @@ export const loopModeLogic: InterviewModeLogic = {
 - 中級：専門用語を少し使用し、中程度の深さ
 - 専門家: ドメイン固有の用語を使用し、深い技術的議論に参加する
 
-## 法案情報
-- 法案名: ${billName}
-- 法案タイトル: ${billTitle}
-- 法案要約: ${billSummary}
-- 法案詳細: ${billContent}
+## 議案情報
+- 議案名: ${billName}
+- 議案タイトル: ${billTitle}
+- 議案要約: ${billSummary}
+- 議案詳細: ${billContent}
 
 ## インタビューテーマ
 ${themes.length > 0 ? themes.map((t: string) => `- ${t}`).join("\n") : "（テーマ未設定）"}
@@ -105,7 +105,7 @@ ${modeInstructions}
 - ユーザーの回答を尊重し、押し付けがましくならないようにしてください
 - **1つのメッセージにつき1つの質問のみをしてください。** 一度に複数の質問をしないでください。
 - 回答が抽象的な場合は具体的な例を求めてください
-- 法案に関する質問のみに集中してください
+- 議案に関する質問のみに集中してください
 `;
   },
 

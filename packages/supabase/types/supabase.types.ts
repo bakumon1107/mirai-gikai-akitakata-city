@@ -77,48 +77,45 @@ export type Database = {
       }
       bills: {
         Row: {
+          committee_id: string | null
+          council_session_id: string | null
           created_at: string
-          diet_session_id: string | null
           id: string
           is_featured: boolean
           name: string
-          originating_house: Database["public"]["Enums"]["house_enum"]
           publish_status: Database["public"]["Enums"]["bill_publish_status"]
           published_at: string | null
           share_thumbnail_url: string | null
-          shugiin_url: string | null
           status: Database["public"]["Enums"]["bill_status_enum"]
           status_note: string | null
           thumbnail_url: string | null
           updated_at: string
         }
         Insert: {
+          committee_id?: string | null
+          council_session_id?: string | null
           created_at?: string
-          diet_session_id?: string | null
           id?: string
           is_featured?: boolean
           name: string
-          originating_house: Database["public"]["Enums"]["house_enum"]
           publish_status?: Database["public"]["Enums"]["bill_publish_status"]
           published_at?: string | null
           share_thumbnail_url?: string | null
-          shugiin_url?: string | null
           status: Database["public"]["Enums"]["bill_status_enum"]
           status_note?: string | null
           thumbnail_url?: string | null
           updated_at?: string
         }
         Update: {
+          committee_id?: string | null
+          council_session_id?: string | null
           created_at?: string
-          diet_session_id?: string | null
           id?: string
           is_featured?: boolean
           name?: string
-          originating_house?: Database["public"]["Enums"]["house_enum"]
           publish_status?: Database["public"]["Enums"]["bill_publish_status"]
           published_at?: string | null
           share_thumbnail_url?: string | null
-          shugiin_url?: string | null
           status?: Database["public"]["Enums"]["bill_status_enum"]
           status_note?: string | null
           thumbnail_url?: string | null
@@ -126,10 +123,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "bills_diet_session_id_fkey"
-            columns: ["diet_session_id"]
+            foreignKeyName: "bills_council_session_id_fkey"
+            columns: ["council_session_id"]
             isOneToOne: false
-            referencedRelation: "diet_sessions"
+            referencedRelation: "council_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bills_committee_id_fkey"
+            columns: ["committee_id"]
+            isOneToOne: false
+            referencedRelation: "committees"
             referencedColumns: ["id"]
           },
         ]
@@ -250,38 +254,146 @@ export type Database = {
           },
         ]
       }
-      diet_sessions: {
+      committees: {
         Row: {
           created_at: string
-          end_date: string
+          description: string | null
           id: string
           is_active: boolean
           name: string
-          shugiin_url: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      council_sessions: {
+        Row: {
+          council_url: string | null
+          created_at: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          name: string
           slug: string | null
           start_date: string
           updated_at: string
         }
         Insert: {
+          council_url?: string | null
           created_at?: string
-          end_date: string
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name: string
-          shugiin_url?: string | null
           slug?: string | null
           start_date: string
           updated_at?: string
         }
         Update: {
+          council_url?: string | null
           created_at?: string
-          end_date?: string
+          end_date?: string | null
           id?: string
           is_active?: boolean
           name?: string
-          shugiin_url?: string | null
           slug?: string | null
           start_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      faction_stances: {
+        Row: {
+          bill_id: string
+          comment: string | null
+          created_at: string
+          faction_id: string
+          id: string
+          type: Database["public"]["Enums"]["stance_type_enum"]
+          updated_at: string
+        }
+        Insert: {
+          bill_id: string
+          comment?: string | null
+          created_at?: string
+          faction_id: string
+          id?: string
+          type: Database["public"]["Enums"]["stance_type_enum"]
+          updated_at?: string
+        }
+        Update: {
+          bill_id?: string
+          comment?: string | null
+          created_at?: string
+          faction_id?: string
+          id?: string
+          type?: Database["public"]["Enums"]["stance_type_enum"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "faction_stances_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "faction_stances_faction_id_fkey"
+            columns: ["faction_id"]
+            isOneToOne: false
+            referencedRelation: "factions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      factions: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
@@ -510,41 +622,6 @@ export type Database = {
           },
         ]
       }
-      mirai_stances: {
-        Row: {
-          bill_id: string
-          comment: string | null
-          created_at: string
-          id: string
-          type: Database["public"]["Enums"]["stance_type_enum"]
-          updated_at: string
-        }
-        Insert: {
-          bill_id: string
-          comment?: string | null
-          created_at?: string
-          id?: string
-          type: Database["public"]["Enums"]["stance_type_enum"]
-          updated_at?: string
-        }
-        Update: {
-          bill_id?: string
-          comment?: string | null
-          created_at?: string
-          id?: string
-          type?: Database["public"]["Enums"]["stance_type_enum"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "mirai_stances_bill_id_fkey"
-            columns: ["bill_id"]
-            isOneToOne: true
-            referencedRelation: "bills"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       preview_tokens: {
         Row: {
           bill_id: string
@@ -620,7 +697,7 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
-      set_active_diet_session: {
+      set_active_council_session: {
         Args: { target_session_id: string }
         Returns: undefined
       }
@@ -628,15 +705,14 @@ export type Database = {
     Enums: {
       bill_publish_status: "draft" | "published" | "coming_soon"
       bill_status_enum:
-        | "introduced"
-        | "in_originating_house"
-        | "in_receiving_house"
-        | "enacted"
-        | "rejected"
         | "preparing"
+        | "submitted"
+        | "in_committee"
+        | "plenary_session"
+        | "approved"
+        | "rejected"
       chat_role_enum: "user" | "system" | "assistant"
       difficulty_level_enum: "normal" | "hard"
-      house_enum: "HR" | "HC"
       interview_config_status_enum: "public" | "closed"
       interview_mode_enum: "loop" | "bulk"
       interview_report_role_enum:
@@ -785,16 +861,15 @@ export const Constants = {
     Enums: {
       bill_publish_status: ["draft", "published", "coming_soon"],
       bill_status_enum: [
-        "introduced",
-        "in_originating_house",
-        "in_receiving_house",
-        "enacted",
-        "rejected",
         "preparing",
+        "submitted",
+        "in_committee",
+        "plenary_session",
+        "approved",
+        "rejected",
       ],
       chat_role_enum: ["user", "system", "assistant"],
       difficulty_level_enum: ["normal", "hard"],
-      house_enum: ["HR", "HC"],
       interview_config_status_enum: ["public", "closed"],
       interview_mode_enum: ["loop", "bulk"],
       interview_report_role_enum: [
@@ -816,4 +891,3 @@ export const Constants = {
     },
   },
 } as const
-

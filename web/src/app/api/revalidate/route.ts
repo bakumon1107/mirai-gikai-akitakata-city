@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
 
     // Revalidate all cache tags
     revalidateTag(CACHE_TAGS.BILLS);
-    revalidateTag(CACHE_TAGS.DIET_SESSIONS);
+    revalidateTag(CACHE_TAGS.COUNCIL_SESSIONS);
 
     return NextResponse.json({
       success: true,

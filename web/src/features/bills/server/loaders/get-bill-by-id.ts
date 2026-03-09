@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import { CACHE_TAGS } from "@/lib/cache-tags";
-import type { BillWithContent } from "../../shared/types";
+import type { BillWithContent, FactionStance } from "../../shared/types";
 import { getBillContentWithDifficulty } from "./helpers/get-bill-content";
 
 export async function getBillById(id: string): Promise<BillWithContent | null> {
@@ -19,9 +19,9 @@ const _getCachedBillById = unstable_cache(
   ): Promise<BillWithContent | null> => {
     const supabase = createAdminClient();
 
-    // 基本的なbill情報、見解、コンテンツ、タグを並列取得
+    // 基本的なbill情報、会派見解、コンテンツ、タグを並列取得
     // 公開ステータスの議案のみを取得
-    const [billResult, miraiStanceResult, billContent, tagsResult] =
+    const [billResult, factionStancesResult, billContent, tagsResult] =
       await Promise.all([
         supabase
           .from("bills")
@@ -29,7 +29,12 @@ const _getCachedBillById = unstable_cache(
           .eq("id", id)
           .eq("publish_status", "published") // 公開済み議案のみ
           .single(),
-        supabase.from("mirai_stances").select("*").eq("bill_id", id).single(),
+        supabase
+          .from("faction_stances")
+          .select(
+            "id, type, comment, faction_id, factions(id, name, display_name, sort_order)"
+          )
+          .eq("bill_id", id),
         getBillContentWithDifficulty(id, difficultyLevel),
         supabase.from("bills_tags").select("tags(id, label)").eq("bill_id", id),
       ]);
@@ -40,8 +45,23 @@ const _getCachedBillById = unstable_cache(
       return null;
     }
 
-    const { data: miraiStance } = miraiStanceResult;
+    const { data: stancesData } = factionStancesResult;
     const { data: billTags } = tagsResult;
+
+    // 会派見解データを整形（sort_order順）
+    const factionStances: FactionStance[] = (stancesData ?? [])
+      .map((s) => ({
+        id: s.id,
+        stance: s.type,
+        comment: s.comment ?? null,
+        faction: s.factions as unknown as {
+          id: string;
+          name: string;
+          display_name: string;
+          sort_order: number;
+        },
+      }))
+      .sort((a, b) => a.faction.sort_order - b.faction.sort_order);
 
     // タグデータを整形
     const tags =
@@ -52,7 +72,7 @@ const _getCachedBillById = unstable_cache(
 
     return {
       ...bill,
-      mirai_stance: miraiStance || undefined,
+      faction_stances: factionStances.length > 0 ? factionStances : undefined,
       bill_content: billContent || undefined,
       tags,
     };

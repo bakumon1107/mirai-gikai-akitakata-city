@@ -2,7 +2,7 @@ import { createAdminClient } from "@mirai-gikai/supabase";
 import type { InterviewConfig } from "../types";
 
 /**
- * 法案IDからすべてのインタビュー設定を取得する（複数設定対応）
+ * 議案IDからすべてのインタビュー設定を取得する（複数設定対応）
  */
 export async function getInterviewConfigs(
   billId: string

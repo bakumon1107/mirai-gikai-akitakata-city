@@ -1,5 +1,5 @@
 import { LinkButton } from "@/components/top/link-button";
-import { EXTERNAL_LINKS } from "@/config/external-links";
+import { siteConfig } from "@/config/site.config";
 
 /**
  * デスクトップメニュー: アクションボタン（サイドバー内）
@@ -8,7 +8,7 @@ export function DesktopMenuActionButtons() {
   return (
     <div className="flex flex-col gap-3">
       <LinkButton
-        href={EXTERNAL_LINKS.ABOUT_NOTE}
+        href={siteConfig.externalLinks.aboutNote}
         icon={{
           src: "/icons/note-icon.png",
           alt: "note",
@@ -16,11 +16,11 @@ export function DesktopMenuActionButtons() {
           height: 20,
         }}
       >
-        みらい議会とは
+        {siteConfig.siteName}とは
       </LinkButton>
 
       <LinkButton
-        href={EXTERNAL_LINKS.DONATION}
+        href={siteConfig.externalLinks.donation}
         icon={{
           src: "/icons/heart-icon.svg",
           alt: "寄附",

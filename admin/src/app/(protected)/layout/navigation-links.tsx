@@ -6,8 +6,11 @@ import { cn } from "@/lib/utils";
 
 const navigationLinks = [
   { href: "/bills", label: "議案管理" },
-  { href: "/diet-sessions", label: "国会会期管理" },
+  { href: "/council-sessions", label: "定例会管理" },
   { href: "/tags", label: "タグ管理" },
+  { href: "/factions", label: "会派管理" },
+  { href: "/committees", label: "委員会管理" },
+  { href: "/ai-collection", label: "AI情報収集" },
 ];
 
 export function NavigationLinks() {

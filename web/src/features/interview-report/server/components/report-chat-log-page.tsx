@@ -108,10 +108,23 @@ interface ChatMessageProps {
   };
 }
 
+function extractAssistantText(content: string): string {
+  try {
+    const parsed = JSON.parse(content);
+    if (typeof parsed?.text === "string") {
+      return parsed.text;
+    }
+  } catch {
+    // JSONでない場合はそのまま返す
+  }
+  return content;
+}
+
 function ChatMessage({ message }: ChatMessageProps) {
   const isAssistant = message.role === "assistant";
 
   if (isAssistant) {
+    const text = extractAssistantText(message.content);
     // AI message: icon on top left with gray background, then plain text below
     return (
       <div className="flex flex-col items-start gap-2">
@@ -119,7 +132,7 @@ function ChatMessage({ message }: ChatMessageProps) {
           <Bot size={24} className="text-gray-600" />
         </div>
         <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap text-gray-800">
-          {message.content}
+          {text}
         </p>
       </div>
     );

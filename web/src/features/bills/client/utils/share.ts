@@ -1,3 +1,4 @@
+import { siteConfig } from "@/config/site.config";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import { getOrigin } from "@/lib/utils/url";
@@ -19,7 +20,7 @@ export function createBillShareUrl(
  */
 export function createShareMessage(bill: BillWithContent): string {
   const displayTitle = bill.bill_content?.title ?? bill.name;
-  return `${displayTitle} #みらい議会`;
+  return `${displayTitle} #${siteConfig.twitterHashtag}`;
 }
 
 /**

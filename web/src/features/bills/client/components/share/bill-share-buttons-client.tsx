@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { EXTERNAL_LINKS } from "@/config/external-links";
+import { siteConfig } from "@/config/site.config";
 import { BillShareModal } from "./bill-share-modal";
 
 interface BillShareButtonsClientProps {
@@ -28,7 +28,7 @@ export function BillShareButtonsClient({
   };
 
   const handleReport = () => {
-    window.open(EXTERNAL_LINKS.REPORT, "_blank");
+    window.open(siteConfig.externalLinks.report, "_blank");
   };
 
   return (

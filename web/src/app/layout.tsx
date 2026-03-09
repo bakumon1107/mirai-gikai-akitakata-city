@@ -8,6 +8,7 @@ import { Header } from "@/components/header";
 import { AuthGate } from "@/components/layouts/auth-gate";
 import { Footer } from "@/components/layouts/footer/footer";
 import { MainLayout } from "@/components/layouts/main-layout";
+import { siteConfig } from "@/config/site.config";
 import { env } from "@/lib/env";
 import { RubyfulInitializer } from "@/lib/rubyful";
 
@@ -23,37 +24,33 @@ const lexendGiga = Lexend_Giga({
   weight: ["400", "500", "700", "800", "900"],
 });
 
-const siteTitle = "みらい議会｜チームみらい";
-const siteDescription =
-  "国会で今どんな法案が検討されているか、わかりやすく伝えるプラットフォーム";
-const siteName = "みらい議会";
 const ogImage = {
   url: "/ogp.jpg",
   width: 1200,
   height: 630,
-  alt: "みらい議会のOGPイメージ",
+  alt: `${siteConfig.siteName}のOGPイメージ`,
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.webUrl),
-  title: siteTitle,
-  description: siteDescription,
-  keywords: [siteName, "議案", "政治", "日本", "政策", "解説", "チームみらい"],
+  title: siteConfig.siteName,
+  description: siteConfig.siteDescription,
+  keywords: [...siteConfig.keywords],
   icons: {
     icon: "/icons/pwa/icon_android_192.png",
     apple: "/icons/pwa/icon_ios.png",
   },
   manifest: "/manifest.json",
   openGraph: {
-    title: siteTitle,
-    description: siteDescription,
+    title: siteConfig.siteName,
+    description: siteConfig.siteDescription,
     images: [ogImage],
-    siteName,
+    siteName: siteConfig.siteName,
   },
   twitter: {
     card: "summary_large_image",
-    title: siteTitle,
-    description: siteDescription,
+    title: siteConfig.siteName,
+    description: siteConfig.siteDescription,
     images: [ogImage.url],
   },
   robots: {

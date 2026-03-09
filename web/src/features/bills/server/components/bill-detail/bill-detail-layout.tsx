@@ -1,11 +1,12 @@
 import { Container } from "@/components/layouts/container";
+import { siteConfig } from "@/config/site.config";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import { InterviewLandingSection } from "@/features/interview-config/client/components/interview-landing-section";
 import { getInterviewConfig } from "@/features/interview-config/server/loaders/get-interview-config";
 import { BillDetailClient } from "../../../client/components/bill-detail/bill-detail-client";
 import { BillDisclaimer } from "../../../client/components/bill-detail/bill-disclaimer";
 import { BillStatusProgress } from "../../../client/components/bill-detail/bill-status-progress";
-import { MiraiStanceCard } from "../../../client/components/bill-detail/mirai-stance-card";
+import { FactionStanceCard } from "../../../client/components/bill-detail/faction-stance-card";
 import type { BillWithContent } from "../../../shared/types";
 import { BillShareButtons } from "../share/bill-share-buttons";
 import { BillContent } from "./bill-content";
@@ -20,8 +21,12 @@ export async function BillDetailLayout({
   bill,
   currentDifficulty,
 }: BillDetailLayoutProps) {
-  const showMiraiStance = bill.status === "preparing" || bill.mirai_stance;
-  const interviewConfig = await getInterviewConfig(bill.id);
+  const showStances =
+    bill.status === "preparing" ||
+    (bill.faction_stances && bill.faction_stances.length > 0);
+  const interviewConfig = siteConfig.features.aiInterview
+    ? await getInterviewConfig(bill.id)
+    : null;
 
   return (
     <div className="container mx-auto pb-8 max-w-4xl">
@@ -38,7 +43,6 @@ export async function BillDetailLayout({
           <div className="my-8">
             <BillStatusProgress
               status={bill.status}
-              originatingHouse={bill.originating_house}
               statusNote={bill.status_note}
             />
           </div>
@@ -48,16 +52,15 @@ export async function BillDetailLayout({
       </BillDetailClient>
 
       <Container>
-        {/* リリース近づくまでは開発環境でのみ表示 */}
-        {interviewConfig != null && process.env.NODE_ENV === "development" && (
+        {siteConfig.features.aiInterview && interviewConfig != null && (
           <div className="my-8">
             <InterviewLandingSection billId={bill.id} />
           </div>
         )}
-        {showMiraiStance && (
+        {showStances && (
           <div className="my-8">
-            <MiraiStanceCard
-              stance={bill.mirai_stance}
+            <FactionStanceCard
+              stances={bill.faction_stances ?? []}
               billStatus={bill.status}
             />
           </div>

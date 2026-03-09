@@ -1,8 +1,12 @@
 import { MessageCircleQuestion } from "lucide-react";
 import Image from "next/image";
+import { siteConfig } from "@/config/site.config";
 import { ManualRuby } from "@/lib/rubyful/manual-ruby";
 
 export function LongPressSection() {
+  if (!siteConfig.features.aiChat) {
+    return null;
+  }
   return (
     <section className="relative bg-white rounded-2xl !px-3 !py-10 overflow-hidden">
       {/* コンテンツエリア */}

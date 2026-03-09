@@ -198,7 +198,7 @@ export function InterviewConfigForm({
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      インタビュー機能の有効/無効を設定します。公開設定は法案ごとに1つのみ可能です。
+                      インタビュー機能の有効/無効を設定します。公開設定は議案ごとに1つのみ可能です。
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -269,7 +269,7 @@ export function InterviewConfigForm({
                       />
                     </FormControl>
                     <FormDescription>
-                      AIが質問を生成する際に参照する情報を入力してください。法案コンテンツは自動で読み込まれます。
+                      AIが質問を生成する際に参照する情報を入力してください。議案コンテンツは自動で読み込まれます。
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

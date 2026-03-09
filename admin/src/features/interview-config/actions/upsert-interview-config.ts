@@ -10,7 +10,7 @@ export type InterviewConfigResult =
   | { success: false; error: string };
 
 /**
- * 同じ法案の他の公開設定を非公開にする
+ * 同じ議案の他の公開設定を非公開にする
  */
 async function closeOtherPublicConfigs(
   supabase: ReturnType<typeof createAdminClient>,

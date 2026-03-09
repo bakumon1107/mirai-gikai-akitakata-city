@@ -11,10 +11,7 @@ export type BillContentInsert =
 export type BillContentUpdate =
   Database["public"]["Tables"]["bill_contents"]["Update"];
 
-export type MiraiStance = Database["public"]["Tables"]["mirai_stances"]["Row"];
-
 // Enums
-export type HouseEnum = Database["public"]["Enums"]["house_enum"];
 export type BillStatusEnum = Database["public"]["Enums"]["bill_status_enum"];
 export type StanceTypeEnum = Database["public"]["Enums"]["stance_type_enum"];
 
@@ -26,13 +23,24 @@ export type ComingSoonBill = {
   id: string;
   name: string; // 正式名称
   title: string | null; // わかりやすいタイトル（bill_contentsから）
-  originating_house: HouseEnum;
-  shugiin_url: string | null;
+  council_url: string | null;
 };
 
 // Combined types for UI
+export type FactionStance = {
+  id: string;
+  stance: StanceTypeEnum;
+  comment: string | null;
+  faction: {
+    id: string;
+    name: string;
+    display_name: string;
+    sort_order: number;
+  };
+};
+
 export type BillWithStance = Bill & {
-  mirai_stance?: MiraiStance;
+  faction_stances?: FactionStance[];
 };
 
 export type BillTag = {
@@ -48,7 +56,8 @@ export type FeaturedTag = {
 
 export type BillWithContent = Bill & {
   bill_content?: BillContent;
-  mirai_stance?: MiraiStance;
+  faction_stances?: FactionStance[];
+  committee_id: string | null;
   tags: BillTag[];
   featured_tag?: FeaturedTag;
 };
@@ -59,39 +68,23 @@ export type BillsByTag = {
   bills: BillWithContent[];
 };
 
-// House display mapping
-export const HOUSE_LABELS: Record<HouseEnum, string> = {
-  HR: "衆議院",
-  HC: "参議院",
-};
-
 // ステータスを日本語ラベルに変換する関数
-export function getBillStatusLabel(
-  status: BillStatusEnum,
-  originatingHouse?: HouseEnum | null
-): string {
+export function getBillStatusLabel(status: BillStatusEnum): string {
   switch (status) {
     case "preparing":
       return "準備中";
-    case "introduced":
-      return "提出済み";
-    case "in_originating_house":
-      if (originatingHouse) {
-        return `${HOUSE_LABELS[originatingHouse]}審議中`;
-      }
-      return "審議中"; // フォールバック
-    case "in_receiving_house":
-      if (originatingHouse) {
-        const receivingHouse = originatingHouse === "HR" ? "HC" : "HR";
-        return `${HOUSE_LABELS[receivingHouse]}審議中`;
-      }
-      return "審議中"; // フォールバック
-    case "enacted":
-      return "成立";
+    case "submitted":
+      return "上程済み";
+    case "in_committee":
+      return "委員会審査中";
+    case "plenary_session":
+      return "本会議採決中";
+    case "approved":
+      return "可決";
     case "rejected":
       return "否決";
     default:
-      return status; // 未知のステータスはそのまま返す
+      return status;
   }
 }
 

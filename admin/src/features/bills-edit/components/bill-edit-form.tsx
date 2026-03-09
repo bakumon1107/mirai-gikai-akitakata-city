@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 
-import type { DietSession } from "@/features/diet-sessions/types";
+import type { Committee } from "@/features/committees/types";
+import type { CouncilSession } from "@/features/council-sessions/types";
 import { updateBill } from "../actions/update-bill";
 import { useBillForm } from "../hooks/use-bill-form";
 import { type Bill, type BillUpdateInput, billUpdateSchema } from "../types";
@@ -15,32 +16,36 @@ import { BillFormFields } from "./bill-form-fields";
 
 interface BillEditFormProps {
   bill: Bill;
-  dietSessions: DietSession[];
+  councilSessions: CouncilSession[];
+  committees: Committee[];
 }
 
-export function BillEditForm({ bill, dietSessions }: BillEditFormProps) {
+export function BillEditForm({
+  bill,
+  councilSessions,
+  committees,
+}: BillEditFormProps) {
   const { isSubmitting, error, handleSubmit, handleCancel } = useBillForm();
 
-  // If bill has no diet_session_id, default to the latest session (first in the list)
-  const defaultDietSessionId =
-    bill.diet_session_id ??
-    (dietSessions.length > 0 ? dietSessions[0].id : null);
+  // If bill has no council_session_id, default to the latest session (first in the list)
+  const defaultCouncilSessionId =
+    bill.council_session_id ??
+    (councilSessions.length > 0 ? councilSessions[0].id : null);
 
   const form = useForm<BillUpdateInput>({
     resolver: zodResolver(billUpdateSchema),
     defaultValues: {
       name: bill.name,
       status: bill.status,
-      originating_house: bill.originating_house,
       status_note: bill.status_note,
       published_at: bill.published_at
         ? new Date(bill.published_at).toISOString().slice(0, 16)
         : "",
       thumbnail_url: bill.thumbnail_url,
       share_thumbnail_url: bill.share_thumbnail_url,
-      shugiin_url: bill.shugiin_url,
       is_featured: bill.is_featured,
-      diet_session_id: defaultDietSessionId,
+      committee_id: bill.committee_id,
+      council_session_id: defaultCouncilSessionId,
     },
   });
 
@@ -62,7 +67,8 @@ export function BillEditForm({ bill, dietSessions }: BillEditFormProps) {
             <BillFormFields
               control={form.control}
               billId={bill.id}
-              dietSessions={dietSessions}
+              councilSessions={councilSessions}
+              committees={committees}
             />
 
             {error && (

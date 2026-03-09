@@ -25,7 +25,7 @@ export async function generateInitialQuestion({
   interviewConfigId,
 }: GenerateInitialQuestionParams): Promise<InterviewMessage | null> {
   try {
-    // インタビュー設定と法案情報を取得
+    // インタビュー設定と議案情報を取得
     // どちらもサーバーサイドでの生成処理のため、常にAdmin用（非公開制限なし）を使用する
     const [interviewConfig, bill, questions] = await Promise.all([
       getInterviewConfigAdmin(billId),
@@ -46,7 +46,7 @@ export async function generateInitialQuestion({
 
     // インタビュー開始の指示を追加（最初の質問にはクイックリプライとquestion_idを含める）
     const firstQuestionId = questions[0]?.id;
-    const billTitle = bill?.bill_content?.title ?? bill?.name ?? "この法案";
+    const billTitle = bill?.bill_content?.title ?? bill?.name ?? "この議案";
     const enhancedSystemPrompt = `${systemPrompt}\n\n## 重要: これはインタビューの開始です。ユーザーからのメッセージはありません。事前定義質問の最初の質問から始めてください。挨拶は温かく丁寧に（2文程度）、「${billTitle}」についてのインタビューであることを明確に伝えた上で、すぐに最初の質問をしてください。最初の質問にクイックリプライが設定されている場合は、必ず quick_replies フィールドに含めてください。${firstQuestionId ? `最初の質問は ID: ${firstQuestionId} であり、レスポンスの question_id にこの値を含めてください。` : ""}`;
 
     // メッセージ履歴なしで最初の質問を生成（構造化出力）

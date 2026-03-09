@@ -2,19 +2,19 @@ import { createAdminClient } from "@mirai-gikai/supabase";
 import { unstable_cache } from "next/cache";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
-import { getActiveDietSession } from "@/features/diet-sessions/server/loaders/get-active-diet-session";
+import { getActiveCouncilSession } from "@/features/council-sessions/server/loaders/get-active-council-session";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { BillsByTag } from "../../shared/types";
 
 /**
  * Featured表示用の議案をタグごとにグループ化して取得
- * featured_priorityが設定されているタグを持つアクティブな国会会期の議案を優先度順に取得
- * アクティブな国会会期がない場合は全件取得
+ * featured_priorityが設定されているタグを持つアクティブな定例会の議案を優先度順に取得
+ * アクティブな定例会がない場合は全件取得
  */
 export async function getBillsByFeaturedTags(): Promise<BillsByTag[]> {
   // キャッシュ外でcookiesにアクセス
   const difficultyLevel = await getDifficultyLevel();
-  const activeSession = await getActiveDietSession();
+  const activeSession = await getActiveCouncilSession();
 
   return _getCachedBillsByFeaturedTags(
     difficultyLevel,
@@ -25,7 +25,7 @@ export async function getBillsByFeaturedTags(): Promise<BillsByTag[]> {
 const _getCachedBillsByFeaturedTags = unstable_cache(
   async (
     difficultyLevel: DifficultyLevelEnum,
-    dietSessionId: string | null
+    councilSessionId: string | null
   ): Promise<BillsByTag[]> => {
     const supabase = createAdminClient();
 
@@ -78,9 +78,9 @@ const _getCachedBillsByFeaturedTags = unstable_cache(
           .eq("bills.publish_status", "published")
           .eq("bills.bill_contents.difficulty_level", difficultyLevel);
 
-        // アクティブな国会会期がある場合のみフィルタリング
-        if (dietSessionId) {
-          query = query.eq("bills.diet_session_id", dietSessionId);
+        // アクティブな定例会がある場合のみフィルタリング
+        if (councilSessionId) {
+          query = query.eq("bills.council_session_id", councilSessionId);
         }
 
         const { data, error } = await query;

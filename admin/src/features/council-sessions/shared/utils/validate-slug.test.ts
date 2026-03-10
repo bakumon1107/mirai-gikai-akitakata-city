@@ -15,7 +15,7 @@ describe("validateSlug", () => {
   });
 
   it("英小文字・数字・ハイフンの組み合わせの場合、nullを返す", () => {
-    expect(validateSlug("diet-session-2024-01")).toBeNull();
+    expect(validateSlug("council-session-2024-01")).toBeNull();
   });
 
   it("nullの場合、nullを返す", () => {
@@ -37,19 +37,19 @@ describe("validateSlug", () => {
   });
 
   it("スペースを含む場合、エラーメッセージを返す", () => {
-    expect(validateSlug("diet session")).toBe(
+    expect(validateSlug("council session")).toBe(
       "スラッグは半角英小文字、数字、ハイフンのみ使用できます"
     );
   });
 
   it("日本語を含む場合、エラーメッセージを返す", () => {
-    expect(validateSlug("国会")).toBe(
+    expect(validateSlug("定例会")).toBe(
       "スラッグは半角英小文字、数字、ハイフンのみ使用できます"
     );
   });
 
   it("アンダースコアを含む場合、エラーメッセージを返す", () => {
-    expect(validateSlug("diet_session")).toBe(
+    expect(validateSlug("council_session")).toBe(
       "スラッグは半角英小文字、数字、ハイフンのみ使用できます"
     );
   });

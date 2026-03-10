@@ -70,11 +70,11 @@ export type BillsByTag = {
 
 // ステータスのソート順（DBのstatus_order generated columnと一致させる）
 export const BILL_STATUS_ORDER: Record<BillStatusEnum, number> = {
-  enacted: 0,
+  approved: 0,
   rejected: 1,
-  in_receiving_house: 2,
-  in_originating_house: 3,
-  introduced: 4,
+  plenary_session: 2,
+  in_committee: 3,
+  submitted: 4,
   preparing: 5,
 };
 

@@ -11,16 +11,15 @@ const baseBill: Bill = {
   name: "テスト議案",
   created_at: "2025-01-01T00:00:00Z",
   updated_at: "2025-01-02T00:00:00Z",
-  diet_session_id: "session-001",
+  council_session_id: "session-001",
+  committee_id: null,
   is_featured: true,
-  originating_house: "HR",
   publish_status: "published",
   published_at: null,
   share_thumbnail_url: null,
-  shugiin_url: null,
-  status: "introduced",
+  status: "preparing",
   status_note: null,
-  status_order: BILL_STATUS_ORDER.introduced,
+  status_order: BILL_STATUS_ORDER.preparing,
   publish_status_order: 2,
   thumbnail_url: null,
 };
@@ -45,9 +44,8 @@ describe("prepareBillForDuplication", () => {
 
   it("その他のフィールドを保持する", () => {
     const result = prepareBillForDuplication(baseBill);
-    expect(result.diet_session_id).toBe("session-001");
+    expect(result.council_session_id).toBe("session-001");
     expect(result.is_featured).toBe(true);
-    expect(result.originating_house).toBe("HR");
   });
 });
 

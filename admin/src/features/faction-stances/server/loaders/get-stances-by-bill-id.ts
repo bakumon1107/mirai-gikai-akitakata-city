@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@mirai-gikai/supabase";
-import type { StanceTypeEnum } from "../types";
+import type { StanceTypeEnum } from "../../shared/types";
 
 export type FactionStanceWithFaction = {
   id: string;

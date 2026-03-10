@@ -16,33 +16,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { deleteFaction } from "../actions/delete-faction";
-import { updateFaction } from "../actions/update-faction";
-import type { FactionWithStanceCount } from "../types";
+import { Textarea } from "@/components/ui/textarea";
+import { deleteCommittee } from "../../server/actions/delete-committee";
+import { updateCommittee } from "../../server/actions/update-committee";
+import type { CommitteeWithBillCount } from "../../shared/types";
 
-type FactionItemProps = {
-  faction: FactionWithStanceCount;
+type CommitteeItemProps = {
+  committee: CommitteeWithBillCount;
 };
 
-export function FactionItem({ faction }: FactionItemProps) {
+export function CommitteeItem({ committee }: CommitteeItemProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(faction.name);
-  const [editDisplayName, setEditDisplayName] = useState(faction.display_name);
-  const [editLogoUrl, setEditLogoUrl] = useState(faction.logo_url ?? "");
-  const [editSortOrder, setEditSortOrder] = useState(
-    faction.sort_order.toString()
+  const [editName, setEditName] = useState(committee.name);
+  const [editDescription, setEditDescription] = useState(
+    committee.description ?? ""
   );
-  const [editIsActive, setEditIsActive] = useState(faction.is_active);
+  const [editSortOrder, setEditSortOrder] = useState(
+    committee.sort_order.toString()
+  );
+  const [editIsActive, setEditIsActive] = useState(committee.is_active);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleUpdate = async () => {
     if (!editName.trim()) {
-      toast.error("識別名を入力してください");
-      return;
-    }
-
-    if (!editDisplayName.trim()) {
-      toast.error("表示名を入力してください");
+      toast.error("委員会名を入力してください");
       return;
     }
 
@@ -55,11 +52,10 @@ export function FactionItem({ faction }: FactionItemProps) {
     setIsSubmitting(true);
 
     try {
-      const result = await updateFaction({
-        id: faction.id,
+      const result = await updateCommittee({
+        id: committee.id,
         name: editName.trim(),
-        display_name: editDisplayName.trim(),
-        logo_url: editLogoUrl.trim() || null,
+        description: editDescription.trim() || null,
         sort_order: sortOrderNum,
         is_active: editIsActive,
       });
@@ -67,12 +63,12 @@ export function FactionItem({ faction }: FactionItemProps) {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("会派を更新しました");
+        toast.success("委員会を更新しました");
         setIsEditing(false);
       }
     } catch (error) {
-      console.error("Update faction error:", error);
-      toast.error("会派の更新に失敗しました");
+      console.error("Update committee error:", error);
+      toast.error("委員会の更新に失敗しました");
     } finally {
       setIsSubmitting(false);
     }
@@ -82,27 +78,26 @@ export function FactionItem({ faction }: FactionItemProps) {
     setIsSubmitting(true);
 
     try {
-      const result = await deleteFaction({ id: faction.id });
+      const result = await deleteCommittee({ id: committee.id });
 
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("会派を削除しました");
+        toast.success("委員会を削除しました");
       }
     } catch (error) {
-      console.error("Delete faction error:", error);
-      toast.error("会派の削除に失敗しました");
+      console.error("Delete committee error:", error);
+      toast.error("委員会の削除に失敗しました");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleCancel = () => {
-    setEditName(faction.name);
-    setEditDisplayName(faction.display_name);
-    setEditLogoUrl(faction.logo_url ?? "");
-    setEditSortOrder(faction.sort_order.toString());
-    setEditIsActive(faction.is_active);
+    setEditName(committee.name);
+    setEditDescription(committee.description ?? "");
+    setEditSortOrder(committee.sort_order.toString());
+    setEditIsActive(committee.is_active);
     setIsEditing(false);
   };
 
@@ -112,34 +107,13 @@ export function FactionItem({ faction }: FactionItemProps) {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>識別名</Label>
+              <Label>委員会名</Label>
               <Input
                 type="text"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 disabled={isSubmitting}
                 autoFocus
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>表示名</Label>
-              <Input
-                type="text"
-                value={editDisplayName}
-                onChange={(e) => setEditDisplayName(e.target.value)}
-                disabled={isSubmitting}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>ロゴURL（任意）</Label>
-              <Input
-                type="text"
-                value={editLogoUrl}
-                onChange={(e) => setEditLogoUrl(e.target.value)}
-                disabled={isSubmitting}
-                placeholder="https://..."
               />
             </div>
 
@@ -152,18 +126,29 @@ export function FactionItem({ faction }: FactionItemProps) {
                 disabled={isSubmitting}
               />
             </div>
+
+            <div className="col-span-2 space-y-2">
+              <Label>説明（任意）</Label>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="委員会の説明を入力"
+                rows={3}
+              />
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
-              id={`is-active-${faction.id}`}
+              id={`is-active-${committee.id}`}
               checked={editIsActive}
               onChange={(e) => setEditIsActive(e.target.checked)}
               disabled={isSubmitting}
               className="h-4 w-4"
             />
-            <Label htmlFor={`is-active-${faction.id}`}>有効</Label>
+            <Label htmlFor={`is-active-${committee.id}`}>有効</Label>
           </div>
 
           <div className="flex gap-2">
@@ -183,27 +168,25 @@ export function FactionItem({ faction }: FactionItemProps) {
         <div className="flex items-center justify-between">
           <div className="flex-1 space-y-1">
             <div className="flex items-center gap-3">
-              <h3 className="font-semibold">{faction.display_name}</h3>
-              <span className="text-sm text-gray-500">({faction.name})</span>
+              <h3 className="font-semibold">{committee.name}</h3>
               <span
                 className={`px-2 py-0.5 rounded text-xs font-medium ${
-                  faction.is_active
+                  committee.is_active
                     ? "bg-green-100 text-green-700"
                     : "bg-gray-100 text-gray-500"
                 }`}
               >
-                {faction.is_active ? "有効" : "無効"}
+                {committee.is_active ? "有効" : "無効"}
               </span>
             </div>
 
+            {committee.description && (
+              <p className="text-sm text-gray-600">{committee.description}</p>
+            )}
+
             <div className="flex items-center gap-4 text-sm text-gray-500">
-              <span>表示順: {faction.sort_order}</span>
-              <span>見解: {faction.stance_count}件</span>
-              {faction.logo_url && (
-                <span className="truncate max-w-xs" title={faction.logo_url}>
-                  ロゴ: {faction.logo_url}
-                </span>
-              )}
+              <span>表示順: {committee.sort_order}</span>
+              <span>議案: {committee.bill_count}件</span>
             </div>
           </div>
 
@@ -225,15 +208,19 @@ export function FactionItem({ faction }: FactionItemProps) {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>会派の削除</AlertDialogTitle>
+                  <AlertDialogTitle>委員会の削除</AlertDialogTitle>
                   <AlertDialogDescription>
-                    「{faction.display_name}
-                    」を削除しますか？紐付く会派見解もすべて削除されます。
+                    「{committee.name}」を削除しますか？
+                    {committee.bill_count > 0 &&
+                      `この委員会には${committee.bill_count}件の議案が紐付いているため削除できません。`}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>キャンセル</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={committee.bill_count > 0}
+                  >
                     削除
                   </AlertDialogAction>
                 </AlertDialogFooter>

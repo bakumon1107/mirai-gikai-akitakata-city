@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-import { deleteStance } from "../actions/delete-stance";
-import { upsertStance } from "../actions/upsert-stance";
-import type { Faction } from "../loaders/get-factions";
-import type { FactionStanceWithFaction } from "../loaders/get-stances-by-bill-id";
-import { STANCE_TYPE_LABELS, type StanceTypeEnum } from "../types";
+import { deleteStance } from "../../server/actions/delete-stance";
+import { upsertStance } from "../../server/actions/upsert-stance";
+import type { Faction } from "../../server/loaders/get-factions";
+import type { FactionStanceWithFaction } from "../../server/loaders/get-stances-by-bill-id";
+import { STANCE_TYPE_LABELS, type StanceTypeEnum } from "../../shared/types";
 
 type FactionStanceRowProps = {
   billId: string;

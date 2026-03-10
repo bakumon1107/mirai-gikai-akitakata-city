@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@mirai-gikai/supabase";
-import type { FactionWithStanceCount } from "../types";
+import type { FactionWithStanceCount } from "../../shared/types";
 
 export async function loadFactions(): Promise<FactionWithStanceCount[]> {
   const supabase = createAdminClient();

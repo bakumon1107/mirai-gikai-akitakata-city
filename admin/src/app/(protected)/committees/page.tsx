@@ -1,6 +1,6 @@
-import { CommitteeForm } from "@/features/committees/components/committee-form";
-import { CommitteeList } from "@/features/committees/components/committee-list";
-import { loadCommittees } from "@/features/committees/loaders/load-committees";
+import { CommitteeForm } from "@/features/committees/client/components/committee-form";
+import { CommitteeList } from "@/features/committees/client/components/committee-list";
+import { loadCommittees } from "@/features/committees/server/loaders/load-committees";
 
 export default async function CommitteesPage() {
   const committees = await loadCommittees();

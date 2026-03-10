@@ -5,16 +5,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { createCommittee } from "../actions/create-committee";
+import { createFaction } from "../../server/actions/create-faction";
 
-export function CommitteeForm() {
+export function FactionForm() {
   const nameId = useId();
-  const descriptionId = useId();
+  const displayNameId = useId();
+  const logoUrlId = useId();
   const sortOrderId = useId();
 
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [sortOrder, setSortOrder] = useState("0");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -22,7 +23,12 @@ export function CommitteeForm() {
     e.preventDefault();
 
     if (!name.trim()) {
-      toast.error("委員会名を入力してください");
+      toast.error("識別名を入力してください");
+      return;
+    }
+
+    if (!displayName.trim()) {
+      toast.error("表示名を入力してください");
       return;
     }
 
@@ -35,23 +41,25 @@ export function CommitteeForm() {
     setIsSubmitting(true);
 
     try {
-      const result = await createCommittee({
+      const result = await createFaction({
         name: name.trim(),
-        description: description.trim() || null,
+        display_name: displayName.trim(),
+        logo_url: logoUrl.trim() || null,
         sort_order: sortOrderNum,
       });
 
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("委員会を作成しました");
+        toast.success("会派を作成しました");
         setName("");
-        setDescription("");
+        setDisplayName("");
+        setLogoUrl("");
         setSortOrder("0");
       }
     } catch (error) {
-      console.error("Create committee error:", error);
-      toast.error("委員会の作成に失敗しました");
+      console.error("Create faction error:", error);
+      toast.error("会派の作成に失敗しました");
     } finally {
       setIsSubmitting(false);
     }
@@ -62,14 +70,41 @@ export function CommitteeForm() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor={nameId}>
-            委員会名 <span className="text-red-500">*</span>
+            識別名 <span className="text-red-500">*</span>
           </Label>
           <Input
             id={nameId}
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="例: 総務委員会"
+            placeholder="例: komeito"
+            disabled={isSubmitting}
+          />
+          <p className="text-xs text-gray-500">英小文字・数字・ハイフンのみ</p>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor={displayNameId}>
+            表示名 <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id={displayNameId}
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="例: 公明党"
+            disabled={isSubmitting}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor={logoUrlId}>ロゴURL（任意）</Label>
+          <Input
+            id={logoUrlId}
+            type="text"
+            value={logoUrl}
+            onChange={(e) => setLogoUrl(e.target.value)}
+            placeholder="https://..."
             disabled={isSubmitting}
           />
         </div>
@@ -82,18 +117,6 @@ export function CommitteeForm() {
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
             disabled={isSubmitting}
-          />
-        </div>
-
-        <div className="col-span-2 space-y-2">
-          <Label htmlFor={descriptionId}>説明（任意）</Label>
-          <Textarea
-            id={descriptionId}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="委員会の説明を入力"
-            disabled={isSubmitting}
-            rows={3}
           />
         </div>
       </div>

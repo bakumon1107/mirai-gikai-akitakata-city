@@ -2,7 +2,7 @@
 
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
-import type { StanceInput } from "../types";
+import type { StanceInput } from "../../shared/types";
 
 export async function upsertStance(
   billId: string,

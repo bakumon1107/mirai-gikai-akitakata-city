@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CouncilSession } from "../../shared/types";
 import { getActiveCouncilSession } from "./get-active-council-session";
-import { findPreviousDietSession } from "../repositories/diet-session-repository";
+import { findPreviousCouncilSession } from "../repositories/council-session-repository";
 
 /**
  * 前回の定例会を取得
@@ -22,7 +22,7 @@ export async function getPreviousCouncilSession(): Promise<CouncilSession | null
 
 const _getCachedPreviousCouncilSession = unstable_cache(
   async (activeStartDate: string): Promise<CouncilSession | null> => {
-    return findPreviousDietSession(activeStartDate);
+    return findPreviousCouncilSession(activeStartDate);
   },
   ["previous-council-session"],
   {

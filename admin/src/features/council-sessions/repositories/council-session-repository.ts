@@ -2,34 +2,34 @@ import "server-only";
 
 import { createAdminClient } from "@mirai-gikai/supabase";
 
-export async function findAllDietSessions() {
+export async function findAllCouncilSessions() {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from("diet_sessions")
+    .from("council_sessions")
     .select("*")
     .order("start_date", { ascending: false });
 
   if (error) {
-    throw new Error(`国会会期の取得に失敗しました: ${error.message}`);
+    throw new Error(`定例会の取得に失敗しました: ${error.message}`);
   }
 
   return data;
 }
 
-export async function createDietSessionRecord(input: {
+export async function createCouncilSessionRecord(input: {
   name: string;
   slug: string | null;
-  shugiin_url: string | null;
+  council_url: string | null;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
 }) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from("diet_sessions")
+    .from("council_sessions")
     .insert({
       name: input.name,
       slug: input.slug,
-      shugiin_url: input.shugiin_url,
+      council_url: input.council_url,
       start_date: input.start_date,
       end_date: input.end_date,
     })
@@ -37,29 +37,29 @@ export async function createDietSessionRecord(input: {
     .single();
 
   if (error) {
-    throw new Error(`国会会期の作成に失敗しました: ${error.message}`);
+    throw new Error(`定例会の作成に失敗しました: ${error.message}`);
   }
 
   return data;
 }
 
-export async function updateDietSessionRecord(
+export async function updateCouncilSessionRecord(
   id: string,
   input: {
     name: string;
     slug: string | null;
-    shugiin_url: string | null;
+    council_url: string | null;
     start_date: string;
-    end_date: string;
+    end_date: string | null;
   }
 ) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from("diet_sessions")
+    .from("council_sessions")
     .update({
       name: input.name,
       slug: input.slug,
-      shugiin_url: input.shugiin_url,
+      council_url: input.council_url,
       start_date: input.start_date,
       end_date: input.end_date,
     })
@@ -68,24 +68,27 @@ export async function updateDietSessionRecord(
     .single();
 
   if (error) {
-    throw new Error(`国会会期の更新に失敗しました: ${error.message}`);
+    throw new Error(`定例会の更新に失敗しました: ${error.message}`);
   }
 
   return data;
 }
 
-export async function deleteDietSessionRecord(id: string) {
+export async function deleteCouncilSessionRecord(id: string) {
   const supabase = createAdminClient();
-  const { error } = await supabase.from("diet_sessions").delete().eq("id", id);
+  const { error } = await supabase
+    .from("council_sessions")
+    .delete()
+    .eq("id", id);
 
   if (error) {
-    throw new Error(`国会会期の削除に失敗しました: ${error.message}`);
+    throw new Error(`定例会の削除に失敗しました: ${error.message}`);
   }
 }
 
-export async function setActiveDietSessionRecord(id: string) {
+export async function setActiveCouncilSessionRecord(id: string) {
   const supabase = createAdminClient();
-  const { error: rpcError } = await supabase.rpc("set_active_diet_session", {
+  const { error: rpcError } = await supabase.rpc("set_active_council_session", {
     target_session_id: id,
   });
 
@@ -96,10 +99,10 @@ export async function setActiveDietSessionRecord(id: string) {
   }
 }
 
-export async function findDietSessionById(id: string) {
+export async function findCouncilSessionById(id: string) {
   const supabase = createAdminClient();
   const { data, error } = await supabase
-    .from("diet_sessions")
+    .from("council_sessions")
     .select()
     .eq("id", id)
     .single();

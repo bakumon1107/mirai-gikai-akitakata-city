@@ -3,8 +3,6 @@ import {
   calculateProgressWidth,
   getCurrentStep,
   getOrderedSteps,
-  getStatusMessage,
-  getStepState,
 } from "../../../shared/utils/bill-progress";
 
 interface BillStatusProgressProps {
@@ -41,19 +39,6 @@ const STATUS_LABELS: Record<BillStatusEnum, string> = {
   approved: "可決",
   rejected: "否決",
 };
-
-// ステップ番号マッピング
-const STATUS_TO_STEP: Record<BillStatusEnum, number> = {
-  preparing: 0,
-  submitted: 1,
-  in_committee: 2,
-  plenary_session: 3,
-  approved: 4,
-  rejected: 4,
-} as const;
-
-// プログレス比率の計算
-const PROGRESS_RATIOS = [0, 1 / 8, 3 / 8, 5 / 8, 1] as const;
 
 // ステータスバッジコンポーネント
 function StatusBadge({ message }: StatusBadgeProps) {
@@ -121,19 +106,15 @@ export function BillStatusProgress({
 }: BillStatusProgressProps) {
   const isPreparing = status === "preparing";
   const currentStep = getCurrentStep(status);
-  const getStatusMessage = (): string => {
-    return STATUS_LABELS[status] ?? "";
-  };
+  const statusMessage = STATUS_LABELS[status] ?? "";
 
   const getStepState = (stepNumber: number): "active" | "inactive" => {
     if (isPreparing) return "inactive";
     return stepNumber <= currentStep ? "active" : "inactive";
   };
 
-  const orderedSteps = getOrderedSteps(originatingHouse, BASE_STEPS);
+  const orderedSteps = getOrderedSteps(BASE_STEPS);
   const progressWidth = calculateProgressWidth(currentStep);
-
-  const statusMessage = getStatusMessage(status, statusNote);
 
   return (
     <>
@@ -166,9 +147,7 @@ export function BillStatusProgress({
             <div className="relative flex justify-around">
               {orderedSteps.map((step, index) => {
                 const stepNumber = index + 1;
-                const isActive =
-                  getStepState(stepNumber, currentStep, isPreparing) ===
-                  "active";
+                const isActive = getStepState(stepNumber) === "active";
 
                 return (
                   <ProgressStep

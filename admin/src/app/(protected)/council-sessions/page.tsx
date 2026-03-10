@@ -1,6 +1,6 @@
-import { CouncilSessionForm } from "@/features/council-sessions/components/council-session-form";
-import { CouncilSessionList } from "@/features/council-sessions/components/council-session-list";
-import { loadCouncilSessions } from "@/features/council-sessions/loaders/load-council-sessions";
+import { CouncilSessionForm } from "@/features/council-sessions/client/components/council-session-form";
+import { CouncilSessionList } from "@/features/council-sessions/client/components/council-session-list";
+import { loadCouncilSessions } from "@/features/council-sessions/server/loaders/load-council-sessions";
 
 export default async function CouncilSessionsPage() {
   const sessions = await loadCouncilSessions();

@@ -20,10 +20,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { siteConfig } from "@/config/site.config";
 import { env } from "@/lib/env";
-import { deleteCouncilSession } from "../actions/delete-council-session";
-import { setActiveCouncilSession } from "../actions/set-active-council-session";
-import { updateCouncilSession } from "../actions/update-council-session";
-import type { CouncilSession } from "../types";
+import { deleteCouncilSession } from "../../server/actions/delete-council-session";
+import { setActiveCouncilSession } from "../../server/actions/set-active-council-session";
+import { updateCouncilSession } from "../../server/actions/update-council-session";
+import type { CouncilSession } from "../../shared/types";
 
 type CouncilSessionItemProps = {
   session: CouncilSession;

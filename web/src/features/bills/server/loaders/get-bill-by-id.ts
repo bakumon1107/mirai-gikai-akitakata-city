@@ -1,9 +1,13 @@
-import { createAdminClient } from "@mirai-gikai/supabase";
 import { unstable_cache } from "next/cache";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { BillWithContent, FactionStance } from "../../shared/types";
+import {
+  findPublishedBillById,
+  findMiraiStanceByBillId,
+  findTagsByBillId,
+} from "../repositories/bill-repository";
 import { getBillContentWithDifficulty } from "./helpers/get-bill-content";
 
 export async function getBillById(id: string): Promise<BillWithContent | null> {
@@ -17,31 +21,18 @@ const _getCachedBillById = unstable_cache(
     id: string,
     difficultyLevel: DifficultyLevelEnum
   ): Promise<BillWithContent | null> => {
-    const supabase = createAdminClient();
-
     // 基本的なbill情報、会派見解、コンテンツ、タグを並列取得
     // 公開ステータスの議案のみを取得
-    const [billResult, factionStancesResult, billContent, tagsResult] =
+    const [bill, factionStancesResult, billContent, tagsResult] =
       await Promise.all([
-        supabase
-          .from("bills")
-          .select("*")
-          .eq("id", id)
-          .eq("publish_status", "published") // 公開済み議案のみ
-          .single(),
-        supabase
-          .from("faction_stances")
-          .select(
-            "id, type, comment, faction_id, factions(id, name, display_name, sort_order)"
-          )
-          .eq("bill_id", id),
+        findPublishedBillById(id),
+        findMiraiStanceByBillId(id),
         getBillContentWithDifficulty(id, difficultyLevel),
-        supabase.from("bills_tags").select("tags(id, label)").eq("bill_id", id),
+        findTagsByBillId(id),
       ]);
 
-    const { data: bill, error: billError } = billResult;
-    if (billError || !bill) {
-      console.error("Failed to fetch bill:", billError);
+    if (!bill) {
+      console.error("Failed to fetch bill");
       return null;
     }
 

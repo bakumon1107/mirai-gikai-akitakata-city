@@ -24,8 +24,8 @@ function getCardStatusLabel(status: BillStatusEnum): string {
 }
 
 export function BillStatusBadge({ status, className }: BillStatusBadgeProps) {
-  const getStatusVariant = (status: BillStatusEnum) => {
-    switch (status) {
+  const getStatusVariant = (s: BillStatusEnum) => {
+    switch (s) {
       case "submitted":
       case "in_committee":
       case "plenary_session":

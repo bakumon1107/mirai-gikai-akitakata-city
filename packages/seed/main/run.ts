@@ -23,6 +23,13 @@ import {
   DEMO_REPORT_ID_CITIZEN,
 } from "./data";
 import { createBillContents } from "./bill-contents-data";
+import {
+  createShippingBillInterviewConfig,
+  createShippingBillQuestions,
+  createShippingBillSessions,
+  createShippingBillMessages,
+  createShippingBillReports,
+} from "./shipping-bill-data";
 import { createAdminClient, clearAllData } from "../shared/helper";
 
 async function seedDatabase() {
@@ -441,6 +448,98 @@ async function seedDatabase() {
       }
     } else {
       console.log("⚠️ Skipped interview config (no bills found)");
+    }
+
+    // === 船荷証券法案のインタビューデータ（トピック解析テスト用）===
+    console.log("🚢 Inserting shipping bill interview data...");
+    const shippingConfig = createShippingBillInterviewConfig(insertedBills);
+    let shippingSessionsCount = 0;
+    let shippingReportsCount = 0;
+
+    if (shippingConfig) {
+      const { data: insertedShippingConfig, error: shippingConfigError } =
+        await supabase
+          .from("interview_configs")
+          .insert(shippingConfig)
+          .select("id")
+          .single();
+
+      if (shippingConfigError) {
+        throw new Error(
+          `Failed to insert shipping bill config: ${shippingConfigError.message}`
+        );
+      }
+
+      if (insertedShippingConfig) {
+        // Questions
+        const shippingQuestions = createShippingBillQuestions(
+          insertedShippingConfig.id
+        );
+        const { error: sqError } = await supabase
+          .from("interview_questions")
+          .insert(shippingQuestions);
+        if (sqError) {
+          throw new Error(
+            `Failed to insert shipping questions: ${sqError.message}`
+          );
+        }
+
+        // Sessions (100件)
+        const shippingSessions = createShippingBillSessions(
+          insertedShippingConfig.id
+        );
+        const { data: insertedShippingSessions, error: ssError } =
+          await supabase
+            .from("interview_sessions")
+            .insert(shippingSessions)
+            .select("id");
+        if (ssError) {
+          throw new Error(
+            `Failed to insert shipping sessions: ${ssError.message}`
+          );
+        }
+
+        if (insertedShippingSessions) {
+          shippingSessionsCount = insertedShippingSessions.length;
+          const shippingSessionIds = insertedShippingSessions.map(
+            (s) => s.id
+          );
+
+          // Messages
+          const shippingMessages =
+            createShippingBillMessages(shippingSessionIds);
+          const { error: smError } = await supabase
+            .from("interview_messages")
+            .insert(shippingMessages);
+          if (smError) {
+            throw new Error(
+              `Failed to insert shipping messages: ${smError.message}`
+            );
+          }
+
+          // Reports (100件、各3 opinions)
+          const shippingReports =
+            createShippingBillReports(shippingSessionIds);
+          const { data: insertedShippingReports, error: srError } =
+            await supabase
+              .from("interview_report")
+              .insert(shippingReports)
+              .select("id");
+          if (srError) {
+            throw new Error(
+              `Failed to insert shipping reports: ${srError.message}`
+            );
+          }
+
+          if (insertedShippingReports) {
+            shippingReportsCount = insertedShippingReports.length;
+          }
+        }
+
+        console.log(
+          `✅ Shipping bill: ${shippingSessionsCount} sessions, ${shippingReportsCount} reports (each with 3 opinions)`
+        );
+      }
     }
 
     console.log("🎉 Database seeding completed successfully!");

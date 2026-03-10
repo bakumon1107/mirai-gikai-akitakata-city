@@ -7,7 +7,11 @@ import type { BillWithContent } from "@/features/bills/shared/types";
 import { InterviewStatusBadge } from "@/features/interview-session/client/components/interview-status-badge";
 import type { LatestInterviewSession } from "@/features/interview-session/server/loaders/get-latest-interview-session";
 import type { InterviewConfig } from "../../server/loaders/get-interview-config";
-import { getBillDetailLink } from "@/features/interview-config/shared/utils/interview-links";
+import {
+  getBillDetailLink,
+  getInterviewDisclosureLink,
+} from "@/features/interview-config/shared/utils/interview-links";
+import { formatEstimatedDuration } from "@/features/interview-config/shared/utils/format-estimated-duration";
 import { InterviewActionButtons } from "./interview-action-buttons";
 
 interface InterviewLPPageProps {
@@ -17,15 +21,19 @@ interface InterviewLPPageProps {
   previewToken?: string;
 }
 
-const FEATURES = [
+const FEATURES: {
+  iconSrc: string;
+  iconSize: { w: number; h: number };
+  text: string;
+}[] = [
   {
-    icon: "/icons/interview-icon-1.svg",
-    iconWidth: 20,
+    iconSrc: "/icons/interview-ear.svg",
+    iconSize: { w: 21, h: 29 },
     text: "AIがあなたの課題感や\nご経験をお聞きします",
   },
   {
-    icon: "/icons/interview-icon-2.svg",
-    iconWidth: 16,
+    iconSrc: "/icons/interview-messages.svg",
+    iconSize: { w: 33, h: 26 },
     text: siteConfig.managingParty
       ? `ご意見は${siteConfig.managingParty}の\n政策検討に活かします`
       : "ご意見は\n政策検討に活かします",
@@ -33,8 +41,8 @@ const FEATURES = [
   ...(siteConfig.managingParty
     ? [
         {
-          icon: "/icons/interview-icon-3.svg",
-          iconWidth: 24,
+          iconSrc: "/icons/interview-landmark.svg",
+          iconSize: { w: 30, h: 29 },
           text: `あなたの声が${siteConfig.managingParty}を通じて${siteConfig.councilName}に届けられる可能性があります`,
         },
       ]
@@ -78,7 +86,7 @@ function _InterviewLPHero({
       <div className="flex flex-col items-center gap-3">
         <div className="inline-flex items-center justify-center gap-2 px-6 py-2 mb-3 bg-primary rounded-2xl">
           <span className="text-[15px] font-medium text-white leading-tight">
-            議案の当事者の方へ
+            当事者・有識者の方へ
           </span>
         </div>
         <h1 className="text-2xl font-bold text-center leading-[1.5]">
@@ -99,11 +107,10 @@ function _InterviewLPHero({
           <div key={feature.text} className="flex items-center gap-4">
             <div className="flex-shrink-0 w-[54px] h-[54px] bg-white rounded-[30px] flex items-center justify-center">
               <Image
-                src={feature.icon}
+                src={feature.iconSrc}
                 alt=""
-                width={feature.iconWidth}
-                height={28}
-                className="object-contain"
+                width={feature.iconSize.w}
+                height={feature.iconSize.h}
               />
             </div>
             <span className="text-[15px] font-medium text-black leading-[1.73] whitespace-pre-line">
@@ -171,14 +178,24 @@ function _InterviewOverviewSection({
   );
 }
 
-function _InterviewDurationSection() {
+function _InterviewDurationSection({
+  estimatedDuration,
+}: {
+  estimatedDuration: number | null;
+}) {
+  const durationText = formatEstimatedDuration(estimatedDuration);
+
+  if (!durationText) {
+    return null;
+  }
+
   return (
     <div className="w-full max-w-[370px] mx-auto bg-white rounded-2xl p-6 space-y-2">
       <h2 className="text-[22px] font-bold text-black leading-[1.64]">
         予定時間
       </h2>
-      <p className="text-[22px] font-bold text-[#0F8472] leading-[1.64]">
-        約5分〜
+      <p className="text-[22px] font-bold text-primary-accent leading-[1.64]">
+        {durationText}
       </p>
     </div>
   );
@@ -239,6 +256,27 @@ function _InterviewNoticeSection() {
   );
 }
 
+function _InterviewDisclosureLink({
+  billId,
+  previewToken,
+}: {
+  billId: string;
+  previewToken?: string;
+}) {
+  const disclosureLink = getInterviewDisclosureLink(billId, previewToken);
+
+  return (
+    <div className="w-full max-w-[370px] mx-auto">
+      <Link
+        href={disclosureLink}
+        className="text-xs text-black leading-[1.83] underline underline-offset-2 hover:opacity-70 transition-opacity"
+      >
+        AIインタビューに関する情報開示
+      </Link>
+    </div>
+  );
+}
+
 function _InterviewFooterActions({
   billId,
   sessionInfo,
@@ -288,9 +326,15 @@ export function InterviewLPPage({
           billName={bill.bill_content?.title ?? bill.name}
           previewToken={previewToken}
         />
-        <_InterviewDurationSection />
+        <_InterviewDurationSection
+          estimatedDuration={interviewConfig.estimated_duration}
+        />
         <_InterviewThemesSection themes={interviewConfig.themes} />
         <_InterviewNoticeSection />
+        <_InterviewDisclosureLink
+          billId={bill.id}
+          previewToken={previewToken}
+        />
         <_InterviewFooterActions
           billId={bill.id}
           sessionInfo={sessionInfo}

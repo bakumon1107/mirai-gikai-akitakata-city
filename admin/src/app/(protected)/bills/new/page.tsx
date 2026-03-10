@@ -1,4 +1,4 @@
-import { BillCreateForm } from "@/features/bills-edit/components/bill-create-form";
+import { BillCreateForm } from "@/features/bills-edit/client/components/bill-create-form";
 import { loadCommittees } from "@/features/committees/loaders/load-committees";
 import { loadCouncilSessions } from "@/features/council-sessions/loaders/load-council-sessions";
 

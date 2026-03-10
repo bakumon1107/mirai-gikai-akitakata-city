@@ -18,7 +18,7 @@ export function FeaturedBillSection({ bills }: FeaturedBillSectionProps) {
         <h2 className="text-[22px] font-bold text-[#1F2937] leading-[1.48]">
           注目の議案🔥
         </h2>
-        <p className="text-xs font-medium text-[#404040] leading-[1.67]">
+        <p className="text-xs font-medium text-mirai-text-secondary leading-[1.67]">
           市議会に上程された注目議案
         </p>
       </div>

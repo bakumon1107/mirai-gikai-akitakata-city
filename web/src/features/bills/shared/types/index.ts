@@ -68,6 +68,16 @@ export type BillsByTag = {
   bills: BillWithContent[];
 };
 
+// ステータスのソート順（DBのstatus_order generated columnと一致させる）
+export const BILL_STATUS_ORDER: Record<BillStatusEnum, number> = {
+  enacted: 0,
+  rejected: 1,
+  in_receiving_house: 2,
+  in_originating_house: 3,
+  introduced: 4,
+  preparing: 5,
+};
+
 // ステータスを日本語ラベルに変換する関数
 export function getBillStatusLabel(status: BillStatusEnum): string {
   switch (status) {

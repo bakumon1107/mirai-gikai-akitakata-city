@@ -1,16 +1,16 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BillEditForm } from "@/features/bills-edit/components/bill-edit-form";
-import { BillTagsForm } from "@/features/bills-edit/components/bill-tags-form";
-import { getBillById } from "@/features/bills-edit/loaders/get-bill-by-id";
-import { getBillTagIds } from "@/features/bills-edit/loaders/get-bill-tag-ids";
+import { BillEditForm } from "@/features/bills-edit/client/components/bill-edit-form";
+import { BillTagsForm } from "@/features/bills-edit/client/components/bill-tags-form";
+import { getBillById } from "@/features/bills-edit/server/loaders/get-bill-by-id";
+import { getBillTagIds } from "@/features/bills-edit/server/loaders/get-bill-tag-ids";
 import { loadCommittees } from "@/features/committees/loaders/load-committees";
 import { loadCouncilSessions } from "@/features/council-sessions/loaders/load-council-sessions";
 import { StancesManager } from "@/features/faction-stances/components/stances-manager";
 import { getFactions } from "@/features/faction-stances/loaders/get-factions";
 import { getStancesByBillId } from "@/features/faction-stances/loaders/get-stances-by-bill-id";
-import { loadTags } from "@/features/tags/loaders/load-tags";
+import { loadTags } from "@/features/tags/server/loaders/load-tags";
 
 interface BillEditPageProps {
   params: Promise<{

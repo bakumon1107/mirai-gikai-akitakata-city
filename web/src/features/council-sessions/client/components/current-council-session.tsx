@@ -7,7 +7,7 @@ type CurrentCouncilSessionProps = {
 
 export function CurrentCouncilSession({ session }: CurrentCouncilSessionProps) {
   return (
-    <div className="w-full bg-[#EAE6DD] px-6 py-6">
+    <div className="w-full bg-mirai-surface-warm px-6 py-6">
       <div className="flex items-center gap-5">
         <div className="flex items-center gap-4 flex-1">
           <h2 className="text-xl font-bold text-gray-800 leading-[0.9]">
@@ -16,7 +16,7 @@ export function CurrentCouncilSession({ session }: CurrentCouncilSessionProps) {
           <div
             className={`
             inline-flex items-center justify-center px-5 py-1.5 rounded-[50px]  shrink-0
-            ${session == null ? "bg-[#BEBCBC]" : "bg-mirai-gradient"}
+            ${session == null ? "bg-mirai-border-muted" : "bg-mirai-gradient"}
             `}
           >
             <span className="text-base font-bold leading-[1.48]">

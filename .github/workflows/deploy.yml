@@ -2,7 +2,7 @@ name: Migrate DB then Deploy
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, kawasaki/develop ]
 
 jobs:
   migrate-and-deploy:

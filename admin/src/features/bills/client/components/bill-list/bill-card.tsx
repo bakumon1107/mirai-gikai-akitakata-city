@@ -18,9 +18,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { BILL_STATUS_CONFIG } from "../../constants/bill-config";
-import type { BillPublishStatus, BillStatus } from "../../types";
-import { getBillStatusLabel } from "../../types";
+import { BILL_STATUS_CONFIG } from "../../../shared/constants/bill-config";
+import type { BillPublishStatus, BillStatus } from "../../../shared/types";
+import { getBillStatusLabel } from "../../../shared/types";
 import { BillActionsMenu } from "../bill-actions-menu/bill-actions-menu";
 import { PreviewButton } from "./preview-button";
 import { PublishStatusBadge } from "./publish-status-badge";

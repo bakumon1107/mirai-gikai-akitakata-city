@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { enrichBillContents } from "../actions/enrich-bill-contents";
+import { enrichBillContents } from "../../actions/enrich-bill-contents";
 import { updateBillContents } from "../../server/actions/update-bill-contents";
 import type { Bill } from "../../shared/types";
 import type {

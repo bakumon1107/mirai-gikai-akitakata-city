@@ -1,7 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@mirai-gikai/supabase";
-import { requireAdmin } from "@/features/auth/lib/auth-server";
+import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import type { ExistingBillDetail } from "../../shared/types";
 
 export async function getExistingBillsDetail(

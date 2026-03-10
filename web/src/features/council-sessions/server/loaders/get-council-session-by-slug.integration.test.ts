@@ -11,9 +11,11 @@ vi.mock("next/cache", () => ({
   unstable_cache: (fn: (...args: never[]) => unknown) => fn,
 }));
 
-const { getDietSessionBySlug } = await import("./get-diet-session-by-slug");
+const { getCouncilSessionBySlug } = await import(
+  "./get-council-session-by-slug"
+);
 
-describe("getDietSessionBySlug 統合テスト", () => {
+describe("getCouncilSessionBySlug 統合テスト", () => {
   let sessionIds: string[] = [];
 
   afterEach(async () => {
@@ -28,7 +30,7 @@ describe("getDietSessionBySlug 統合テスト", () => {
     const session = await createTestDietSession({ slug });
     sessionIds.push(session.id);
 
-    const result = await getDietSessionBySlug(slug);
+    const result = await getCouncilSessionBySlug(slug);
 
     expect(result).not.toBeNull();
     expect(result?.id).toBe(session.id);
@@ -36,7 +38,7 @@ describe("getDietSessionBySlug 統合テスト", () => {
   });
 
   it("存在しない slug では null を返す", async () => {
-    const result = await getDietSessionBySlug(
+    const result = await getCouncilSessionBySlug(
       "non-existent-slug-loader-999999999"
     );
 

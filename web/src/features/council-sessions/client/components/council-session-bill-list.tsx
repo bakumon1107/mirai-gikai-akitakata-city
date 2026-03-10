@@ -11,7 +11,7 @@ type Props = {
 
 export function CouncilSessionBillList({ session, bills }: Props) {
   const startDate = new Date(session.start_date);
-  const endDate = new Date(session.end_date);
+  const endDate = new Date(session.end_date ?? session.start_date);
   const sessionDescription = `${startDate.getFullYear()}.${startDate.getMonth() + 1}月〜${endDate.getMonth() + 1}月に実施された${session.name}`;
 
   return (

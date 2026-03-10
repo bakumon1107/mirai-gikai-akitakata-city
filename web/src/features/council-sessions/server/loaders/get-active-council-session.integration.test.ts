@@ -10,9 +10,11 @@ import {
 vi.mock("next/cache", () => ({
   unstable_cache: (fn: (...args: never[]) => unknown) => fn,
 }));
-const { getActiveDietSession } = await import("./get-active-diet-session");
+const { getActiveCouncilSession } = await import(
+  "./get-active-council-session"
+);
 
-describe("getActiveDietSession 統合テスト", () => {
+describe("getActiveCouncilSession 統合テスト", () => {
   const sessionIds: string[] = [];
 
   afterEach(async () => {
@@ -26,7 +28,7 @@ describe("getActiveDietSession 統合テスト", () => {
     const session = await createTestDietSession({ is_active: true });
     sessionIds.push(session.id);
 
-    const result = await getActiveDietSession();
+    const result = await getActiveCouncilSession();
 
     expect(result).not.toBeNull();
     expect(result?.is_active).toBe(true);

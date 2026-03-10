@@ -11,9 +11,11 @@ vi.mock("next/cache", () => ({
   unstable_cache: (fn: (...args: never[]) => unknown) => fn,
 }));
 
-const { getCurrentDietSession } = await import("./get-current-diet-session");
+const { getCurrentCouncilSession } = await import(
+  "./get-current-council-session"
+);
 
-describe("getCurrentDietSession 統合テスト", () => {
+describe("getCurrentCouncilSession 統合テスト", () => {
   let sessionIds: string[] = [];
 
   afterEach(async () => {
@@ -32,7 +34,7 @@ describe("getCurrentDietSession 統合テスト", () => {
     sessionIds.push(session.id);
 
     // Date オブジェクトを渡す（loader固有の変換ロジック）
-    const result = await getCurrentDietSession(new Date("2025-07-15"));
+    const result = await getCurrentCouncilSession(new Date("2025-07-15"));
 
     expect(result).not.toBeNull();
     expect(result?.id).toBe(session.id);
@@ -46,7 +48,7 @@ describe("getCurrentDietSession 統合テスト", () => {
     });
     sessionIds.push(session.id);
 
-    const result = await getCurrentDietSession(new Date("2031-07-01"));
+    const result = await getCurrentCouncilSession(new Date("2031-07-01"));
 
     if (result) {
       expect(result.id).not.toBe(session.id);

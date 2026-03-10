@@ -1,4 +1,4 @@
-import type { CouncilSession } from "../types";
+import type { CouncilSession } from "../../shared/types";
 import { CouncilSessionItem } from "./council-session-item";
 
 type CouncilSessionListProps = {

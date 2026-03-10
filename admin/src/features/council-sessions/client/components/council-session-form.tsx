@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { siteConfig } from "@/config/site.config";
-import { createCouncilSession } from "../actions/create-council-session";
+import { createCouncilSession } from "../../server/actions/create-council-session";
 
 export function CouncilSessionForm() {
   const nameId = useId();

@@ -7,6 +7,7 @@ import { logger } from "../logger";
  */
 export const WEB_CACHE_TAGS = {
   BILLS: "bills",
+  COUNCIL_SESSIONS: "council-sessions",
   DIET_SESSIONS: "diet-sessions",
   INTERVIEW_CONFIGS: "interview-configs",
 } as const;

@@ -16,13 +16,15 @@ const TABLES_TO_CLEAR = [
   "interview_sessions",
   "interview_questions",
   "interview_configs",
-  "mirai_stances",
+  "faction_stances",
   "chats",
   "bill_contents",
   "bills_tags",
   "bills",
   "tags",
-  "diet_sessions",
+  "factions",
+  "committees",
+  "council_sessions",
 ] as const;
 
 export async function clearAllData(supabase: AdminClient) {

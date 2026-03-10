@@ -4,6 +4,7 @@ import NextTopLoader from "nextjs-toploader";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { siteConfig } from "@/config/site.config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,8 +19,8 @@ const geistMono = Geist_Mono({
 const isDev = process.env.NODE_ENV === "development";
 
 export const metadata: Metadata = {
-  title: "みらい議会 Admin",
-  description: "みらい議会の管理者向けダッシュボード",
+  title: `${siteConfig.siteName} Admin`,
+  description: `${siteConfig.siteName}の管理者向けダッシュボード`,
   icons: {
     icon: isDev
       ? "/icons/pwa/icon_dev_192_v3.png"

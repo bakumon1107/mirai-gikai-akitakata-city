@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ManualRuby } from "@/lib/rubyful/manual-ruby";
+import { siteConfig } from "@/config/site.config";
 import { SOCIAL_LINKS } from "@/lib/social-links";
 import { LinkButton } from "./link-button";
 
@@ -13,6 +13,9 @@ const TEAM_MIRAI_SNS_ORDER = [
 ] as const;
 
 export function TeamMirai() {
+  if (!siteConfig.features.showTeamMiraiSection) {
+    return null;
+  }
   return (
     <div className="py-10">
       <div className="flex flex-col gap-6">
@@ -36,9 +39,9 @@ export function TeamMirai() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             <p className="text-[15px] leading-[28px] text-black">
-              参議院議員・AIエンジニアの
-              <ManualRuby ruby="あんの">安野</ManualRuby>
-              たかひろが立ち上げた政党です。テクノロジーで政治の課題を解決することを目指しています。
+              テクノロジーで政治の課題を解決することを目指す政党です。
+              {siteConfig.siteName}は、{siteConfig.councilName}
+              の議論を市民に届けるために運営しています。
             </p>
           </div>
 

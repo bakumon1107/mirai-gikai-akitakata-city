@@ -1,7 +1,7 @@
 {
-  "name": "みらい議会",
-  "short_name": "みらい議会",
-  "description": "国会で今どんな法案が検討されているか、わかりやすく伝えるプラットフォーム",
+  "name": "みらい議会ー川崎版",
+  "short_name": "みらい議会ー川崎版",
+  "description": "川崎市議会で今どんな議案が検討されているか、わかりやすく伝えるプラットフォーム",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#F7F4F0",

@@ -1,5 +1,6 @@
 import { Home, User } from "lucide-react";
 import type { ReactNode } from "react";
+import { siteConfig } from "@/config/site.config";
 import { LogoutButton } from "@/features/auth/client/components/logout-button";
 import { getCurrentAdmin } from "@/features/auth/server/lib/auth-server";
 import { NavigationLinks } from "./layout/navigation-links";
@@ -22,7 +23,7 @@ export default async function MainLayout({
                   <Home className="h-5 w-5 text-white" />
                 </div>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  みらい議会 Admin
+                  {siteConfig.siteName} Admin
                 </h1>
               </div>
             </div>

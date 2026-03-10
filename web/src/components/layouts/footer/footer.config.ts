@@ -1,4 +1,4 @@
-import { EXTERNAL_LINKS } from "@/config/external-links";
+import { siteConfig } from "@/config/site.config";
 
 export type FooterLink = {
   label: string;
@@ -17,28 +17,35 @@ export const primaryLinks: FooterLink[] = [
     label: "TOP",
     href: "/",
   },
-  {
-    label: "みらい議会とは",
-    href: EXTERNAL_LINKS.ABOUT_NOTE,
-    external: true,
-  },
-  {
-    label: "チームみらいについて",
-    href: EXTERNAL_LINKS.TEAM_MIRAI_ABOUT,
-    external: true,
-  },
-  {
-    label: "寄附で応援する",
-    href: EXTERNAL_LINKS.DONATION,
-    external: true,
-  },
+  ...(siteConfig.externalLinks.aboutNote
+    ? [
+        {
+          label: `${siteConfig.siteName}とは`,
+          href: siteConfig.externalLinks.aboutNote,
+          external: true,
+        },
+      ]
+    : []),
+  ...(siteConfig.features.showTeamMiraiSection
+    ? ([
+        {
+          label: "チームみらいについて",
+          href: siteConfig.externalLinks.teamAbout,
+          external: true,
+        },
+        {
+          label: "寄附で応援する",
+          href: siteConfig.externalLinks.donation,
+          external: true,
+        },
+      ] as FooterLink[])
+    : []),
 ];
 
 export const policyLinks: FooterPolicyLink[] = [
   {
     label: "よくあるご質問",
-    href: EXTERNAL_LINKS.FAQ,
-    external: true,
+    href: "/faq",
   },
   {
     label: "利用規約",

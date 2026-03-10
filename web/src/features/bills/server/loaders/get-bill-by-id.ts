@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import { CACHE_TAGS } from "@/lib/cache-tags";
-import type { BillWithContent } from "../../shared/types";
+import type { BillWithContent, FactionStance } from "../../shared/types";
 import {
   findPublishedBillById,
   findMiraiStanceByBillId,
@@ -21,19 +21,38 @@ const _getCachedBillById = unstable_cache(
     id: string,
     difficultyLevel: DifficultyLevelEnum
   ): Promise<BillWithContent | null> => {
-    // 基本的なbill情報、見解、コンテンツ、タグを並列取得
+    // 基本的なbill情報、会派見解、コンテンツ、タグを並列取得
     // 公開ステータスの議案のみを取得
-    const [bill, miraiStance, billContent, billTags] = await Promise.all([
-      findPublishedBillById(id),
-      findMiraiStanceByBillId(id),
-      getBillContentWithDifficulty(id, difficultyLevel),
-      findTagsByBillId(id),
-    ]);
+    const [bill, factionStancesResult, billContent, tagsResult] =
+      await Promise.all([
+        findPublishedBillById(id),
+        findMiraiStanceByBillId(id),
+        getBillContentWithDifficulty(id, difficultyLevel),
+        findTagsByBillId(id),
+      ]);
 
     if (!bill) {
       console.error("Failed to fetch bill");
       return null;
     }
+
+    const { data: stancesData } = factionStancesResult;
+    const { data: billTags } = tagsResult;
+
+    // 会派見解データを整形（sort_order順）
+    const factionStances: FactionStance[] = (stancesData ?? [])
+      .map((s) => ({
+        id: s.id,
+        stance: s.type,
+        comment: s.comment ?? null,
+        faction: s.factions as unknown as {
+          id: string;
+          name: string;
+          display_name: string;
+          sort_order: number;
+        },
+      }))
+      .sort((a, b) => a.faction.sort_order - b.faction.sort_order);
 
     // タグデータを整形
     const tags =
@@ -44,7 +63,7 @@ const _getCachedBillById = unstable_cache(
 
     return {
       ...bill,
-      mirai_stance: miraiStance || undefined,
+      faction_stances: factionStances.length > 0 ? factionStances : undefined,
       bill_content: billContent || undefined,
       tags,
     };

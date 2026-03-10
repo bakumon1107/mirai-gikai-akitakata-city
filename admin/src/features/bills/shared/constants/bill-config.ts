@@ -19,19 +19,19 @@ export const BILL_STATUS_CONFIG: Record<
     icon: Settings,
     color: "text-gray-600 bg-gray-50",
   },
-  introduced: {
+  submitted: {
     icon: FileText,
     color: "text-blue-600 bg-blue-50",
   },
-  in_originating_house: {
+  in_committee: {
     icon: Clock,
     color: "text-yellow-600 bg-yellow-50",
   },
-  in_receiving_house: {
+  plenary_session: {
     icon: AlertCircle,
     color: "text-orange-600 bg-orange-50",
   },
-  enacted: {
+  approved: {
     icon: CheckCircle,
     color: "text-green-600 bg-green-50",
   },

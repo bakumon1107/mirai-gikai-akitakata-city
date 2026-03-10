@@ -1,12 +1,12 @@
-import type { BillStatusEnum, HouseEnum } from "../types";
+import type { BillStatusEnum } from "../types";
 
-// ステップ番号マッピング
+// ステップ番号マッピング（川崎市議会: 一院制）
 const STATUS_TO_STEP: Record<BillStatusEnum, number> = {
   preparing: 0,
-  introduced: 1,
-  in_originating_house: 2,
-  in_receiving_house: 3,
-  enacted: 4,
+  submitted: 1,
+  in_committee: 2,
+  plenary_session: 3,
+  approved: 4,
   rejected: 4,
 } as const;
 
@@ -20,7 +20,7 @@ export function getStatusMessage(
   status: BillStatusEnum,
   statusNote: string | null | undefined
 ): string {
-  if (status === "preparing") return "法案提出前";
+  if (status === "preparing") return "議案上程前";
   return statusNote || "";
 }
 
@@ -37,17 +37,12 @@ export function getStepState(
 }
 
 /**
- * 発議院に応じてステップ順序を調整する
+ * ステップ一覧をそのまま返す（川崎市議会は一院制のため順序変更なし）
  */
 export function getOrderedSteps(
-  originatingHouse: HouseEnum,
   baseSteps: readonly { readonly label: string }[]
 ): { label: string }[] {
-  const steps = baseSteps.map((s) => ({ label: s.label }));
-  if (originatingHouse === "HC") {
-    [steps[1], steps[2]] = [steps[2], steps[1]];
-  }
-  return steps;
+  return baseSteps.map((s) => ({ label: s.label }));
 }
 
 /**

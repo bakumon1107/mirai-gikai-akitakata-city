@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Markdown from "react-markdown";
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/site.config";
 import {
   Dialog,
   DialogContent,
@@ -121,7 +122,8 @@ export function InterviewConsentModal({
             回答データは党内での政策検討に利用します。
           </p>
           <p className="text-sm font-bold leading-[22px]">
-            インタビュー内容はのちにみらい議会上に公開される場合があります。個人情報および機密情報の記載はお控えください。
+            インタビュー内容はのちに{siteConfig.siteName}
+            上に公開される場合があります。個人情報および機密情報の記載はお控えください。
           </p>
 
           <div className="border border-black rounded-lg p-4">

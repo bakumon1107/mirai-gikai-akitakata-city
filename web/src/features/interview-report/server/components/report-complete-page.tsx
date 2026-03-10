@@ -33,11 +33,10 @@ export async function ReportCompletePage({
   }
 
   const billId = report.bill_id;
-
   const isExpertRole = isExpertRegistrationTargetRole(report.role);
   const authResult = await getAuthenticatedUser();
 
-  // 法案・メッセージ・有識者登録状況を並列取得
+  // 議案とメッセージ・有識者登録状況を並列取得
   const [bill, messages, isExpertRegistered] = await Promise.all([
     getBillById(billId),
     getInterviewMessages(report.interview_session_id),
@@ -59,7 +58,7 @@ export async function ReportCompletePage({
 
   return (
     <div className="min-h-dvh bg-mirai-surface">
-      {/* 法案サムネイル画像 */}
+      {/* 議案サムネイル画像 */}
       {bill.thumbnail_url && (
         <div className="relative w-full h-[320px]">
           <Image
@@ -89,7 +88,7 @@ export async function ReportCompletePage({
             ご協力ありがとうございました
           </h1>
 
-          {/* 法案名 */}
+          {/* 議案名 */}
           <div className="bg-mirai-surface-grouped rounded-xl px-4 py-2">
             <p className="text-sm text-gray-800">
               {bill.bill_content?.title || bill.name}

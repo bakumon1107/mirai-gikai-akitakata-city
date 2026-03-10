@@ -7,36 +7,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 
-import type { DietSession } from "@/features/diet-sessions/shared/types";
+import type { Committee } from "@/features/committees/types";
+import type { CouncilSession } from "@/features/council-sessions/types";
 import { createBill } from "../../server/actions/create-bill";
 import { type BillCreateInput, billCreateSchema } from "../../shared/types";
 import { useBillForm } from "../hooks/use-bill-form";
 import { BillFormFields } from "./bill-form-fields";
 
 interface BillCreateFormProps {
-  dietSessions: DietSession[];
+  councilSessions: CouncilSession[];
+  committees: Committee[];
 }
 
-export function BillCreateForm({ dietSessions }: BillCreateFormProps) {
+export function BillCreateForm({
+  councilSessions,
+  committees,
+}: BillCreateFormProps) {
   const { isSubmitting, error, handleSubmit, handleCancel } = useBillForm();
 
   // Default to the latest session (first in the list, sorted by start_date desc)
-  const defaultDietSessionId =
-    dietSessions.length > 0 ? dietSessions[0].id : null;
+  const defaultCouncilSessionId =
+    councilSessions.length > 0 ? councilSessions[0].id : null;
 
   const form = useForm<BillCreateInput>({
     resolver: zodResolver(billCreateSchema),
     defaultValues: {
       name: "",
       status: "preparing",
-      originating_house: "HR",
       status_note: null,
       published_at: new Date().toISOString().slice(0, 16),
       thumbnail_url: null,
       share_thumbnail_url: null,
-      shugiin_url: null,
       is_featured: false,
-      diet_session_id: defaultDietSessionId,
+      council_session_id: defaultCouncilSessionId,
     },
   });
 
@@ -54,7 +57,8 @@ export function BillCreateForm({ dietSessions }: BillCreateFormProps) {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <BillFormFields
               control={form.control}
-              dietSessions={dietSessions}
+              councilSessions={councilSessions}
+              committees={committees}
             />
 
             {error && (

@@ -10,7 +10,9 @@ import type {
 type BillContentInsert =
   Database["public"]["Tables"]["bill_contents"]["Insert"];
 
-export async function findBillsWithDietSessions(sortConfig?: BillSortConfig) {
+export async function findBillsWithCouncilSessions(
+  sortConfig?: BillSortConfig
+) {
   const supabase = createAdminClient();
   const field = sortConfig?.field ?? "created_at";
   const ascending = (sortConfig?.order ?? "desc") === "asc";
@@ -25,7 +27,7 @@ export async function findBillsWithDietSessions(sortConfig?: BillSortConfig) {
 
   const { data, error } = await supabase
     .from("bills")
-    .select("*, diet_sessions(name)")
+    .select("*, council_sessions(name)")
     .order(field, orderOptions);
 
   if (error) {

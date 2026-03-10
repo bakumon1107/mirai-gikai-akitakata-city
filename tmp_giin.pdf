@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="description" content="川崎市公式サイト。くらし・手続きから市政情報までさまざまな情報を掲載しています。">
+<meta property="og:title" content="ページが見つかりません">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://www.city.kawasaki.jp/css/img/apple-touch-icon.png">
+<meta property="og:url" content="https://www.city.kawasaki.jp/index.html">
+<meta property="og:description" content="川崎市公式サイト。くらし・手続きから市政情報までさまざまな情報を掲載しています。">
+<meta property="og:site_name" content="川崎市">
+<title>川崎市：ページが見つかりません</title>
+<link rel="stylesheet" type="text/css" href="/css/common.css" media="screen,print">
+<link rel="stylesheet" type="text/css" href="/css/other.css" media="screen,print">
+<link rel="stylesheet" type="text/css" href="/css/drawer.css" media="screen,print">
+<link id="changecss" rel="stylesheet" type="text/css" href="/css/color01.css" media="screen,print">
+<link rel="stylesheet" type="text/css" href="/css/yomiage.css" media="screen">
+<link rel="stylesheet" type="text/css" href="/css/print.css" media="print">
+<link rel="icon" href="/css/img/favicon.ico">
+<link rel="apple-touch-icon" sizes="180x180" href="/css/img/apple-touch-icon.png">
+<script src="//typesquare.com/3/tsst/script/ja/typesquare.js?65b83b155ec846289b9b4105ac1e02d5"></script>
+<!-- <script src="//cdn1.readspeaker.com/script/6272/webReader/webReader.js?pids=wr&amp;forceAdapter=ioshtml5&amp;disable=translation,lookup"></script> -->
+<script src="/js/jquery-3.6.0.min.js"></script>
+<!-- <script src="/js/onload-ud.js"></script> -->
+<!-- <script src="/js/emergency_disp.js"></script> -->
+<script src="/js/g_custom_search.js"></script>
+<script>
+  window.rsConf = { general: { usePost: true } };
+</script>
+
+<script src="https://tsutaeru.cloud/assets/snippet/js/tsutaeru_mo.js"></script>
+<script>
+  __tsutaeruMO.init({
+    access_token: '839bad3c-4738-4c14-94f1-5b1956a97f35',
+    toolbar: {
+      message: true,
+      fixed:false
+    }
+  });
+</script>
+
+
+<script>
+  function main_trans(aLng){
+    var transUrl = "https://www-city-kawasaki-jp.j-server.com/LUCKAWASAK/ns/w1/"; // 翻訳用URL(共通)
+
+    var rUrl = location.href;
+    if(rUrl == ""){
+        rUrl = 'https://www.city.kawasaki.jp/';
+    }
+
+    var nUrl = transUrl + 'ja' + aLng + '/' + rUrl;
+
+    location.href = nUrl;
+    return false;
+}
+</script>
+
+</head>
+<body id="body" class="inbody inerror drawer drawer--top">
+<img id="pagetop" class="anchor" src="/images/clearspacer.gif" alt="ページの先頭です" width="1" height="1">
+<div class="all">
+<div class="design">
+<!-- ▼▼▼▼▼ヘッダ▼▼▼▼▼ -->
+<header class="main_header">
+<p class="skip"><a href="#HONBUN">共通メニューなどをスキップして本文へ</a></p>
+<div class="head">
+
+<div class="head_in">
+<div class="h1_wrap">
+<p class="h1"><a href="/index.html"><img class="h1_img_logo" src="/css/img/head_logo.png" alt="川崎市"><span class="home">トップ</span></a></p>
+</div>
+
+<div class="h_main">
+<div class="h_main_in">
+<div class="head_search_box">
+<!-- ▼▼検索ボックス▼▼ -->
+<div class="src_box head_search">
+<form action="https://www.city.kawasaki.jp/search/index.html" id="cse-search-box" name="cse-search-box">
+  <input type="hidden" name="cx" value="">
+  <input type="hidden" name="ie" value="UTF-8">
+  <input type="text" name="q" class="q" title="検索キーワード">
+  <button class="input_line" id="search_button" type="submit">検索</button>
+</form>
+<script src="https://www.google.com/cse/brand?form=cse-search-box&amp;lang=ja"></script>
+</div>
+<!-- ▲▲検索ボックス▲▲ -->
+</div>
+
+
+</div>
+</div>
+</div>
+</div>
+
+</header>
+
+<img id="HONBUN" tabindex="-1" class="anchor" src="/images/clearspacer.gif" alt="" width="1" height="1">
+<!-- ▲▲▲▲▲ヘッダ▲▲▲▲▲ -->
+<!-- ▼▼▼▼▼メイン▼▼▼▼▼ -->
+<div id="main_outline">
+<div class="main_naka">
+<div class="error">
+<h1>ページが見つかりません</h1>
+<ul>
+<li>アクセスしたページは、削除されたか、または現在利用できない可能性があります。</li>
+<li>ページを探す場合には、画面上部の検索ボックスから検索するか、<a href="/index.html">トップページへ移動</a>して探してください。</li>
+<li>過去に公開していた川崎市公式ウェブサイトは、平成22年（2010年）4月1日からのデータが次のサイトで御覧になれます。<br><a href="https://warp.ndl.go.jp/info:ndljp/pid/1003654/www.city.kawasaki.jp/">国立国会図書館インターネット資料収集保存事業（WARP）の川崎市のページ</a><p><b>注意事項：</b>保存データは公開当時のものであるため、最新情報とは異なる場合があります。保存が行われたタイミングの都合により、全ての掲載内容が保存されている訳ではありません。</p></li>
+</ul>
+
+
+<div class="sub_shi_ku">
+<div class="sub_ku">
+  <ul class="sub_navi_sub">
+    <li><a href="/index.html">川崎市ホームページ</a></li>
+    <li><a href="/kawasaki/index.html">川崎区</a></li>
+    <li><a href="/saiwai/index.html">幸区</a></li>
+    <li><a href="/nakahara/index.html">中原区</a></li>
+    <li><a href="/takatsu/index.html">高津区</a></li>
+    <li><a href="/miyamae/index.html">宮前区</a></li>
+    <li><a href="/tama/index.html">多摩区</a></li>
+    <li><a href="/asao/index.html">麻生区</a></li>
+    <li><a href="/800/index.html">川崎市上下水道局</a></li>
+    <li><a href="/820/index.html">市バス（川崎市交通局）</a></li>
+    <li><a href="/880/index.html">川崎市教育委員会</a></li>
+    <li><a href="/233300/index.html">入札情報かわさき</a></li>
+    <li><a href="/2020olypara/index.html">かわさきパラムーブメント</a></li>
+    <li><a href="/kawasakiu18/index.html">かわさきしこどもページ</a></li>
+    <li><a href="/830-1/index.html">病院局</a></li>
+  </ul>
+</div>
+</div>
+
+
+</div>
+</div>
+</div>
+</div>
+<!-- GTM element show -->
+<img src="/images/clearspacer02.gif" alt="" width="1" height="1" id="endof0102-02">
+<!-- End GTM element show -->
+<!-- ▲▲▲▲▲メイン▲▲▲▲▲ -->
+<!-- ▼▼▼▼▼フッタ▼▼▼▼▼ -->
+<footer class="main_footer">
+
+<div class="foot_modori">
+  <p class="modoriin">
+  <a href="#pagetop"><span>ページの</span><span>先頭へ</span></a>
+  </p>
+</div>
+
+<div class="foot_wrap">
+    <div class="foot_copy">
+        <p class="foot_copyin" lang="en">(c) <script src="/js/year.js"></script> City of Kawasaki. All rights reserved. </p>
+    </div>
+</div>
+</footer>
+<!-- ▲▲▲▲▲フッタ▲▲▲▲▲ -->
+</div>
+<script src="/js/drawer.js"></script>
+<script src="/js/iscroll.js"></script>
+<script src="/js/toolbox.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/color.js"></script>
+</body>
+</html>

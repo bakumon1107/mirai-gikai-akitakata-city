@@ -129,17 +129,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "bills_council_session_id_fkey"
-            columns: ["council_session_id"]
-            isOneToOne: false
-            referencedRelation: "council_sessions"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "bills_committee_id_fkey"
             columns: ["committee_id"]
             isOneToOne: false
             referencedRelation: "committees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bills_diet_session_id_fkey"
+            columns: ["council_session_id"]
+            isOneToOne: false
+            referencedRelation: "council_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -326,6 +326,36 @@ export type Database = {
         }
         Relationships: []
       }
+      expert_registrations: {
+        Row: {
+          affiliation: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          affiliation: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          affiliation?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       faction_stances: {
         Row: {
           bill_id: string
@@ -401,36 +431,6 @@ export type Database = {
           name?: string
           sort_order?: number
           updated_at?: string
-        }
-        Relationships: []
-      }
-      expert_registrations: {
-        Row: {
-          affiliation: string
-          created_at: string
-          email: string
-          id: string
-          name: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          affiliation: string
-          created_at?: string
-          email: string
-          id?: string
-          name: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          affiliation?: string
-          created_at?: string
-          email?: string
-          id?: string
-          name?: string
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
@@ -663,41 +663,6 @@ export type Database = {
             columns: ["interview_config_id"]
             isOneToOne: false
             referencedRelation: "interview_configs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      mirai_stances: {
-        Row: {
-          bill_id: string
-          comment: string | null
-          created_at: string
-          id: string
-          type: Database["public"]["Enums"]["stance_type_enum"]
-          updated_at: string
-        }
-        Insert: {
-          bill_id: string
-          comment?: string | null
-          created_at?: string
-          id?: string
-          type: Database["public"]["Enums"]["stance_type_enum"]
-          updated_at?: string
-        }
-        Update: {
-          bill_id?: string
-          comment?: string | null
-          created_at?: string
-          id?: string
-          type?: Database["public"]["Enums"]["stance_type_enum"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "mirai_stances_bill_id_fkey"
-            columns: ["bill_id"]
-            isOneToOne: true
-            referencedRelation: "bills"
             referencedColumns: ["id"]
           },
         ]
@@ -980,7 +945,6 @@ export type Database = {
         | "plenary_session"
         | "approved"
         | "rejected"
-        | "enacted"
       chat_role_enum: "user" | "system" | "assistant"
       difficulty_level_enum: "normal" | "hard"
       interview_config_status_enum: "public" | "closed"
@@ -1137,7 +1101,6 @@ export const Constants = {
         "plenary_session",
         "approved",
         "rejected",
-        "enacted",
       ],
       chat_role_enum: ["user", "system", "assistant"],
       difficulty_level_enum: ["normal", "hard"],
@@ -1162,3 +1125,4 @@ export const Constants = {
     },
   },
 } as const
+

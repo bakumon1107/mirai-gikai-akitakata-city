@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 
-import type { Committee } from "@/features/committees/types";
-import type { CouncilSession } from "@/features/council-sessions/types";
+import type { Committee } from "@/features/committees/shared/types";
+import type { CouncilSession } from "@/features/council-sessions/shared/types";
 import { updateBill } from "../../server/actions/update-bill";
 import {
   type Bill,

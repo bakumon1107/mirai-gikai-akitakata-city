@@ -4,7 +4,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { randomUUID } from "node:crypto";
 import { siteConfig } from "@/config/site.config";
-import { requireAdmin } from "@/features/auth/lib/auth-server";
+import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import {
   ClaudeUsageLimitError,
   executeClaudeToFile,

@@ -19,8 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { Committee } from "@/features/committees/types";
-import type { CouncilSession } from "@/features/council-sessions/types";
+import type { Committee } from "@/features/committees/shared/types";
+import type { CouncilSession } from "@/features/council-sessions/shared/types";
 import type { BillStatus } from "@/features/bills/shared/types";
 import type { BillCreateInput } from "../../shared/types";
 import { ThumbnailUpload } from "./thumbnail-upload";

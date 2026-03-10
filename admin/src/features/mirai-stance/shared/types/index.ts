@@ -1,6 +1,8 @@
 import type { Database } from "@mirai-gikai/supabase";
 import { z } from "zod";
 
+export type MiraiStance = Database["public"]["Tables"]["mirai_stances"]["Row"];
+
 export type FactionStance =
   Database["public"]["Tables"]["faction_stances"]["Row"];
 export type StanceTypeEnum = Database["public"]["Enums"]["stance_type_enum"];

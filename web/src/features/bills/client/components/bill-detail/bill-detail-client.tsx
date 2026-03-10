@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useRef } from "react";
 import { siteConfig } from "@/config/site.config";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
@@ -13,7 +14,8 @@ import type { BillWithContent } from "../../../shared/types";
 interface BillDetailClientProps {
   bill: BillWithContent;
   currentDifficulty: DifficultyLevelEnum;
-  children: React.ReactNode;
+  hasInterviewConfig: boolean;
+  children: ReactNode;
 }
 
 /**
@@ -27,6 +29,7 @@ interface BillDetailClientProps {
 export function BillDetailClient({
   bill,
   currentDifficulty,
+  hasInterviewConfig,
   children,
 }: BillDetailClientProps) {
   const chatButtonRef = useRef<ChatButtonRef>(null);
@@ -49,6 +52,7 @@ export function BillDetailClient({
       <ChatButton
         ref={chatButtonRef}
         billContext={bill}
+        hasInterviewConfig={hasInterviewConfig}
         difficultyLevel={currentDifficulty}
       />
     </>

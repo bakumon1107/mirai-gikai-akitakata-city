@@ -16,7 +16,7 @@ export function ComingSoonSection({ bills }: ComingSoonSectionProps) {
         <h2 className="text-[22px] font-bold text-black leading-[1.48]">
           これから掲載される議案
         </h2>
-        <p className="text-xs text-[#404040]">
+        <p className="text-xs text-mirai-text-secondary">
           {siteConfig.siteName}は、順次更新されていきます
         </p>
       </div>
@@ -37,7 +37,7 @@ export function ComingSoonSection({ bills }: ComingSoonSectionProps) {
       )}
 
       {/* 川崎市議会情報へのリンク */}
-      <div className="text-right text-sm text-[#404040]">
+      <div className="text-right text-sm text-mirai-text-secondary">
         <Link
           href={siteConfig.councilBillsDetailUrl}
           target="_blank"
@@ -73,7 +73,7 @@ function ComingSoonBillCard({ bill }: { bill: ComingSoonBill }) {
             {displayTitle}
           </h3>
           {officialName && (
-            <p className="text-xs text-[#666666]">{officialName}</p>
+            <p className="text-xs text-mirai-text-subtle">{officialName}</p>
           )}
         </div>
         {bill.council_url && (

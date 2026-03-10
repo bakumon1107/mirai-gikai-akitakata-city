@@ -1,7 +1,7 @@
-import { createAdminClient } from "@mirai-gikai/supabase";
 import { unstable_cache } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CouncilSession } from "../../shared/types";
+import { findCurrentDietSession } from "../repositories/diet-session-repository";
 
 /**
  * 指定日時点で開催中の定例会を取得
@@ -21,23 +21,7 @@ export async function getCurrentCouncilSession(
 
 const _getCachedCurrentCouncilSession = unstable_cache(
   async (targetDate: string): Promise<CouncilSession | null> => {
-    const supabase = createAdminClient();
-
-    const { data, error } = await supabase
-      .from("council_sessions")
-      .select("*")
-      .lte("start_date", targetDate)
-      .or(`end_date.gte.${targetDate},end_date.is.null`)
-      .order("start_date", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Failed to fetch current council session:", error);
-      return null;
-    }
-
-    return data;
+    return findCurrentDietSession(targetDate);
   },
   ["current-council-session"],
   {

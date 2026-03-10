@@ -2,6 +2,7 @@
 
 import { ArrowRight, Lock } from "lucide-react";
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site.config";
 import {
@@ -18,7 +19,7 @@ interface MakePrivateModalProps {
   isSubmitting: boolean;
 }
 
-function CheckListItem({ children }: { children: React.ReactNode }) {
+function CheckListItem({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-start gap-3">
       <Image
@@ -26,7 +27,7 @@ function CheckListItem({ children }: { children: React.ReactNode }) {
         alt=""
         width={20}
         height={20}
-        className="flex-shrink-0 mt-0.5"
+        className="flex-shrink-0 mt-1"
       />
       <p className="text-sm font-medium leading-relaxed">{children}</p>
     </div>

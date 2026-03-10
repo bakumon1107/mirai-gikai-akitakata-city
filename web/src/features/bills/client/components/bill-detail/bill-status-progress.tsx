@@ -1,4 +1,11 @@
 import type { BillStatusEnum } from "../../../shared/types";
+import {
+  calculateProgressWidth,
+  getCurrentStep,
+  getOrderedSteps,
+  getStatusMessage,
+  getStepState,
+} from "../../../shared/utils/bill-progress";
 
 interface BillStatusProgressProps {
   status: BillStatusEnum;
@@ -63,7 +70,7 @@ function StatusBadge({ message }: StatusBadgeProps) {
         style={{
           borderLeft: "7.5px solid transparent",
           borderRight: "7.5px solid transparent",
-          borderTop: "7.5px solid #a9e89d",
+          borderTop: "7.5px solid var(--color-mirai-progress-fill)",
         }}
       />
     </div>
@@ -113,8 +120,7 @@ export function BillStatusProgress({
   statusNote,
 }: BillStatusProgressProps) {
   const isPreparing = status === "preparing";
-  const currentStep = STATUS_TO_STEP[status] ?? 0;
-
+  const currentStep = getCurrentStep(status);
   const getStatusMessage = (): string => {
     return STATUS_LABELS[status] ?? "";
   };
@@ -124,10 +130,10 @@ export function BillStatusProgress({
     return stepNumber <= currentStep ? "active" : "inactive";
   };
 
-  const orderedSteps = [...BASE_STEPS];
-  const progressWidth = PROGRESS_RATIOS[currentStep] * 100;
+  const orderedSteps = getOrderedSteps(originatingHouse, BASE_STEPS);
+  const progressWidth = calculateProgressWidth(currentStep);
 
-  const statusMessage = getStatusMessage();
+  const statusMessage = getStatusMessage(status, statusNote);
 
   return (
     <>
@@ -160,7 +166,9 @@ export function BillStatusProgress({
             <div className="relative flex justify-around">
               {orderedSteps.map((step, index) => {
                 const stepNumber = index + 1;
-                const isActive = getStepState(stepNumber) === "active";
+                const isActive =
+                  getStepState(stepNumber, currentStep, isPreparing) ===
+                  "active";
 
                 return (
                   <ProgressStep

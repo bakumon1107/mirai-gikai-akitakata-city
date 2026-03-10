@@ -1,16 +1,10 @@
 import "./globals.css";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
 import { Lexend_Giga, Noto_Sans_JP } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
-import { Header } from "@/components/header";
-import { AuthGate } from "@/components/layouts/auth-gate";
-import { Footer } from "@/components/layouts/footer/footer";
-import { MainLayout } from "@/components/layouts/main-layout";
 import { siteConfig } from "@/config/site.config";
+import type { ReactNode } from "react";
 import { env } from "@/lib/env";
-import { RubyfulInitializer } from "@/lib/rubyful";
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -24,6 +18,7 @@ const lexendGiga = Lexend_Giga({
   weight: ["400", "500", "700", "800", "900"],
 });
 
+const isDev = process.env.NODE_ENV === "development";
 const ogImage = {
   url: "/ogp.jpg",
   width: 1200,
@@ -37,7 +32,9 @@ export const metadata: Metadata = {
   description: siteConfig.siteDescription,
   keywords: [...siteConfig.keywords],
   icons: {
-    icon: "/icons/pwa/icon_android_192.png",
+    icon: isDev
+      ? "/icons/pwa/icon_dev_192_v3.png"
+      : "/icons/pwa/icon_android_192.png",
     apple: "/icons/pwa/icon_ios.png",
   },
   manifest: "/manifest.json",
@@ -76,24 +73,15 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="ja">
       <body
-        className={`${notoSansJP.variable} ${lexendGiga.variable} font-sans antialiased bg-[#EEEEEE]`}
+        className={`${notoSansJP.variable} ${lexendGiga.variable} font-sans antialiased bg-mirai-surface-light`}
       >
         <NextTopLoader showSpinner={false} color="#2aa693" />
-        <SpeedInsights />
-        <GoogleAnalytics gaId={env.analytics.gaTrackingId ?? ""} />
-        <RubyfulInitializer />
-        <AuthGate />
-
-        <MainLayout>
-          <Header />
-          <main className="min-h-screen bg-[#F7F4F0]">{children}</main>
-          <Footer />
-        </MainLayout>
+        {children}
       </body>
     </html>
   );

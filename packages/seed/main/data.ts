@@ -264,14 +264,14 @@ export function createInterviewQuestions(
     {
       interview_config_id: interviewConfigId,
       question: "この議案に賛成ですか？反対ですか？",
-      instruction: "ユーザーの立場を明確にしてください。",
+      follow_up_guide: "ユーザーの立場を明確にしてください。",
       quick_replies: ["賛成", "反対", "どちらでもない"],
       question_order: 1,
     },
     {
       interview_config_id: interviewConfigId,
       question: "その理由を教えてください。",
-      instruction: "具体的な理由を引き出してください。",
+      follow_up_guide: "具体的な理由を引き出してください。",
       quick_replies: null,
       question_order: 2,
     },
@@ -292,7 +292,7 @@ export function createInterviewSessions(
   for (let i = 0; i < 20; i++) {
     const baseOffset = i * 86400000 * 3; // 3日ずつずらす
 
-    // パターン1: 完了 + レポートあり（賛成）- 最初の5件は公開
+    // パターン1: 完了 + レポートあり（賛成）
     sessions.push({
       interview_config_id: interviewConfigId,
       user_id: `00000000-0000-0000-0000-${String(i * 5 + 1).padStart(12, "0")}`,
@@ -302,10 +302,9 @@ export function createInterviewSessions(
       completed_at: new Date(
         now.getTime() - baseOffset - 3000000
       ).toISOString(),
-      is_public_by_user: i < 5, // 最初の5件は公開
     });
 
-    // パターン2: 完了 + レポートあり（反対）- 最初の5件は公開
+    // パターン2: 完了 + レポートあり（反対）
     sessions.push({
       interview_config_id: interviewConfigId,
       user_id: `00000000-0000-0000-0000-${String(i * 5 + 2).padStart(12, "0")}`,
@@ -315,10 +314,9 @@ export function createInterviewSessions(
       completed_at: new Date(
         now.getTime() - baseOffset - 6600000
       ).toISOString(),
-      is_public_by_user: i < 5, // 最初の5件は公開
     });
 
-    // パターン3: 完了 + レポートあり（中立）- 最初の5件は公開
+    // パターン3: 完了 + レポートあり（中立）
     sessions.push({
       interview_config_id: interviewConfigId,
       user_id: `00000000-0000-0000-0000-${String(i * 5 + 3).padStart(12, "0")}`,
@@ -328,7 +326,6 @@ export function createInterviewSessions(
       completed_at: new Date(
         now.getTime() - baseOffset - 10200000
       ).toISOString(),
-      is_public_by_user: i < 5, // 最初の5件は公開
     });
 
     // パターン4: 完了したけどレポート未作成
@@ -341,7 +338,6 @@ export function createInterviewSessions(
       completed_at: new Date(
         now.getTime() - baseOffset - 13800000
       ).toISOString(),
-      is_public_by_user: false,
     });
 
     // パターン5: 進行中（未完了、レポートなし）
@@ -352,7 +348,6 @@ export function createInterviewSessions(
         now.getTime() - baseOffset - 1800000
       ).toISOString(),
       completed_at: null,
-      is_public_by_user: false,
     });
   }
 
@@ -534,9 +529,11 @@ export function createInterviewReports(
   sessionIds.forEach((sessionId, index) => {
     const patternIndex = index % 5;
     if (patternIndex < 3) {
+      const loopIndex = Math.floor(index / 5);
       reports.push({
         interview_session_id: sessionId,
         ...reportTemplates[patternIndex],
+        is_public_by_user: loopIndex < 5, // 最初の5件は公開
       });
     }
   });
@@ -573,13 +570,8 @@ export function createDemoSession(
     id: DEMO_SESSION_ID,
     interview_config_id: interviewConfigId,
     user_id: "00000000-0000-0000-0000-000000000000",
-    started_at: new Date(
-      now.getTime() - 3600000
-    ).toISOString(),
-    completed_at: new Date(
-      now.getTime() - 3000000
-    ).toISOString(),
-    is_public_by_user: true,
+    started_at: new Date(now.getTime() - 3600000).toISOString(),
+    completed_at: new Date(now.getTime() - 3000000).toISOString(),
   };
 }
 
@@ -640,6 +632,7 @@ export function createDemoReport(): InterviewReportInsert {
           "市役所の窓口手続きのオンライン化や、行政文書のデジタル化が進むと市民にとって便利になると期待している。",
       },
     ],
+    is_public_by_user: true,
   };
 }
 
@@ -653,37 +646,22 @@ export function createAdditionalDemoSessions(
       id: DEMO_SESSION_ID_WORK,
       interview_config_id: interviewConfigId,
       user_id: "00000000-0000-0000-0000-000000000010",
-      started_at: new Date(
-        now.getTime() - 7200000
-      ).toISOString(),
-      completed_at: new Date(
-        now.getTime() - 6600000
-      ).toISOString(),
-      is_public_by_user: true,
+      started_at: new Date(now.getTime() - 7200000).toISOString(),
+      completed_at: new Date(now.getTime() - 6600000).toISOString(),
     },
     {
       id: DEMO_SESSION_ID_DAILY,
       interview_config_id: interviewConfigId,
       user_id: "00000000-0000-0000-0000-000000000011",
-      started_at: new Date(
-        now.getTime() - 10800000
-      ).toISOString(),
-      completed_at: new Date(
-        now.getTime() - 10200000
-      ).toISOString(),
-      is_public_by_user: true,
+      started_at: new Date(now.getTime() - 10800000).toISOString(),
+      completed_at: new Date(now.getTime() - 10200000).toISOString(),
     },
     {
       id: DEMO_SESSION_ID_CITIZEN,
       interview_config_id: interviewConfigId,
       user_id: "00000000-0000-0000-0000-000000000012",
-      started_at: new Date(
-        now.getTime() - 14400000
-      ).toISOString(),
-      completed_at: new Date(
-        now.getTime() - 13800000
-      ).toISOString(),
-      is_public_by_user: true,
+      started_at: new Date(now.getTime() - 14400000).toISOString(),
+      completed_at: new Date(now.getTime() - 10200000).toISOString(),
     },
   ];
 }
@@ -809,6 +787,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
             "共働きで子ども2人を育てているが、医療費の自己負担が家計を圧迫している。助成拡充で負担が減れば助かる。",
         },
       ],
+      is_public_by_user: true,
     },
     {
       id: DEMO_REPORT_ID_DAILY,
@@ -826,6 +805,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
             "風邪や怪我で小児科にかかることが多く、月に何回も通院する。自己負担が積み重なると家計に影響が大きい。",
         },
       ],
+      is_public_by_user: true,
     },
     {
       id: DEMO_REPORT_ID_CITIZEN,
@@ -843,6 +823,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
             "他の行政サービスとのバランスも考えつつ、子育て世帯への支援として医療費助成は拡充すべきと考える。",
         },
       ],
+      is_public_by_user: true,
     },
   ];
 }

@@ -1,7 +1,7 @@
-import { createAdminClient } from "@mirai-gikai/supabase";
 import { unstable_cache } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { CouncilSession } from "../../shared/types";
+import { findActiveDietSession } from "../repositories/diet-session-repository";
 
 /**
  * アクティブな定例会を取得
@@ -14,20 +14,7 @@ export async function getActiveCouncilSession(): Promise<CouncilSession | null> 
 
 const _getCachedActiveCouncilSession = unstable_cache(
   async (): Promise<CouncilSession | null> => {
-    const supabase = createAdminClient();
-
-    const { data: activeSession, error: activeError } = await supabase
-      .from("council_sessions")
-      .select("*")
-      .eq("is_active", true)
-      .maybeSingle();
-
-    if (activeError) {
-      console.error("Failed to fetch active council session:", activeError);
-      return null;
-    }
-
-    return activeSession;
+    return findActiveDietSession();
   },
   ["active-council-session"],
   {

@@ -3,7 +3,6 @@ import {
   CheckCircle,
   Clock,
   FileText,
-  Gavel,
   Settings,
   XCircle,
 } from "lucide-react";
@@ -39,9 +38,5 @@ export const BILL_STATUS_CONFIG: Record<
   rejected: {
     icon: XCircle,
     color: "text-red-600 bg-red-50",
-  },
-  enacted: {
-    icon: Gavel,
-    color: "text-purple-600 bg-purple-50",
   },
 };

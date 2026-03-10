@@ -3,28 +3,23 @@
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
-import type { UpdateFactionInput } from "../types";
+import type { UpdateCommitteeInput } from "../../shared/types";
 
-export async function updateFaction(input: UpdateFactionInput) {
+export async function updateCommittee(input: UpdateCommitteeInput) {
   try {
     await requireAdmin();
 
     const supabase = createAdminClient();
 
     if (!input.name || input.name.trim().length === 0) {
-      return { error: "識別名を入力してください" };
-    }
-
-    if (!input.display_name || input.display_name.trim().length === 0) {
-      return { error: "表示名を入力してください" };
+      return { error: "委員会名を入力してください" };
     }
 
     const { data, error } = await supabase
-      .from("factions")
+      .from("committees")
       .update({
         name: input.name.trim(),
-        display_name: input.display_name.trim(),
-        logo_url: input.logo_url || null,
+        description: input.description || null,
         sort_order: input.sort_order,
         is_active: input.is_active,
         updated_at: new Date().toISOString(),
@@ -35,22 +30,22 @@ export async function updateFaction(input: UpdateFactionInput) {
 
     if (error) {
       if (error.code === "23505") {
-        return { error: "この識別名は既に存在します" };
+        return { error: "この委員会名は既に存在します" };
       }
       if (error.code === "PGRST116") {
-        return { error: "会派が見つかりません" };
+        return { error: "委員会が見つかりません" };
       }
-      return { error: `会派の更新に失敗しました: ${error.message}` };
+      return { error: `委員会の更新に失敗しました: ${error.message}` };
     }
 
     await invalidateWebCache();
 
     return { data };
   } catch (error) {
-    console.error("Update faction error:", error);
+    console.error("Update committee error:", error);
     if (error instanceof Error) {
       return { error: error.message };
     }
-    return { error: "会派の更新中にエラーが発生しました" };
+    return { error: "委員会の更新中にエラーが発生しました" };
   }
 }

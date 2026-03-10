@@ -5,11 +5,11 @@ import { BillEditForm } from "@/features/bills-edit/client/components/bill-edit-
 import { BillTagsForm } from "@/features/bills-edit/client/components/bill-tags-form";
 import { getBillById } from "@/features/bills-edit/server/loaders/get-bill-by-id";
 import { getBillTagIds } from "@/features/bills-edit/server/loaders/get-bill-tag-ids";
-import { loadCommittees } from "@/features/committees/loaders/load-committees";
-import { loadCouncilSessions } from "@/features/council-sessions/loaders/load-council-sessions";
-import { StancesManager } from "@/features/faction-stances/components/stances-manager";
-import { getFactions } from "@/features/faction-stances/loaders/get-factions";
-import { getStancesByBillId } from "@/features/faction-stances/loaders/get-stances-by-bill-id";
+import { loadCommittees } from "@/features/committees/server/loaders/load-committees";
+import { loadCouncilSessions } from "@/features/council-sessions/server/loaders/load-council-sessions";
+import { StancesManager } from "@/features/faction-stances/client/components/stances-manager";
+import { getFactions } from "@/features/faction-stances/server/loaders/get-factions";
+import { getStancesByBillId } from "@/features/faction-stances/server/loaders/get-stances-by-bill-id";
 import { loadTags } from "@/features/tags/server/loaders/load-tags";
 
 interface BillEditPageProps {

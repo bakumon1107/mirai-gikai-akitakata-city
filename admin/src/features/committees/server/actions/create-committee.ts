@@ -3,7 +3,7 @@
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
-import type { CreateCommitteeInput } from "../types";
+import type { CreateCommitteeInput } from "../../shared/types";
 
 export async function createCommittee(input: CreateCommitteeInput) {
   try {

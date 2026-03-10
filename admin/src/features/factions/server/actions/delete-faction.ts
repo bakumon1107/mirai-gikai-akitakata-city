@@ -3,7 +3,7 @@
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
-import type { DeleteFactionInput } from "../types";
+import type { DeleteFactionInput } from "../../shared/types";
 
 export async function deleteFaction(input: DeleteFactionInput) {
   try {

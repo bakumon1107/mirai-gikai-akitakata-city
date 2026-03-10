@@ -1,6 +1,6 @@
 "use client";
 
-import type { CommitteeWithBillCount } from "../types";
+import type { CommitteeWithBillCount } from "../../shared/types";
 import { CommitteeItem } from "./committee-item";
 
 type CommitteeListProps = {

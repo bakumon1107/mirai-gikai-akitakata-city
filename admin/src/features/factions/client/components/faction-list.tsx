@@ -1,6 +1,6 @@
 "use client";
 
-import type { FactionWithStanceCount } from "../types";
+import type { FactionWithStanceCount } from "../../shared/types";
 import { FactionItem } from "./faction-item";
 
 type FactionListProps = {

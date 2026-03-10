@@ -1,6 +1,6 @@
-import { FactionForm } from "@/features/factions/components/faction-form";
-import { FactionList } from "@/features/factions/components/faction-list";
-import { loadFactions } from "@/features/factions/loaders/load-factions";
+import { FactionForm } from "@/features/factions/client/components/faction-form";
+import { FactionList } from "@/features/factions/client/components/faction-list";
+import { loadFactions } from "@/features/factions/server/loaders/load-factions";
 
 export default async function FactionsPage() {
   const factions = await loadFactions();

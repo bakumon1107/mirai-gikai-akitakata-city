@@ -6,7 +6,6 @@ import {
   createTestTag,
   cleanupTestTag,
   createTestBillTag,
-  createTestMiraiStance,
   createTestPreviewToken,
   createTestDietSession,
   cleanupTestDietSession,
@@ -166,22 +165,7 @@ describe("bill-repository 統合テスト", () => {
   // ============================================================
 
   describe("findMiraiStanceByBillId", () => {
-    it("議案のmirai_stanceを取得できる", async () => {
-      const bill = await createTestBill();
-      billIds.push(bill.id);
-      await createTestMiraiStance(bill.id, {
-        type: "for",
-        comment: "賛成コメント",
-      });
-
-      const result = await findMiraiStanceByBillId(bill.id);
-
-      expect(result).not.toBeNull();
-      expect(result?.type).toBe("for");
-      expect(result?.comment).toBe("賛成コメント");
-    });
-
-    it("stanceが存在しない場合はnullを返す", async () => {
+    it("川崎市議会DBにはmirai_stancesテーブルが存在しないため常にnullを返す", async () => {
       const bill = await createTestBill();
       billIds.push(bill.id);
 

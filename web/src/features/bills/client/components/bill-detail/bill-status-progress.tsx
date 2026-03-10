@@ -38,7 +38,6 @@ const STATUS_LABELS: Record<BillStatusEnum, string> = {
   plenary_session: "本会議採決中",
   approved: "可決",
   rejected: "否決",
-  enacted: "成立",
 };
 
 // ステータスバッジコンポーネント

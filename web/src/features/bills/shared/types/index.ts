@@ -6,7 +6,6 @@ export type BillInsert = Database["public"]["Tables"]["bills"]["Insert"];
 export type BillUpdate = Database["public"]["Tables"]["bills"]["Update"];
 
 export type BillContent = Database["public"]["Tables"]["bill_contents"]["Row"];
-export type MiraiStance = Database["public"]["Tables"]["mirai_stances"]["Row"];
 export type BillContentInsert =
   Database["public"]["Tables"]["bill_contents"]["Insert"];
 export type BillContentUpdate =
@@ -15,6 +14,17 @@ export type BillContentUpdate =
 // Enums
 export type BillStatusEnum = Database["public"]["Enums"]["bill_status_enum"];
 export type StanceTypeEnum = Database["public"]["Enums"]["stance_type_enum"];
+
+// mirai_stances テーブルは川崎DB上には存在しないが、
+// stance-styles.ts と関連テストが参照するためローカル型として定義する
+export type MiraiStance = {
+  id: string;
+  bill_id: string;
+  type: StanceTypeEnum;
+  comment: string | null;
+  created_at: string;
+  updated_at: string;
+};
 
 // 公開ステータス型（議案の公開/非公開を管理）
 export type BillPublishStatus = "draft" | "published" | "coming_soon";
@@ -71,13 +81,12 @@ export type BillsByTag = {
 
 // ステータスのソート順（DBのstatus_order generated columnと一致させる）
 export const BILL_STATUS_ORDER: Record<BillStatusEnum, number> = {
-  enacted: 0,
-  approved: 1,
-  rejected: 2,
-  plenary_session: 3,
-  in_committee: 4,
-  submitted: 5,
-  preparing: 6,
+  approved: 0,
+  rejected: 1,
+  plenary_session: 2,
+  in_committee: 3,
+  submitted: 4,
+  preparing: 5,
 };
 
 // ステータスを日本語ラベルに変換する関数
@@ -95,8 +104,6 @@ export function getBillStatusLabel(status: BillStatusEnum): string {
       return "可決";
     case "rejected":
       return "否決";
-    case "enacted":
-      return "成立";
     default:
       return status;
   }

@@ -8,7 +8,6 @@ const STATUS_TO_STEP: Record<BillStatusEnum, number> = {
   plenary_session: 3,
   approved: 4,
   rejected: 4,
-  enacted: 4,
 } as const;
 
 // プログレス比率

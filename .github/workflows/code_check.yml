@@ -2,9 +2,9 @@ name: Code Check
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, kawasaki/develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main, kawasaki/develop]
 
 jobs:
   lint-and-typecheck:

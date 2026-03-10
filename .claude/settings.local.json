@@ -57,7 +57,8 @@
       "Bash(node:*)",
       "Bash(pnpm:*)",
       "Bash(head:*)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(cat:*)"
     ]
   }
 }

@@ -1,0 +1,39 @@
+name: Migrate DB then Deploy Admin
+
+on:
+  push:
+    branches: [kawasaki/admin]
+
+jobs:
+  migrate-and-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      # Supabase CLI セットアップ
+      - uses: supabase/setup-cli@b60b5899c73b63a2d2d651b1e90db8d4c9392f51 # v1.6.0
+        with:
+            version: latest
+
+      # Supabase プロジェクトへリンク（ノンインタラクティブ）
+      - name: Supabase link
+        run: |
+          supabase link --project-ref $SUPABASE_PROJECT_REF --password $SUPABASE_DB_PASSWORD
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # マイグレーション適用（idempotent）
+      - name: Supabase db push
+        run: |
+          supabase db push --include-all
+          supabase config push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      # 成功したら Vercel デプロイを開始
+      - name: Trigger Vercel Deploy Hook
+        run: |
+          curl -X POST "${{ secrets.ADMIN_VERCEL_DEPLOY_HOOK_URL }}"

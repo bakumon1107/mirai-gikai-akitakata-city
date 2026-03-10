@@ -1,8 +1,8 @@
-name: Migrate DB then Deploy
+name: Migrate DB then Deploy Web
 
 on:
   push:
-    branches: [ main, kawasaki/develop ]
+    branches: [kawasaki/web]
 
 jobs:
   migrate-and-deploy:
@@ -37,4 +37,3 @@ jobs:
       - name: Trigger Vercel Deploy Hook
         run: |
           curl -X POST "${{ secrets.WEB_VERCEL_DEPLOY_HOOK_URL }}"
-          curl -X POST "${{ secrets.ADMIN_VERCEL_DEPLOY_HOOK_URL }}"

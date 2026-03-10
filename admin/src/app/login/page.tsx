@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { siteConfig } from "@/config/site.config";
 import { LoginForm } from "@/features/auth/client/components/login-form";
 
 export default function LoginPage() {
@@ -11,7 +12,7 @@ export default function LoginPage() {
             管理者ログイン
           </CardTitle>
           <p className="text-sm text-muted-foreground text-center">
-            みらい議会 Admin
+            {siteConfig.siteName} Admin
           </p>
         </CardHeader>
         <CardContent>

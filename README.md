@@ -1,3 +1,19 @@
+# みらい議会ー川崎版
+
+// 後でここにリンク貼ります
+
+## 注意事項
+- このプロジェクトは「チームみらい」が開発・運営している「みらい議会」をForkして開発したものとなります。  
+- **非公式**ですので、ここでの不具合や気になる点についての問い合わせは  
+  党公式ではなく[GondoTakashi](https://x.com/TakashiGondo)にご連絡ください。
+
+## 他地方議会向けForkガイド
+- 他の市議会・県議会等のバージョンを作成したい場合は、  
+  以下のドキュメントを参考にすると早いと思います  
+  [fork手順](docs/kawasaki/20260304_1000_別地域向けfork手順.md)
+
+---
+
 # みらい議会
 
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/team-mirai-volunteer/mirai-gikai)

@@ -6,22 +6,24 @@ import {
   LegalSectionTitle,
 } from "@/components/layouts/legal-page-layout";
 import { Container } from "@/components/layouts/container";
+import { siteConfig } from "@/config/site.config";
 
 export const metadata: Metadata = {
-  title: "利用規約 | みらい議会",
-  description: "みらい議会の利用規約",
+  title: `利用規約 | ${siteConfig.siteName}`,
+  description: `${siteConfig.siteName}の利用規約`,
 };
 
 export default function TermsPage() {
   return (
     <LegalPageLayout
       title="利用規約"
-      description="みらい議会をご利用いただくにあたっての基本的なルールを定めています。"
+      description={`${siteConfig.siteName}をご利用いただくにあたっての基本的なルールを定めています。`}
       className="pt-24 md:pt-12"
     >
       <Container className="space-y-10">
         <LegalParagraph>
-          みらい議会（以下「本サービス」といいます。）をご利用いただく場合、以下の規約に同意いただいたものとみなします。
+          {siteConfig.siteName}
+          （以下「本サービス」といいます。）をご利用いただく場合、以下の規約に同意いただいたものとみなします。
         </LegalParagraph>
 
         <section className="space-y-4">
@@ -34,7 +36,7 @@ export default function TermsPage() {
               "法令または公序良俗に反する行為",
               "本サービスの運営を妨げる行為",
               "本サービスの情報を改ざん・加工し、誤解を招く形で利用する行為",
-              "チームみらい（以下「当団体」といいます。）または第三者の権利・利益を侵害する行為",
+              `${siteConfig.operator.name}（以下「当団体」といいます。）または第三者の権利・利益を侵害する行為`,
               "サーバへの過剰な負荷、システムへの妨害・改ざん・侵入行為",
               "自動化ツール、ボット等による操作",
               "本サービスの提供するAIチャット機能に個人情報を入力する行為",
@@ -49,7 +51,7 @@ export default function TermsPage() {
             <LegalList
               items={[
                 "システムプロンプトその他の内部設定を改変、削除、またはこれを推測しようとする行為",
-                "AIに対して「みらい議会」や国会提出法案等の関連テーマ以外の応答を生成させようとする行為",
+                `AIに対して「${siteConfig.siteName}」や市議会議案等の関連テーマ以外の応答を生成させようとする行為`,
                 "プロンプトインジェクション等、AIモデルを意図的に誤動作させる行為",
                 "当団体が設けた利用制限、レートリミット、安全制御、規制回避ポリシー、フィルタリング機能、ログ取得・監視機構を不正に回避または無効化しようとする行為",
                 "出力させた応答を、あたかもユーザー自身が執筆したかのように偽装して表明する行為",
@@ -90,7 +92,9 @@ export default function TermsPage() {
         <section className="space-y-4">
           <LegalSectionTitle>第6条（準拠法・管轄）</LegalSectionTitle>
           <LegalParagraph>
-            本規約は日本法に準拠し、本サービスに関連して生じる一切の紛争については、東京地方裁判所を第一審の専属的合意管轄裁判所とします。
+            本規約は日本法に準拠し、本サービスに関連して生じる一切の紛争については、
+            {siteConfig.operator.jurisdiction}
+            を第一審の専属的合意管轄裁判所とします。
           </LegalParagraph>
         </section>
       </Container>

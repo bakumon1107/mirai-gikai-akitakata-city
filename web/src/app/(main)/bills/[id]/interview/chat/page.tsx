@@ -20,7 +20,7 @@ export default async function InterviewChatPage({
 }: InterviewChatPageProps) {
   const { id: billId } = await params;
 
-  // 法案とインタビュー設定を取得
+  // 議案とインタビュー設定を取得
   const [bill, interviewConfig] = await Promise.all([
     getBillById(billId),
     getInterviewConfig(billId),

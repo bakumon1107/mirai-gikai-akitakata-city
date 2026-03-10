@@ -1,8 +1,8 @@
 import { unstable_cache } from "next/cache";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
-import { getPreviousDietSession } from "@/features/diet-sessions/server/loaders/get-previous-diet-session";
-import type { DietSession } from "@/features/diet-sessions/shared/types";
+import { getPreviousCouncilSession } from "@/features/council-sessions/server/loaders/get-previous-council-session";
+import type { CouncilSession } from "@/features/council-sessions/shared/types";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { BillWithContent } from "../../shared/types";
 import {
@@ -14,17 +14,17 @@ import {
 const MAX_PREVIEW_BILLS = 5;
 
 export type PreviousSessionBillsResult = {
-  session: DietSession;
+  session: CouncilSession;
   bills: BillWithContent[];
   totalBillCount: number;
 } | null;
 
 /**
- * 前回の国会会期とその議案を取得（プレビュー用、最大5件）
+ * 前回の定例会とその議案を取得（プレビュー用、最大5件）
  * 前回の会期がない場合はnullを返す
  */
 export async function getPreviousSessionBills(): Promise<PreviousSessionBillsResult> {
-  const previousSession = await getPreviousDietSession();
+  const previousSession = await getPreviousCouncilSession();
   if (!previousSession) {
     return null;
   }
@@ -44,11 +44,11 @@ export async function getPreviousSessionBills(): Promise<PreviousSessionBillsRes
 
 const _getCachedPreviousSessionBills = unstable_cache(
   async (
-    dietSessionId: string,
+    councilSessionId: string,
     difficultyLevel: DifficultyLevelEnum
   ): Promise<BillWithContent[]> => {
     const data = await findPreviousSessionBills(
-      dietSessionId,
+      councilSessionId,
       difficultyLevel,
       MAX_PREVIEW_BILLS
     );

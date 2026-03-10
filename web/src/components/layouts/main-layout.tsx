@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { siteConfig } from "@/config/site.config";
 import { isInterviewSection, isMainPage } from "@/lib/page-layout-utils";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +12,7 @@ interface MainLayoutProps {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
-  const useSidebarLayout = isMainPage(pathname);
+  const useSidebarLayout = isMainPage(pathname) && siteConfig.features.aiChat;
   const isInterview = isInterviewSection(pathname);
 
   return (

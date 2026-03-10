@@ -5,7 +5,7 @@ import {
   cleanupTestDietSession,
 } from "../utils";
 
-describe("set_active_diet_session() 関数", () => {
+describe("set_active_council_session() 関数", () => {
   let sessionIds: string[] = [];
 
   beforeEach(async () => {
@@ -30,12 +30,12 @@ describe("set_active_diet_session() 関数", () => {
     });
     sessionIds.push(a.id, b.id, c.id);
 
-    await adminClient.rpc("set_active_diet_session", {
+    await adminClient.rpc("set_active_council_session", {
       target_session_id: b.id,
     });
 
     const { data } = await adminClient
-      .from("diet_sessions")
+      .from("council_sessions")
       .select("id, is_active")
       .in("id", [a.id, b.id, c.id]);
 
@@ -56,12 +56,12 @@ describe("set_active_diet_session() 関数", () => {
     sessionIds.push(a.id, b.id);
 
     // a が active な状態で b に切り替え
-    await adminClient.rpc("set_active_diet_session", {
+    await adminClient.rpc("set_active_council_session", {
       target_session_id: b.id,
     });
 
     const { data } = await adminClient
-      .from("diet_sessions")
+      .from("council_sessions")
       .select("id, is_active")
       .in("id", [a.id, b.id]);
 
@@ -77,12 +77,12 @@ describe("set_active_diet_session() 関数", () => {
     });
     sessionIds.push(a.id);
 
-    await adminClient.rpc("set_active_diet_session", {
+    await adminClient.rpc("set_active_council_session", {
       target_session_id: "00000000-0000-0000-0000-000000000000",
     });
 
     const { data } = await adminClient
-      .from("diet_sessions")
+      .from("council_sessions")
       .select("id, is_active")
       .eq("id", a.id)
       .single();

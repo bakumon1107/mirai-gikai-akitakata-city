@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { siteConfig } from "@/config/site.config";
 import { usePathname } from "next/navigation";
 import { isInterviewPage } from "@/lib/page-layout-utils";
 import { policyLinks, primaryLinks } from "./footer.config";
@@ -16,10 +17,10 @@ export function Footer() {
   return (
     <footer className="bg-mirai-gradient text-slate-900">
       <div className="mx-auto flex w-full max-w-[500px] flex-col items-center px-6 py-14 pb-20 text-center">
-        <FooterLogoSection />
+        {siteConfig.features.showTeamMiraiSection && <FooterLogoSection />}
         <FooterPrimaryLinks />
         <FooterPolicies />
-        <FooterCopyright />
+        {siteConfig.features.showTeamMiraiSection && <FooterCopyright />}
       </div>
     </footer>
   );
@@ -28,10 +29,10 @@ export function Footer() {
 function FooterLogoSection() {
   return (
     <div className="flex flex-col items-center text-center mb-9">
-      <Link href="/" aria-label="みらい議会 トップページ">
+      <Link href="/" aria-label={`${siteConfig.siteName} トップページ`}>
         <Image
           src="/img/logo.svg"
-          alt="みらい議会"
+          alt={siteConfig.siteName}
           width={150}
           height={128}
           className="h-auto"

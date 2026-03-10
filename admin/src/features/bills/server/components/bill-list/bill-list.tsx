@@ -19,25 +19,19 @@ import { BILL_STATUS_CONFIG } from "../../../shared/constants/bill-config";
 import type {
   BillSortConfig,
   BillStatus,
-  BillWithDietSession,
+  BillWithCouncilSession,
 } from "../../../shared/types";
 import { getBillStatusLabel } from "../../../shared/types";
 import { getBills } from "../../loaders/get-bills";
 
-function StatusBadge({
-  status,
-  originatingHouse,
-}: {
-  status: BillStatus;
-  originatingHouse: BillWithDietSession["originating_house"];
-}) {
+function StatusBadge({ status }: { status: BillStatus }) {
   const config = BILL_STATUS_CONFIG[status];
   const Icon = config.icon;
 
   return (
     <div className="inline-flex items-center gap-1.5 py-1 rounded-full text-sm font-bold">
       <Icon className="h-4 w-4" />
-      <span>{getBillStatusLabel(status, originatingHouse)}</span>
+      <span>{getBillStatusLabel(status)}</span>
     </div>
   );
 }
@@ -62,7 +56,7 @@ export async function BillList({ sortConfig }: { sortConfig: BillSortConfig }) {
           <TableHeader>
             <TableRow>
               <TableHead>議案名</TableHead>
-              <TableHead>国会会期</TableHead>
+              <TableHead>定例会</TableHead>
               <SortableTableHead
                 field="publish_status_order"
                 currentField={sortConfig.field}
@@ -98,7 +92,7 @@ export async function BillList({ sortConfig }: { sortConfig: BillSortConfig }) {
   );
 }
 
-function BillRow({ bill }: { bill: BillWithDietSession }) {
+function BillRow({ bill }: { bill: BillWithCouncilSession }) {
   return (
     <TableRow>
       <TableCell className="max-w-[400px]">
@@ -110,7 +104,7 @@ function BillRow({ bill }: { bill: BillWithDietSession }) {
         </Link>
       </TableCell>
       <TableCell className="text-gray-600">
-        {bill.diet_sessions?.name ?? "-"}
+        {bill.council_sessions?.name ?? "-"}
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
@@ -128,10 +122,7 @@ function BillRow({ bill }: { bill: BillWithDietSession }) {
         </div>
       </TableCell>
       <TableCell>
-        <StatusBadge
-          status={bill.status}
-          originatingHouse={bill.originating_house}
-        />
+        <StatusBadge status={bill.status} />
       </TableCell>
       <TableCell className="text-gray-600">
         {bill.published_at

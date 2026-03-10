@@ -14,7 +14,7 @@ export function BackToBillButton({ billId }: BackToBillButtonProps) {
     >
       <Undo2 className="w-5 h-5 text-gray-800" />
       <span className="text-base font-bold text-gray-800">
-        法案の記事に戻る
+        議案の記事に戻る
       </span>
     </Link>
   );

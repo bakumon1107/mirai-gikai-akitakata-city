@@ -11,8 +11,9 @@ import { PreviousSessionSection } from "@/features/bills/server/components/previ
 import { loadHomeData } from "@/features/bills/server/loaders/load-home-data";
 import type { BillWithContent } from "@/features/bills/shared/types";
 import { HomeChatClient } from "@/features/chat/client/components/home-chat-client";
-import { CurrentDietSession } from "@/features/diet-sessions/client/components/current-diet-session";
-import { getCurrentDietSession } from "@/features/diet-sessions/server/loaders/get-current-diet-session";
+import { siteConfig } from "@/config/site.config";
+import { getCurrentCouncilSession } from "@/features/council-sessions/server/loaders/get-current-council-session";
+import { CurrentCouncilSession } from "@/features/council-sessions/client/components/current-council-session";
 import { getJapanTime } from "@/lib/utils/date";
 
 export default async function Home() {
@@ -21,7 +22,7 @@ export default async function Home() {
 
   // ゆくゆくタグ機能がマージされたらBFFに統合する
   const [currentSession, currentDifficulty] = await Promise.all([
-    getCurrentDietSession(getJapanTime()),
+    getCurrentCouncilSession(getJapanTime()),
     getDifficultyLevel(),
   ]);
 
@@ -38,14 +39,14 @@ export default async function Home() {
     <>
       <Hero />
 
-      {/* 本日の国会セクション */}
-      <CurrentDietSession session={currentSession} />
+      {/* 本日の定例会セクション */}
+      <CurrentCouncilSession session={currentSession} />
 
       {/* 議案一覧セクション */}
       <Container className="">
         <div className="py-10">
           <main className="flex flex-col gap-16">
-            {/* 注目の法案セクション */}
+            {/* 注目の議案セクション */}
             <FeaturedBillSection bills={featuredBills} />
 
             {/* タグ別議案一覧セクション */}
@@ -56,8 +57,7 @@ export default async function Home() {
           </main>
         </div>
       </Container>
-
-      {/* 前回の国会セクション（Archive） */}
+      {/* 前回の定例会セクション（Archive） */}
       {previousSessionData && (
         <div className="bg-mirai-surface-muted py-10">
           <Container>
@@ -82,13 +82,15 @@ export default async function Home() {
       </Container>
 
       {/* チャット機能 */}
-      <HomeChatClient
-        currentDifficulty={currentDifficulty}
-        bills={billsByTag
-          .flatMap((x) => x.bills)
-          .concat(featuredBills)
-          .map(toBillChatContext)}
-      />
+      {siteConfig.features.aiChat && (
+        <HomeChatClient
+          currentDifficulty={currentDifficulty}
+          bills={billsByTag
+            .flatMap((x) => x.bills)
+            .concat(featuredBills)
+            .map(toBillChatContext)}
+        />
+      )}
     </>
   );
 }

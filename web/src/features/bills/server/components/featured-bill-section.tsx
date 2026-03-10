@@ -15,11 +15,11 @@ export function FeaturedBillSection({ bills }: FeaturedBillSectionProps) {
     <section className="flex flex-col gap-6">
       {/* セクションヘッダー */}
       <div className="flex flex-col gap-1.5">
-        <h2 className="text-[22px] font-bold text-mirai-text leading-[1.48]">
-          注目の法案🔥
+        <h2 className="text-[22px] font-bold text-[#1F2937] leading-[1.48]">
+          注目の議案🔥
         </h2>
         <p className="text-xs font-medium text-mirai-text-secondary leading-[1.67]">
-          国会に提出された注目法案
+          市議会に上程された注目議案
         </p>
       </div>
 

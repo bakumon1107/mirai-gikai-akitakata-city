@@ -1,8 +1,10 @@
 import {
   bills,
   tags,
-  dietSessions,
-  createMiraiStances,
+  councilSessions,
+  factions,
+  committees,
+  createFactionStances,
   createBillsTags,
   createInterviewConfig,
   createInterviewQuestions,
@@ -54,22 +56,65 @@ async function seedDatabase() {
 
     console.log(`✅ Inserted ${insertedTags.length} tags`);
 
-    // Insert diet sessions
-    console.log("🏛️  Inserting diet sessions...");
-    const { data: insertedDietSessions, error: dietSessionsError } =
-      await supabase.from("diet_sessions").insert(dietSessions).select("id");
+    // Insert council sessions
+    console.log("🏛️  Inserting council sessions...");
+    const { data: insertedCouncilSessions, error: councilSessionsError } =
+      await supabase
+        .from("council_sessions")
+        .insert(councilSessions)
+        .select("id");
 
-    if (dietSessionsError) {
+    if (councilSessionsError) {
       throw new Error(
-        `Failed to insert diet sessions: ${dietSessionsError.message}`
+        `Failed to insert council sessions: ${councilSessionsError.message}`
       );
     }
 
-    if (!insertedDietSessions) {
-      throw new Error("No diet sessions were inserted");
+    if (!insertedCouncilSessions) {
+      throw new Error("No council sessions were inserted");
     }
 
-    console.log(`✅ Inserted ${insertedDietSessions.length} diet sessions`);
+    console.log(
+      `✅ Inserted ${insertedCouncilSessions.length} council sessions`
+    );
+
+    // Insert committees
+    console.log("🏢 Inserting committees...");
+    const { data: insertedCommittees, error: committeesError } = await supabase
+      .from("committees")
+      .insert(committees)
+      .select("id, name");
+
+    if (committeesError) {
+      throw new Error(
+        `Failed to insert committees: ${committeesError.message}`
+      );
+    }
+
+    if (!insertedCommittees) {
+      throw new Error("No committees were inserted");
+    }
+
+    console.log(`✅ Inserted ${insertedCommittees.length} committees`);
+
+    // Insert factions
+    console.log("🏛️  Inserting factions...");
+    const { data: insertedFactions, error: factionsError } = await supabase
+      .from("factions")
+      .insert(factions)
+      .select("id, name");
+
+    if (factionsError) {
+      throw new Error(
+        `Failed to insert factions: ${factionsError.message}`
+      );
+    }
+
+    if (!insertedFactions) {
+      throw new Error("No factions were inserted");
+    }
+
+    console.log(`✅ Inserted ${insertedFactions.length} factions`);
 
     // Insert bills
     console.log("📄 Inserting bills...");
@@ -88,30 +133,34 @@ async function seedDatabase() {
 
     console.log(`✅ Inserted ${insertedBills.length} bills`);
 
-    // Link first 3 bills to the 219 diet session (current session)
-    const session219Id = insertedDietSessions[0]?.id;
-    if (session219Id) {
+    // Link first 3 bills to the current council session
+    const currentSessionId = insertedCouncilSessions[0]?.id;
+    if (currentSessionId) {
       const billsToLink = insertedBills.slice(0, 3);
       for (const bill of billsToLink) {
         await supabase
           .from("bills")
-          .update({ diet_session_id: session219Id })
+          .update({ council_session_id: currentSessionId })
           .eq("id", bill.id);
       }
-      console.log(`🔗 Linked ${billsToLink.length} bills to 219 diet session`);
+      console.log(
+        `🔗 Linked ${billsToLink.length} bills to current council session`
+      );
     }
 
-    // Link last 5 bills to the 218 diet session (previous session)
-    const session218Id = insertedDietSessions[1]?.id;
-    if (session218Id) {
-      const bills218 = insertedBills.slice(-5);
-      for (const bill of bills218) {
+    // Link last 5 bills to the previous council session
+    const previousSessionId = insertedCouncilSessions[1]?.id;
+    if (previousSessionId) {
+      const previousBills = insertedBills.slice(-5);
+      for (const bill of previousBills) {
         await supabase
           .from("bills")
-          .update({ diet_session_id: session218Id })
+          .update({ council_session_id: previousSessionId })
           .eq("id", bill.id);
       }
-      console.log(`🔗 Linked ${bills218.length} bills to 218 diet session`);
+      console.log(
+        `🔗 Linked ${previousBills.length} bills to previous council session`
+      );
     }
 
     // Insert bill_contents
@@ -135,26 +184,34 @@ async function seedDatabase() {
 
     console.log(`✅ Inserted ${insertedContents.length} bill contents`);
 
-    // Insert mirai_stances
-    console.log("🎯 Inserting mirai stances...");
-    const miraiStances = createMiraiStances(insertedBills);
+    // Insert faction_stances (みらい会派の見解)
+    console.log("🎯 Inserting faction stances...");
+    const miraiFaction = insertedFactions.find((f) => f.name === "mirai");
+    let insertedStancesCount = 0;
 
-    const { data: insertedStances, error: stancesError } = await supabase
-      .from("mirai_stances")
-      .insert(miraiStances)
-      .select("id");
-
-    if (stancesError) {
-      throw new Error(
-        `Failed to insert mirai stances: ${stancesError.message}`
+    if (miraiFaction) {
+      const factionStances = createFactionStances(
+        insertedBills,
+        miraiFaction.id
       );
+
+      const { data: insertedStances, error: stancesError } = await supabase
+        .from("faction_stances")
+        .insert(factionStances)
+        .select("id");
+
+      if (stancesError) {
+        throw new Error(
+          `Failed to insert faction stances: ${stancesError.message}`
+        );
+      }
+
+      if (insertedStances) {
+        insertedStancesCount = insertedStances.length;
+      }
     }
 
-    if (!insertedStances) {
-      throw new Error("No mirai stances were inserted");
-    }
-
-    console.log(`✅ Inserted ${insertedStances.length} mirai stances`);
+    console.log(`✅ Inserted ${insertedStancesCount} faction stances`);
 
     // Insert bills_tags (関連付け)
     console.log("🔗 Inserting bills-tags relations...");
@@ -219,7 +276,9 @@ async function seedDatabase() {
 
         if (insertedQuestions) {
           insertedQuestionsCount = insertedQuestions.length;
-          console.log(`✅ Inserted ${insertedQuestionsCount} interview questions`);
+          console.log(
+            `✅ Inserted ${insertedQuestionsCount} interview questions`
+          );
         }
 
         // Insert interview sessions
@@ -239,7 +298,9 @@ async function seedDatabase() {
 
         if (insertedSessions && insertedSessions.length > 0) {
           insertedSessionsCount = insertedSessions.length;
-          console.log(`✅ Inserted ${insertedSessionsCount} interview sessions`);
+          console.log(
+            `✅ Inserted ${insertedSessionsCount} interview sessions`
+          );
 
           // Insert interview messages
           console.log("💬 Inserting interview messages...");
@@ -260,7 +321,9 @@ async function seedDatabase() {
 
           if (insertedMessages) {
             insertedMessagesCount = insertedMessages.length;
-            console.log(`✅ Inserted ${insertedMessagesCount} interview messages`);
+            console.log(
+              `✅ Inserted ${insertedMessagesCount} interview messages`
+            );
           }
 
           // Insert interview reports
@@ -280,7 +343,9 @@ async function seedDatabase() {
 
           if (insertedReports) {
             insertedReportsCount = insertedReports.length;
-            console.log(`✅ Inserted ${insertedReportsCount} interview reports`);
+            console.log(
+              `✅ Inserted ${insertedReportsCount} interview reports`
+            );
           }
 
           // Insert demo session, messages, and report with fixed IDs
@@ -320,12 +385,18 @@ async function seedDatabase() {
           }
 
           console.log(`✅ Inserted demo data`);
-          console.log(`   Demo report URL: /report/${DEMO_REPORT_ID}/chat-log`);
+          console.log(
+            `   Demo report URL: /report/${DEMO_REPORT_ID}/chat-log`
+          );
 
           // Insert additional demo sessions, messages, and reports (for 4 role types)
-          console.log("🎭 Inserting additional demo data for all role types...");
+          console.log(
+            "🎭 Inserting additional demo data for all role types..."
+          );
 
-          const additionalDemoSessions = createAdditionalDemoSessions(insertedConfig.id);
+          const additionalDemoSessions = createAdditionalDemoSessions(
+            insertedConfig.id
+          );
           const { error: additionalSessionsError } = await supabase
             .from("interview_sessions")
             .insert(additionalDemoSessions);
@@ -358,11 +429,21 @@ async function seedDatabase() {
             );
           }
 
-          console.log(`✅ Inserted additional demo data for all 4 role types`);
-          console.log(`   subject_expert: /report/${DEMO_REPORT_ID}/chat-log`);
-          console.log(`   work_related: /report/${DEMO_REPORT_ID_WORK}/chat-log`);
-          console.log(`   daily_life_affected: /report/${DEMO_REPORT_ID_DAILY}/chat-log`);
-          console.log(`   general_citizen: /report/${DEMO_REPORT_ID_CITIZEN}/chat-log`);
+          console.log(
+            `✅ Inserted additional demo data for all 4 role types`
+          );
+          console.log(
+            `   subject_expert: /report/${DEMO_REPORT_ID}/chat-log`
+          );
+          console.log(
+            `   work_related: /report/${DEMO_REPORT_ID_WORK}/chat-log`
+          );
+          console.log(
+            `   daily_life_affected: /report/${DEMO_REPORT_ID_DAILY}/chat-log`
+          );
+          console.log(
+            `   general_citizen: /report/${DEMO_REPORT_ID_CITIZEN}/chat-log`
+          );
         }
       }
     } else {
@@ -463,11 +544,13 @@ async function seedDatabase() {
 
     console.log("🎉 Database seeding completed successfully!");
     console.log("\n📊 Summary:");
-    console.log(`  Diet Sessions: ${insertedDietSessions.length}`);
+    console.log(`  Council Sessions: ${insertedCouncilSessions.length}`);
+    console.log(`  Committees: ${insertedCommittees.length}`);
+    console.log(`  Factions: ${insertedFactions.length}`);
     console.log(`  Tags: ${insertedTags.length}`);
     console.log(`  Bills: ${insertedBills.length}`);
     console.log(`  Bill Contents: ${insertedContents.length}`);
-    console.log(`  Mirai Stances: ${insertedStances.length}`);
+    console.log(`  Faction Stances: ${insertedStancesCount}`);
     console.log(`  Bills-Tags Relations: ${insertedBillsTags.length}`);
     console.log(`  Interview Config: ${interviewConfigData ? 1 : 0}`);
     console.log(`  Interview Questions: ${insertedQuestionsCount}`);

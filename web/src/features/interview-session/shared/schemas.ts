@@ -26,7 +26,7 @@ const scoresSchema = z.object({
     "具体性（0-100）- 実務経験に基づく具体的な事例や数値が含まれているか"
   ),
   impact: scoreValueSchema.describe(
-    "影響度（0-100）- 法案が与える社会的影響や関係者への影響について言及があるか"
+    "影響度（0-100）- 議案が与える市民生活や行政運営への影響について言及があるか"
   ),
   constructiveness: scoreValueSchema.describe(
     "建設性（0-100）- 問題点の指摘だけでなく、改善案や代替案の提示があるか"
@@ -49,7 +49,7 @@ export const interviewReportSchema = z
       .enum(["for", "against", "neutral"])
       .nullable()
       .describe(
-        "法案に対するユーザーのスタンス。for=賛成、against=反対、neutral=期待と懸念の両方がある"
+        "議案に対するユーザーのスタンス。for=賛成、against=反対、neutral=期待と懸念の両方がある"
       ),
     role: z
       .enum([
@@ -80,7 +80,7 @@ export const interviewReportSchema = z
         "ユーザーの具体的な主張（最大3件）。メインの主張を補強する内容を最低1つは含める。元の対話ログにないことは記載しない"
       ),
     scores: scoresSchema.describe(
-      "インタビューを「法案検討の参考資料」として評価したスコア"
+      "インタビューを「議案検討の参考資料」として評価したスコア"
     ),
   })
   .strict();

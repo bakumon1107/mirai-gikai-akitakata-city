@@ -55,7 +55,9 @@
       "Bash(echo === A-2-6: トップページでの前の定例会リンク ===:*)",
       "Bash(echo === A-3-5: 免責事項の川崎市議会テキスト ===:*)",
       "Bash(node:*)",
-      "Bash(pnpm:*)"
+      "Bash(pnpm:*)",
+      "Bash(head:*)",
+      "Bash(sed:*)"
     ]
   }
 }

@@ -11,9 +11,11 @@ vi.mock("next/cache", () => ({
   unstable_cache: (fn: (...args: never[]) => unknown) => fn,
 }));
 
-const { getPreviousDietSession } = await import("./get-previous-diet-session");
+const { getPreviousCouncilSession } = await import(
+  "./get-previous-council-session"
+);
 
-describe("getPreviousDietSession 統合テスト", () => {
+describe("getPreviousCouncilSession 統合テスト", () => {
   const sessionIds: string[] = [];
 
   afterEach(async () => {
@@ -40,7 +42,7 @@ describe("getPreviousDietSession 統合テスト", () => {
     });
     sessionIds.push(active.id);
 
-    const result = await getPreviousDietSession();
+    const result = await getPreviousCouncilSession();
 
     expect(result).not.toBeNull();
     // biome-ignore lint/style/noNonNullAssertion: toBeNull 後に安全

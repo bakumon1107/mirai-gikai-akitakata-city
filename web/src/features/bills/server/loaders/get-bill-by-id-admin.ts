@@ -31,23 +31,10 @@ export async function getBillByIdAdmin(
     return null;
   }
 
-  const { data: stancesData } = factionStancesResult;
-  const { data: billTags } = tagsResult;
+  const billTags = tagsResult;
 
-  // 会派見解データを整形（sort_order順）
-  const factionStances: FactionStance[] = (stancesData ?? [])
-    .map((s) => ({
-      id: s.id,
-      stance: s.type,
-      comment: s.comment ?? null,
-      faction: s.factions as unknown as {
-        id: string;
-        name: string;
-        display_name: string;
-        sort_order: number;
-      },
-    }))
-    .sort((a, b) => a.faction.sort_order - b.faction.sort_order);
+  // 川崎版は会派見解なし（mirai_stancesは議会全体のスタンス）
+  const factionStances: FactionStance[] = [];
 
   // タグデータを整形
   const tags =

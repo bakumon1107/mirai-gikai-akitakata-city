@@ -252,27 +252,32 @@ export async function createTestBillTag(billId: string, tagId: string) {
   return data;
 }
 
-/** テスト用 mirai_stances を作成 */
+/** テスト用 mirai_stances を作成
+ * 川崎市議会DBにはmirai_stancesテーブルが存在しないためモックを返す
+ */
 export async function createTestMiraiStance(
   billId: string,
   overrides: Partial<{
     type: "for" | "against" | "neutral";
     comment: string;
   }> = {}
-) {
-  const defaults = {
+): Promise<{
+  id: string;
+  bill_id: string;
+  type: "for" | "against" | "neutral";
+  comment: string;
+  created_at: string;
+  updated_at: string;
+}> {
+  const now = new Date().toISOString();
+  return {
+    id: `mock-mirai-stance-${Date.now()}`,
     bill_id: billId,
-    type: "for" as const,
-    comment: "テストコメント",
-    ...overrides,
+    type: overrides.type ?? "for",
+    comment: overrides.comment ?? "テストコメント",
+    created_at: now,
+    updated_at: now,
   };
-  const { data, error } = await adminClient
-    .from("mirai_stances")
-    .insert(defaults)
-    .select()
-    .single();
-  if (error) throw new Error(`mirai_stances 作成失敗: ${error.message}`);
-  return data;
 }
 
 /** テスト用 preview_tokens を作成 */

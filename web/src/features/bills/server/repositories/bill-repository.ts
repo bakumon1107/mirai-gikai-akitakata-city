@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
+import type { MiraiStance } from "../../shared/types";
 
 // ============================================================
 // Bills
@@ -80,20 +81,12 @@ export async function findBillById(id: string) {
 
 /**
  * 議案のmirai_stanceを取得
+ * 川崎市議会DBにはmirai_stancesテーブルが存在しないため常にnullを返す
  */
-export async function findMiraiStanceByBillId(billId: string) {
-  const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("mirai_stances")
-    .select("*")
-    .eq("bill_id", billId)
-    .single();
-
-  if (error) {
-    return null;
-  }
-
-  return data;
+export async function findMiraiStanceByBillId(
+  _billId: string
+): Promise<MiraiStance | null> {
+  return null;
 }
 
 /**

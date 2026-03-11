@@ -4,7 +4,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { spawn } from "node:child_process";
 
-const CLAUDE_PATH = "/Users/t-gondo/.local/bin/claude";
+const CLAUDE_PATH = process.env.CLAUDE_CLI_PATH ?? "claude";
 
 /** Claude の使用制限に達したことを示すエラー */
 export class ClaudeUsageLimitError extends Error {

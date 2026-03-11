@@ -2,7 +2,7 @@ name: Migrate DB then Deploy Web
 
 on:
   push:
-    branches: [kawasaki/web]
+    branches: [kawasaki/develop]
 
 jobs:
   migrate-and-deploy:

@@ -7,6 +7,7 @@
     "db:migrate": "npx supabase migration up --include-all && pnpm run db:types:gen",
     "db:reset": "dotenv -e .env -- npx supabase db reset && pnpm db:types:gen && pnpm seed",
     "dev": "dotenv -e .env -- pnpm -r --stream --parallel run dev",
+    "dev:admin:prod-db": "dotenv -e .env.production -- pnpm --filter admin dev",
     "seed": "dotenv -e .env -- pnpm --filter @mirai-gikai/seed seed",
     "seed:csv": "dotenv -e .env -- pnpm --filter @mirai-gikai/seed seed:csv",
     "test": "pnpm -r --parallel run test",

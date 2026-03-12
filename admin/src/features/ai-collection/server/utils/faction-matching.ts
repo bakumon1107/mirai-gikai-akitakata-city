@@ -9,14 +9,14 @@ export type FactionRecord = {
 /**
  * 会派名でDBの会派を検索する。
  *
- * マッチング優先順位:
+ * マッチング方式（完全一致のみ）:
  * 1. display_name と完全一致
  * 2. alternative_names のいずれかと完全一致
- * 3. alternative_names のいずれかと部分一致（双方向）
  *
- * ※ display_name の部分一致は意図しないマッチを防ぐため使用しない。
- *   例: "川崎市議会議員団" が "自由民主党川崎市議会議員団" に誤マッチするのを防ぐ。
- *   略称はすべて alternative_names に登録することで対応する。
+ * 部分一致は使用しない。
+ * 略称・旧称など全ての別表記は alternative_names に明示登録することで対応する。
+ * 部分一致を許可すると「川崎市議会議員団」が「自由民主党川崎市議会議員団」など
+ * 別の会派に誤マッチする問題が生じるため、完全一致のみとする。
  */
 export function findFactionByName(
   factions: FactionRecord[],
@@ -31,16 +31,7 @@ export function findFactionByName(
   if (exactDisplayMatch) return exactDisplayMatch;
 
   // 2. alternative_names のいずれかと完全一致
-  const exactAltMatch = factions.find((f) =>
-    f.alternative_names.some((alt) => alt.toLowerCase() === normalized)
-  );
-  if (exactAltMatch) return exactAltMatch;
-
-  // 3. alternative_names のいずれかと部分一致（双方向）
   return factions.find((f) =>
-    f.alternative_names.some((alt) => {
-      const altNorm = alt.toLowerCase();
-      return normalized.includes(altNorm) || altNorm.includes(normalized);
-    })
+    f.alternative_names.some((alt) => alt.toLowerCase() === normalized)
   );
 }

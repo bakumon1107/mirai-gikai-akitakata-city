@@ -3,6 +3,7 @@ name: Migrate DB then Deploy Web
 on:
   push:
     branches: [kawasaki/develop]
+  workflow_dispatch:
 
 jobs:
   migrate-and-deploy:

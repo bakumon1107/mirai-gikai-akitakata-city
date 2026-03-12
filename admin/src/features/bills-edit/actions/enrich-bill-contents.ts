@@ -1,16 +1,17 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import * as os from "node:os";
 import * as path from "node:path";
-import { randomUUID } from "node:crypto";
 import { siteConfig } from "@/config/site.config";
-import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import {
+  ClaudeTimeoutError,
   ClaudeUsageLimitError,
+  cleanupTempFile,
   executeClaudeToFile,
   readCollectionOutput,
-  cleanupTempFile,
 } from "@/features/ai-collection/server/utils/execute-claude";
+import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 
 export type EnrichedContent = {
   hard: {
@@ -98,6 +99,13 @@ export async function enrichBillContents(
     } catch (err) {
       if (err instanceof ClaudeUsageLimitError) {
         return { success: false, error: err.message, isUsageLimit: true };
+      }
+      if (err instanceof ClaudeTimeoutError) {
+        console.error(
+          "[enrich-bill-contents] タイムアウト診断情報:",
+          err.diagnostics
+        );
+        return { success: false, error: err.message };
       }
       throw err;
     }

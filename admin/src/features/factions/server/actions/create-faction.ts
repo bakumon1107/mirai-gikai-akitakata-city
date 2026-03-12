@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
@@ -37,6 +38,7 @@ export async function createFaction(input: CreateFactionInput) {
       return { error: `会派の作成に失敗しました: ${error.message}` };
     }
 
+    revalidatePath("/factions");
     await invalidateWebCache();
 
     return { data };

@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
@@ -23,6 +24,7 @@ export async function deleteFaction(input: DeleteFactionInput) {
       return { error: `会派の削除に失敗しました: ${error.message}` };
     }
 
+    revalidatePath("/factions");
     await invalidateWebCache();
 
     return { success: true };

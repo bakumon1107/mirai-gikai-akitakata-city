@@ -7,6 +7,7 @@ import {
   ChevronRight,
   ExternalLink,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { applyDrafts } from "../../server/actions/apply-drafts";
 import { getExistingBillsDetail } from "../../server/actions/get-existing-bills-detail";
 import { getFactionMatchStatus } from "../../server/actions/get-faction-match-status";
+import { reapplyStances } from "../../server/actions/reapply-stances";
 import type {
   BillFieldOverride,
   CollectionRun,
@@ -167,10 +169,28 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
+  const [isReapplying, setIsReapplying] = useState(false);
+  const [isRefreshingMatch, setIsRefreshingMatch] = useState(false);
   const [diffsMap, setDiffsMap] = useState<Map<string, DiffItem[]>>(new Map());
   const [factionMatchMap, setFactionMatchMap] = useState<
     Map<string, FactionMatchStatus>
   >(new Map());
+  // 会派見解の選択状態（再取り込み用）
+  const [selectedStanceIds, setSelectedStanceIds] = useState<Set<string>>(
+    new Set(run.factionStances.map((s) => s.id))
+  );
+
+  const fetchMatchStatuses = useCallback(async () => {
+    if (run.factionStances.length === 0) return;
+    const matchStatuses = await getFactionMatchStatus([
+      ...new Set(run.factionStances.map((s) => s.factionName)),
+    ]);
+    const newMatchMap = new Map<string, FactionMatchStatus>();
+    for (const status of matchStatuses) {
+      newMatchMap.set(status.factionName, status);
+    }
+    setFactionMatchMap(newMatchMap);
+  }, [run.factionStances]);
 
   // Fetch existing bill details and faction match status on mount
   // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount
@@ -189,7 +209,6 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
             : Promise.resolve([]),
         ]);
 
-        // Build faction match map
         const newMatchMap = new Map<string, FactionMatchStatus>();
         for (const status of matchStatuses) {
           newMatchMap.set(status.factionName, status);
@@ -257,6 +276,23 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
     []
   );
 
+  const toggleStance = (id: string) => {
+    setSelectedStanceIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAllStances = () => {
+    if (selectedStanceIds.size === run.factionStances.length) {
+      setSelectedStanceIds(new Set());
+    } else {
+      setSelectedStanceIds(new Set(run.factionStances.map((s) => s.id)));
+    }
+  };
+
   const handleApply = async () => {
     const existingBillOverrides: BillFieldOverride[] = [];
     for (const bill of existingBills) {
@@ -313,6 +349,49 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
     }
   };
 
+  const handleReapplyStances = async () => {
+    if (selectedStanceIds.size === 0) {
+      toast.error("再取り込みする会派見解を選択してください");
+      return;
+    }
+
+    setIsReapplying(true);
+    try {
+      const result = await reapplyStances({
+        runId: run.id,
+        stanceIds: Array.from(selectedStanceIds),
+      });
+
+      if (!result.success) {
+        toast.error(result.error ?? "再取り込みに失敗しました");
+        return;
+      }
+
+      toast.success(`${result.appliedCount}件の会派見解を取り込みました`);
+      for (const w of result.warnings) {
+        toast.warning(w);
+      }
+    } catch (err) {
+      console.error("Reapply stances error:", err);
+      toast.error("再取り込みに失敗しました");
+    } finally {
+      setIsReapplying(false);
+    }
+  };
+
+  const handleRefreshMatchStatus = async () => {
+    setIsRefreshingMatch(true);
+    try {
+      await fetchMatchStatuses();
+      toast.success("マッチング状況を更新しました");
+    } catch (err) {
+      console.error("Refresh match status error:", err);
+      toast.error("マッチング状況の更新に失敗しました");
+    } finally {
+      setIsRefreshingMatch(false);
+    }
+  };
+
   if (run.bills.length === 0) {
     return (
       <p className="text-sm text-gray-500">収集された議案はありません。</p>
@@ -335,39 +414,44 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
       );
     }).length;
 
-  const unmatchedFactions = run.factionStances.filter(
-    (s) => factionMatchMap.get(s.factionName)?.matchedFactionId === null
-  );
+  const unmatchedFactionNames = [
+    ...new Set(
+      run.factionStances
+        .filter(
+          (s) => factionMatchMap.get(s.factionName)?.matchedFactionId === null
+        )
+        .map((s) => s.factionName)
+    ),
+  ];
+
+  const allStancesSelected =
+    run.factionStances.length > 0 &&
+    selectedStanceIds.size === run.factionStances.length;
 
   return (
     <div className="space-y-6">
       {/* Unmatched faction warning */}
-      {!isLoadingDetails && unmatchedFactions.length > 0 && (
+      {!isLoadingDetails && unmatchedFactionNames.length > 0 && (
         <div className="rounded-md border border-red-200 bg-red-50 p-3">
           <div className="flex items-start gap-2">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
             <div>
               <p className="text-sm font-medium text-red-700">
                 DBに登録されていない会派名が含まれています（
-                {
-                  [...new Set(unmatchedFactions.map((s) => s.factionName))]
-                    .length
-                }
+                {unmatchedFactionNames.length}
                 件）
               </p>
               <p className="mt-1 text-xs text-red-600">
-                これらの会派見解は適用時にスキップされます。会派マスターに別名を追加するか、会派名を確認してください。
+                会派マスターに別名を追加した後、「マッチング再チェック」ボタンで状態を更新してから「選択した見解を取り込む」を実行してください。
               </p>
               <ul className="mt-1 flex flex-wrap gap-1">
-                {[...new Set(unmatchedFactions.map((s) => s.factionName))].map(
-                  (name) => (
-                    <li key={name}>
-                      <Badge variant="destructive" className="text-xs">
-                        {name}
-                      </Badge>
-                    </li>
-                  )
-                )}
+                {unmatchedFactionNames.map((name) => (
+                  <li key={name}>
+                    <Badge variant="destructive" className="text-xs">
+                      {name}
+                    </Badge>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -597,13 +681,34 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
       {/* Faction stances table */}
       {run.factionStances.length > 0 && (
         <div>
-          <h3 className="mb-3 text-base font-semibold">
-            会派見解（{run.factionStances.length}件）
-          </h3>
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-base font-semibold">
+              会派見解（{run.factionStances.length}件）
+            </h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshMatchStatus}
+              disabled={isRefreshingMatch || isLoadingDetails}
+            >
+              {isRefreshingMatch ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              マッチング再チェック
+            </Button>
+          </div>
           <div className="overflow-x-auto rounded-md border">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-gray-50">
+                  <th className="w-10 px-3 py-2 text-center">
+                    <Checkbox
+                      checked={allStancesSelected}
+                      onCheckedChange={toggleAllStances}
+                    />
+                  </th>
                   <th className="px-3 py-2 text-left">議案名</th>
                   <th className="px-3 py-2 text-left">会派名（AI収集）</th>
                   <th className="px-3 py-2 text-left">DB会派マッチ</th>
@@ -621,6 +726,12 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
                       key={stance.id}
                       className="border-b last:border-0 hover:bg-gray-50"
                     >
+                      <td className="px-3 py-2 text-center">
+                        <Checkbox
+                          checked={selectedStanceIds.has(stance.id)}
+                          onCheckedChange={() => toggleStance(stance.id)}
+                        />
+                      </td>
                       <td className="max-w-xs px-3 py-2">
                         <p className="line-clamp-2">{stance.billTitle}</p>
                       </td>
@@ -685,6 +796,26 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* Reapply stances button */}
+          <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 p-3">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReapplyStances}
+                disabled={isReapplying || selectedStanceIds.size === 0}
+              >
+                {isReapplying && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                選択した見解を取り込む（{selectedStanceIds.size}件）
+              </Button>
+              <p className="text-xs text-blue-700">
+                別名追加後に「マッチング再チェック」→ チェックを確認してから実行
+              </p>
+            </div>
           </div>
         </div>
       )}

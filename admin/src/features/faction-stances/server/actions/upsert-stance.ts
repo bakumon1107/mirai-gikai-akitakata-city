@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
 import type { StanceInput } from "../../shared/types";
@@ -28,7 +29,8 @@ export async function upsertStance(
       throw new Error("会派見解の保存に失敗しました");
     }
 
-    invalidateWebCache();
+    revalidatePath("/bills", "layout");
+    await invalidateWebCache();
     return { success: true };
   } catch (error) {
     console.error("Error in upsertStance:", error);

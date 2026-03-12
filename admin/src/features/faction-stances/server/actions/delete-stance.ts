@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
 
@@ -17,7 +18,8 @@ export async function deleteStance(stanceId: string) {
       throw new Error("会派見解の削除に失敗しました");
     }
 
-    invalidateWebCache();
+    revalidatePath("/bills", "layout");
+    await invalidateWebCache();
     return { success: true };
   } catch (error) {
     console.error("Error in deleteStance:", error);

@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import {
   invalidateWebCache,
@@ -29,6 +30,7 @@ export async function updateTag(input: UpdateTagInput) {
       return { error: mapTagDbError(result.error, "更新") };
     }
 
+    revalidatePath("/tags");
     // web側のキャッシュを無効化
     await invalidateWebCache([WEB_CACHE_TAGS.BILLS]);
 

@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
@@ -38,6 +39,7 @@ export async function updateCommittee(input: UpdateCommitteeInput) {
       return { error: `委員会の更新に失敗しました: ${error.message}` };
     }
 
+    revalidatePath("/committees");
     await invalidateWebCache();
 
     return { data };

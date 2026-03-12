@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import {
   invalidateWebCache,
@@ -15,6 +16,7 @@ export async function deleteCouncilSession(input: DeleteCouncilSessionInput) {
 
     await deleteCouncilSessionRecord(input.id);
 
+    revalidatePath("/council-sessions");
     await invalidateWebCache([WEB_CACHE_TAGS.COUNCIL_SESSIONS]);
     return { success: true };
   } catch (error) {

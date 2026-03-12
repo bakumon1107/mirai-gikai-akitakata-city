@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import {
   invalidateWebCache,
@@ -36,6 +37,7 @@ export async function createCouncilSession(input: CreateCouncilSessionInput) {
       end_date: input.end_date || null,
     });
 
+    revalidatePath("/council-sessions");
     await invalidateWebCache([WEB_CACHE_TAGS.COUNCIL_SESSIONS]);
     return { data };
   } catch (error) {

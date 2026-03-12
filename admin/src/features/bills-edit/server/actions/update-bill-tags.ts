@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import {
   invalidateWebCache,
@@ -34,6 +35,7 @@ export async function updateBillTags(billId: string, tagIds: string[]) {
       await createBillsTags(billId, toAdd);
     }
 
+    revalidatePath("/bills", "layout");
     // キャッシュを更新
     await invalidateWebCache([WEB_CACHE_TAGS.BILLS]);
 

@@ -27,6 +27,34 @@ type ApplyResult = {
   error?: string;
 };
 
+type FactionRecord = {
+  id: string;
+  display_name: string;
+  alternative_names: string[];
+};
+
+/**
+ * 会派名（display_name・alternative_names）で会派を検索する。
+ * 部分一致（検索名が会派名に含まれる、または会派名が検索名に含まれる）でマッチする。
+ */
+function findFactionByName(
+  factions: FactionRecord[],
+  searchName: string
+): FactionRecord | undefined {
+  const normalized = searchName.trim().toLowerCase();
+  return factions.find((f) => {
+    const displayMatch =
+      f.display_name.toLowerCase().includes(normalized) ||
+      normalized.includes(f.display_name.toLowerCase());
+    if (displayMatch) return true;
+    return f.alternative_names.some(
+      (alt) =>
+        alt.toLowerCase().includes(normalized) ||
+        normalized.includes(alt.toLowerCase())
+    );
+  });
+}
+
 export async function applyDrafts(
   input: ApplyDraftsInput
 ): Promise<ApplyResult> {
@@ -55,6 +83,12 @@ export async function applyDrafts(
     const supabase = createAdminClient();
     const warnings: string[] = [];
     let appliedCount = 0;
+
+    // 全会派を一括取得（display_name・alternative_names でマッチングするため）
+    const { data: allFactions } = await supabase
+      .from("factions")
+      .select("id, display_name, alternative_names");
+    const factions: FactionRecord[] = allFactions ?? [];
 
     // Map from DraftBill.id to inserted/existing bill_id
     const billIdMap = new Map<string, string>();
@@ -191,11 +225,7 @@ export async function applyDrafts(
           continue;
         }
 
-        const { data: faction } = await supabase
-          .from("factions")
-          .select("id")
-          .ilike("display_name", `%${stanceOverride.factionName}%`)
-          .maybeSingle();
+        const faction = findFactionByName(factions, stanceOverride.factionName);
 
         if (!faction) {
           warnings.push(
@@ -256,13 +286,9 @@ export async function applyDrafts(
       const billId = billIdMap.get(matchedBill.id);
       if (!billId) continue;
 
-      const { data: faction, error: factionError } = await supabase
-        .from("factions")
-        .select("id, display_name")
-        .ilike("display_name", `%${stance.factionName}%`)
-        .maybeSingle();
+      const faction = findFactionByName(factions, stance.factionName);
 
-      if (factionError || !faction) {
+      if (!faction) {
         warnings.push(
           `会派「${stance.factionName}」が見つかりません。スキップしました。`
         );

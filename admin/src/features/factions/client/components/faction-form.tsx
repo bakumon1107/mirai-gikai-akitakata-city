@@ -7,14 +7,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createFaction } from "../../server/actions/create-faction";
 
+/** カンマ区切り文字列を別名配列に変換 */
+function parseAlternativeNames(value: string): string[] {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 export function FactionForm() {
   const nameId = useId();
   const displayNameId = useId();
+  const alternativeNamesId = useId();
   const logoUrlId = useId();
   const sortOrderId = useId();
 
   const [name, setName] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [alternativeNames, setAlternativeNames] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [sortOrder, setSortOrder] = useState("0");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +54,7 @@ export function FactionForm() {
       const result = await createFaction({
         name: name.trim(),
         display_name: displayName.trim(),
+        alternative_names: parseAlternativeNames(alternativeNames),
         logo_url: logoUrl.trim() || null,
         sort_order: sortOrderNum,
       });
@@ -54,6 +65,7 @@ export function FactionForm() {
         toast.success("会派を作成しました");
         setName("");
         setDisplayName("");
+        setAlternativeNames("");
         setLogoUrl("");
         setSortOrder("0");
       }
@@ -85,7 +97,7 @@ export function FactionForm() {
 
         <div className="space-y-2">
           <Label htmlFor={displayNameId}>
-            表示名 <span className="text-red-500">*</span>
+            表示名（正式名称） <span className="text-red-500">*</span>
           </Label>
           <Input
             id={displayNameId}
@@ -95,6 +107,21 @@ export function FactionForm() {
             placeholder="例: 公明党"
             disabled={isSubmitting}
           />
+        </div>
+
+        <div className="col-span-2 space-y-2">
+          <Label htmlFor={alternativeNamesId}>別名（任意）</Label>
+          <Input
+            id={alternativeNamesId}
+            type="text"
+            value={alternativeNames}
+            onChange={(e) => setAlternativeNames(e.target.value)}
+            placeholder="例: 公明, 公明党議員団"
+            disabled={isSubmitting}
+          />
+          <p className="text-xs text-gray-500">
+            略称・旧称など。カンマ区切りで複数入力可。AI収集時の会派名マッチングに使用されます。
+          </p>
         </div>
 
         <div className="space-y-2">

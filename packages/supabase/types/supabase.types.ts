@@ -403,6 +403,7 @@ export type Database = {
       }
       factions: {
         Row: {
+          alternative_names: string[]
           created_at: string
           display_name: string
           id: string
@@ -413,6 +414,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          alternative_names?: string[]
           created_at?: string
           display_name: string
           id?: string
@@ -423,6 +425,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          alternative_names?: string[]
           created_at?: string
           display_name?: string
           id?: string

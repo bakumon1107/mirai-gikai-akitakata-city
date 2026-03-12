@@ -90,6 +90,37 @@ export async function findMiraiStanceByBillId(
 }
 
 /**
+ * 議案に紐づく会派見解を取得
+ */
+export async function findFactionStancesByBillId(billId: string) {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("faction_stances")
+    .select(
+      `
+      id,
+      type,
+      comment,
+      factions (
+        id,
+        name,
+        display_name,
+        sort_order
+      )
+    `
+    )
+    .eq("bill_id", billId)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error(`Failed to fetch faction stances: ${error.message}`);
+    return [];
+  }
+
+  return data ?? [];
+}
+
+/**
  * 議案のタグを取得
  */
 export async function findTagsByBillId(billId: string) {

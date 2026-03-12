@@ -1,8 +1,8 @@
 import "server-only";
+import { spawn } from "node:child_process";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
-import { spawn } from "node:child_process";
 
 const CLAUDE_PATH = process.env.CLAUDE_CLI_PATH ?? "claude";
 
@@ -11,6 +11,18 @@ export class ClaudeUsageLimitError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ClaudeUsageLimitError";
+  }
+}
+
+/** Claude の実行がタイムアウトし、出力ファイルが存在しなかった場合のエラー */
+export class ClaudeTimeoutError extends Error {
+  /** デバッグ用の診断情報（stdout/stderr末尾） */
+  readonly diagnostics: string;
+
+  constructor(timeoutSec: number, diagnostics: string) {
+    super(`Claude の実行が ${timeoutSec} 秒でタイムアウトしました`);
+    this.name = "ClaudeTimeoutError";
+    this.diagnostics = diagnostics;
   }
 }
 
@@ -34,6 +46,9 @@ type ClaudeJsonResponse = {
   subtype?: string;
   [key: string]: unknown;
 };
+
+/** Claude CLI 実行のタイムアウト（ms）。WebSearch を伴うため長めに設定 */
+const CLAUDE_TIMEOUT_MS = 15 * 60 * 1000; // 15分
 
 /** Claude を実行し、結果JSONが書き込まれた一時ファイルのパスを返す */
 export function executeClaudeToFile(
@@ -64,6 +79,34 @@ export function executeClaudeToFile(
 
     let stdout = "";
     let stderr = "";
+    let settled = false;
+
+    const settle = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      fn();
+    };
+
+    // タイムアウト: プロセスを強制終了し、出力ファイルが存在すれば結果を流用する
+    const timer = setTimeout(() => {
+      proc.kill("SIGKILL");
+      // Write ツールが完了していれば出力ファイルが存在する可能性がある
+      fs.access(_outputFilePath)
+        .then(() => {
+          // ファイルが存在 → 結果を流用して resolve
+          settle(resolve);
+        })
+        .catch(() => {
+          // ファイルなし → ClaudeTimeoutError で診断情報を保持
+          const diagnostics = (stderr + stdout).slice(-500);
+          settle(() =>
+            reject(
+              new ClaudeTimeoutError(CLAUDE_TIMEOUT_MS / 1000, diagnostics)
+            )
+          );
+        });
+    }, CLAUDE_TIMEOUT_MS);
 
     proc.stdout.on("data", (chunk: Buffer) => {
       stdout += chunk.toString();
@@ -74,23 +117,29 @@ export function executeClaudeToFile(
     });
 
     proc.on("error", (err) => {
-      reject(new Error(`claude の起動に失敗しました: ${err.message}`));
+      settle(() =>
+        reject(new Error(`claude の起動に失敗しました: ${err.message}`))
+      );
     });
 
     proc.on("close", (code) => {
       if (code !== 0) {
         const combined = stderr + stdout;
         if (isUsageLimitError(combined)) {
-          reject(
-            new ClaudeUsageLimitError(
-              `Claude の使用制限に達しました。stderr: ${stderr.slice(0, 300)}`
+          settle(() =>
+            reject(
+              new ClaudeUsageLimitError(
+                `Claude の使用制限に達しました。stderr: ${stderr.slice(0, 300)}`
+              )
             )
           );
           return;
         }
-        reject(
-          new Error(
-            `claude がコード ${code} で終了しました。stderr: ${stderr.slice(0, 500)}`
+        settle(() =>
+          reject(
+            new Error(
+              `claude がコード ${code} で終了しました。stderr: ${stderr.slice(0, 500)}`
+            )
           )
         );
         return;
@@ -101,15 +150,21 @@ export function executeClaudeToFile(
         if (parsed.is_error || parsed.subtype === "error") {
           const resultStr = String(parsed.result ?? "不明なエラー");
           if (isUsageLimitError(resultStr)) {
-            reject(
-              new ClaudeUsageLimitError(
-                `Claude の使用制限に達しました: ${resultStr.slice(0, 300)}`
+            settle(() =>
+              reject(
+                new ClaudeUsageLimitError(
+                  `Claude の使用制限に達しました: ${resultStr.slice(0, 300)}`
+                )
               )
             );
             return;
           }
-          reject(
-            new Error(`Claude がエラーを返しました: ${resultStr.slice(0, 300)}`)
+          settle(() =>
+            reject(
+              new Error(
+                `Claude がエラーを返しました: ${resultStr.slice(0, 300)}`
+              )
+            )
           );
           return;
         }
@@ -117,7 +172,7 @@ export function executeClaudeToFile(
         // JSON parse 失敗は無視してファイル読み込みに進む
       }
 
-      resolve();
+      settle(resolve);
     });
   });
 }

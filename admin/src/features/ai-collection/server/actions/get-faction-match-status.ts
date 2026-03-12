@@ -2,18 +2,12 @@
 
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
-
-type FactionMatchStatus = {
-  factionName: string;
-  matchedFactionId: string | null;
-  matchedDisplayName: string | null;
-  /** display_nameで一致したか、alternative_namesで一致したか */
-  matchedBy: "display_name" | "alternative_name" | null;
-};
+import type { FactionMatchStatus } from "../../shared/types";
+import { findFactionByName } from "../utils/faction-matching";
 
 /**
  * 会派名リストに対して、DBの会派とのマッチング状況を返す。
- * display_name・alternative_names の部分一致で検索。
+ * display_name の完全一致 → alternative_names の完全一致 → 部分一致の順で検索。
  */
 export async function getFactionMatchStatus(
   factionNames: string[]
@@ -32,38 +26,26 @@ export async function getFactionMatchStatus(
   return factionNames.map((searchName) => {
     const normalized = searchName.trim().toLowerCase();
 
-    for (const f of factions) {
-      const displayMatch =
-        f.display_name.toLowerCase().includes(normalized) ||
-        normalized.includes(f.display_name.toLowerCase());
-      if (displayMatch) {
-        return {
-          factionName: searchName,
-          matchedFactionId: f.id,
-          matchedDisplayName: f.display_name,
-          matchedBy: "display_name",
-        };
-      }
-      const altMatch = f.alternative_names.find(
-        (alt) =>
-          alt.toLowerCase().includes(normalized) ||
-          normalized.includes(alt.toLowerCase())
-      );
-      if (altMatch) {
-        return {
-          factionName: searchName,
-          matchedFactionId: f.id,
-          matchedDisplayName: f.display_name,
-          matchedBy: "alternative_name",
-        };
-      }
+    const matched = findFactionByName(factions, searchName);
+    if (!matched) {
+      return {
+        factionName: searchName,
+        matchedFactionId: null,
+        matchedDisplayName: null,
+        matchedBy: null,
+      };
     }
+
+    const matchedBy =
+      matched.display_name.toLowerCase() === normalized
+        ? "display_name"
+        : "alternative_name";
 
     return {
       factionName: searchName,
-      matchedFactionId: null,
-      matchedDisplayName: null,
-      matchedBy: null,
+      matchedFactionId: matched.id,
+      matchedDisplayName: matched.display_name,
+      matchedBy,
     };
   });
 }

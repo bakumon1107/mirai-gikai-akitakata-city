@@ -12,6 +12,10 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
 import { loadRun } from "../utils/storage";
+import {
+  findFactionByName,
+  type FactionRecord,
+} from "../utils/faction-matching";
 import type { BillFieldOverride, DraftBill } from "../../shared/types";
 
 type ApplyDraftsInput = {
@@ -26,34 +30,6 @@ type ApplyResult = {
   warnings: string[];
   error?: string;
 };
-
-type FactionRecord = {
-  id: string;
-  display_name: string;
-  alternative_names: string[];
-};
-
-/**
- * 会派名（display_name・alternative_names）で会派を検索する。
- * 部分一致（検索名が会派名に含まれる、または会派名が検索名に含まれる）でマッチする。
- */
-function findFactionByName(
-  factions: FactionRecord[],
-  searchName: string
-): FactionRecord | undefined {
-  const normalized = searchName.trim().toLowerCase();
-  return factions.find((f) => {
-    const displayMatch =
-      f.display_name.toLowerCase().includes(normalized) ||
-      normalized.includes(f.display_name.toLowerCase());
-    if (displayMatch) return true;
-    return f.alternative_names.some(
-      (alt) =>
-        alt.toLowerCase().includes(normalized) ||
-        normalized.includes(alt.toLowerCase())
-    );
-  });
-}
 
 export async function applyDrafts(
   input: ApplyDraftsInput

@@ -1,6 +1,13 @@
 "use client";
 
-import { ChevronDown, ChevronRight, ExternalLink, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { applyDrafts } from "../../server/actions/apply-drafts";
 import { getExistingBillsDetail } from "../../server/actions/get-existing-bills-detail";
+import { getFactionMatchStatus } from "../../server/actions/get-faction-match-status";
 import type {
   BillFieldOverride,
   CollectionRun,
   DraftBill,
   DraftFactionStance,
   ExistingBillDetail,
+  FactionMatchStatus,
 } from "../../shared/types";
 
 type DraftReviewProps = {
@@ -159,37 +168,59 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [diffsMap, setDiffsMap] = useState<Map<string, DiffItem[]>>(new Map());
+  const [factionMatchMap, setFactionMatchMap] = useState<
+    Map<string, FactionMatchStatus>
+  >(new Map());
 
-  // Fetch existing bill details on mount
+  // Fetch existing bill details and faction match status on mount
   // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount
   useEffect(() => {
-    if (existingBills.length === 0) return;
+    const fetchDetails = async () => {
+      setIsLoadingDetails(true);
+      try {
+        const [details, matchStatuses] = await Promise.all([
+          existingBills.length > 0
+            ? getExistingBillsDetail(existingBills.map((b) => b.title))
+            : Promise.resolve([]),
+          run.factionStances.length > 0
+            ? getFactionMatchStatus([
+                ...new Set(run.factionStances.map((s) => s.factionName)),
+              ])
+            : Promise.resolve([]),
+        ]);
 
-    setIsLoadingDetails(true);
-    void getExistingBillsDetail(existingBills.map((b) => b.title)).then(
-      (details) => {
-        const detailMap = new Map(details.map((d) => [d.name, d]));
-
-        // Compute diffs and initialize overrides
-        const newDiffsMap = new Map<string, DiffItem[]>();
-        const newOverrides = new Map<string, OverrideState>();
-
-        for (const bill of existingBills) {
-          const detail = detailMap.get(bill.title);
-          if (!detail) continue;
-          const runStances = run.factionStances.filter(
-            (s) => s.billTitle === bill.title
-          );
-          const diffs = computeDiffs(bill, detail, runStances);
-          newDiffsMap.set(bill.id, diffs);
-          newOverrides.set(bill.id, buildInitialOverride(diffs));
+        // Build faction match map
+        const newMatchMap = new Map<string, FactionMatchStatus>();
+        for (const status of matchStatuses) {
+          newMatchMap.set(status.factionName, status);
         }
+        setFactionMatchMap(newMatchMap);
 
-        setDiffsMap(newDiffsMap);
-        setOverrides(newOverrides);
+        if (details.length > 0) {
+          const detailMap = new Map(details.map((d) => [d.name, d]));
+          const newDiffsMap = new Map<string, DiffItem[]>();
+          const newOverrides = new Map<string, OverrideState>();
+
+          for (const bill of existingBills) {
+            const detail = detailMap.get(bill.title);
+            if (!detail) continue;
+            const runStances = run.factionStances.filter(
+              (s) => s.billTitle === bill.title
+            );
+            const diffs = computeDiffs(bill, detail, runStances);
+            newDiffsMap.set(bill.id, diffs);
+            newOverrides.set(bill.id, buildInitialOverride(diffs));
+          }
+
+          setDiffsMap(newDiffsMap);
+          setOverrides(newOverrides);
+        }
+      } finally {
         setIsLoadingDetails(false);
       }
-    );
+    };
+
+    void fetchDetails();
   }, []); // only on mount
 
   const toggleNewBill = (id: string) => {
@@ -304,8 +335,45 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
       );
     }).length;
 
+  const unmatchedFactions = run.factionStances.filter(
+    (s) => factionMatchMap.get(s.factionName)?.matchedFactionId === null
+  );
+
   return (
     <div className="space-y-6">
+      {/* Unmatched faction warning */}
+      {!isLoadingDetails && unmatchedFactions.length > 0 && (
+        <div className="rounded-md border border-red-200 bg-red-50 p-3">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+            <div>
+              <p className="text-sm font-medium text-red-700">
+                DBに登録されていない会派名が含まれています（
+                {
+                  [...new Set(unmatchedFactions.map((s) => s.factionName))]
+                    .length
+                }
+                件）
+              </p>
+              <p className="mt-1 text-xs text-red-600">
+                これらの会派見解は適用時にスキップされます。会派マスターに別名を追加するか、会派名を確認してください。
+              </p>
+              <ul className="mt-1 flex flex-wrap gap-1">
+                {[...new Set(unmatchedFactions.map((s) => s.factionName))].map(
+                  (name) => (
+                    <li key={name}>
+                      <Badge variant="destructive" className="text-xs">
+                        {name}
+                      </Badge>
+                    </li>
+                  )
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bills table */}
       <div>
         <h3 className="mb-3 text-base font-semibold">
@@ -368,14 +436,14 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
                         {isExisting ? (
                           <Badge
                             variant="outline"
-                            className="text-amber-600 border-amber-400"
+                            className="border-amber-400 text-amber-600"
                           >
                             既存
                           </Badge>
                         ) : (
                           <Badge
                             variant="outline"
-                            className="text-green-600 border-green-400"
+                            className="border-green-400 text-green-600"
                           >
                             新規
                           </Badge>
@@ -425,7 +493,7 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
                           <td />
                           <td
                             colSpan={7}
-                            className="px-6 py-2 text-sm text-gray-500 italic"
+                            className="px-6 py-2 text-sm italic text-gray-500"
                           >
                             差分なし（DBの値とAI収集結果が一致しています）
                           </td>
@@ -490,7 +558,7 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
                               </td>
                               <td
                                 colSpan={2}
-                                className="px-6 py-2 text-xs text-gray-500 font-medium"
+                                className="px-6 py-2 text-xs font-medium text-gray-500"
                               >
                                 {diff.label}
                               </td>
@@ -502,7 +570,7 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
                                     : diff.from}
                                 </span>
                                 <span className="mx-2 text-gray-400">→</span>
-                                <span className="text-blue-700 font-medium">
+                                <span className="font-medium text-blue-700">
                                   {diff.key === "contents"
                                     ? diff.to.slice(0, 80) +
                                       (diff.to.length > 80 ? "…" : "")
@@ -537,54 +605,84 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
               <thead>
                 <tr className="border-b bg-gray-50">
                   <th className="px-3 py-2 text-left">議案名</th>
-                  <th className="px-3 py-2 text-left">会派名</th>
+                  <th className="px-3 py-2 text-left">会派名（AI収集）</th>
+                  <th className="px-3 py-2 text-left">DB会派マッチ</th>
                   <th className="px-3 py-2 text-left">賛否</th>
                   <th className="px-3 py-2 text-left">コメント</th>
                   <th className="px-3 py-2 text-left">参照URL</th>
                 </tr>
               </thead>
               <tbody>
-                {run.factionStances.map((stance) => (
-                  <tr
-                    key={stance.id}
-                    className="border-b last:border-0 hover:bg-gray-50"
-                  >
-                    <td className="max-w-xs px-3 py-2">
-                      <p className="line-clamp-2">{stance.billTitle}</p>
-                    </td>
-                    <td className="px-3 py-2">{stance.factionName}</td>
-                    <td className="px-3 py-2">
-                      <Badge
-                        variant={
-                          STANCE_VARIANTS[stance.stanceType] ?? "outline"
-                        }
-                      >
-                        {STANCE_LABELS[stance.stanceType] ?? stance.stanceType}
-                      </Badge>
-                    </td>
-                    <td className="max-w-xs px-3 py-2 text-gray-600">
-                      <p className="line-clamp-2">{stance.comment ?? "—"}</p>
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex flex-col gap-1">
-                        {stance.sourceUrls.map((url) => (
-                          <a
-                            key={url}
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-blue-600 hover:underline"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            <span className="max-w-[200px] truncate text-xs">
-                              {url}
+                {run.factionStances.map((stance) => {
+                  const match = factionMatchMap.get(stance.factionName);
+                  const isLoading = isLoadingDetails;
+                  return (
+                    <tr
+                      key={stance.id}
+                      className="border-b last:border-0 hover:bg-gray-50"
+                    >
+                      <td className="max-w-xs px-3 py-2">
+                        <p className="line-clamp-2">{stance.billTitle}</p>
+                      </td>
+                      <td className="px-3 py-2">{stance.factionName}</td>
+                      <td className="px-3 py-2">
+                        {isLoading ? (
+                          <Loader2 className="h-3 w-3 animate-spin text-gray-400" />
+                        ) : match?.matchedFactionId ? (
+                          <div className="flex items-center gap-1">
+                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-green-500" />
+                            <span className="text-xs text-green-700">
+                              {match.matchedDisplayName}
+                              {match.matchedBy === "alternative_name" && (
+                                <span className="ml-1 text-gray-400">
+                                  （別名）
+                                </span>
+                              )}
                             </span>
-                          </a>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-500" />
+                            <span className="text-xs text-red-600">
+                              未マッチ
+                            </span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        <Badge
+                          variant={
+                            STANCE_VARIANTS[stance.stanceType] ?? "outline"
+                          }
+                        >
+                          {STANCE_LABELS[stance.stanceType] ??
+                            stance.stanceType}
+                        </Badge>
+                      </td>
+                      <td className="max-w-xs px-3 py-2 text-gray-600">
+                        <p className="line-clamp-2">{stance.comment ?? "—"}</p>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex flex-col gap-1">
+                          {stance.sourceUrls.map((url) => (
+                            <a
+                              key={url}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-blue-600 hover:underline"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              <span className="max-w-[200px] truncate text-xs">
+                                {url}
+                              </span>
+                            </a>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

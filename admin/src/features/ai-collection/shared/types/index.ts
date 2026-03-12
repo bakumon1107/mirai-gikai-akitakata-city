@@ -1,5 +1,12 @@
 export type CollectionStatus = "running" | "completed" | "failed" | "paused";
 
+export type FactionMatchStatus = {
+  factionName: string;
+  matchedFactionId: string | null;
+  matchedDisplayName: string | null;
+  matchedBy: "display_name" | "alternative_name" | null;
+};
+
 export type ExistingBillDetail = {
   id: string;
   name: string;

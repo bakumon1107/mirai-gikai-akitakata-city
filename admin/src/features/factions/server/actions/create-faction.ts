@@ -25,6 +25,7 @@ export async function createFaction(input: CreateFactionInput) {
       .insert({
         name: input.name.trim(),
         display_name: input.display_name.trim(),
+        alternative_names: input.alternative_names,
         logo_url: input.logo_url || null,
         sort_order: input.sort_order,
       })

@@ -24,10 +24,26 @@ type FactionItemProps = {
   faction: FactionWithStanceCount;
 };
 
+/** 別名配列をカンマ区切り文字列に変換 */
+function formatAlternativeNames(names: string[]): string {
+  return names.join(", ");
+}
+
+/** カンマ区切り文字列を別名配列に変換 */
+function parseAlternativeNames(value: string): string[] {
+  return value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 export function FactionItem({ faction }: FactionItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(faction.name);
   const [editDisplayName, setEditDisplayName] = useState(faction.display_name);
+  const [editAlternativeNames, setEditAlternativeNames] = useState(
+    formatAlternativeNames(faction.alternative_names)
+  );
   const [editLogoUrl, setEditLogoUrl] = useState(faction.logo_url ?? "");
   const [editSortOrder, setEditSortOrder] = useState(
     faction.sort_order.toString()
@@ -59,6 +75,7 @@ export function FactionItem({ faction }: FactionItemProps) {
         id: faction.id,
         name: editName.trim(),
         display_name: editDisplayName.trim(),
+        alternative_names: parseAlternativeNames(editAlternativeNames),
         logo_url: editLogoUrl.trim() || null,
         sort_order: sortOrderNum,
         is_active: editIsActive,
@@ -100,6 +117,7 @@ export function FactionItem({ faction }: FactionItemProps) {
   const handleCancel = () => {
     setEditName(faction.name);
     setEditDisplayName(faction.display_name);
+    setEditAlternativeNames(formatAlternativeNames(faction.alternative_names));
     setEditLogoUrl(faction.logo_url ?? "");
     setEditSortOrder(faction.sort_order.toString());
     setEditIsActive(faction.is_active);
@@ -123,13 +141,27 @@ export function FactionItem({ faction }: FactionItemProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>表示名</Label>
+              <Label>表示名（正式名称）</Label>
               <Input
                 type="text"
                 value={editDisplayName}
                 onChange={(e) => setEditDisplayName(e.target.value)}
                 disabled={isSubmitting}
               />
+            </div>
+
+            <div className="col-span-2 space-y-2">
+              <Label>別名（任意）</Label>
+              <Input
+                type="text"
+                value={editAlternativeNames}
+                onChange={(e) => setEditAlternativeNames(e.target.value)}
+                disabled={isSubmitting}
+                placeholder="例: 公明, 公明党議員団"
+              />
+              <p className="text-xs text-gray-500">
+                略称・旧称など。カンマ区切りで複数入力可。AI収集時の会派名マッチングに使用されます。
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -186,7 +218,7 @@ export function FactionItem({ faction }: FactionItemProps) {
               <h3 className="font-semibold">{faction.display_name}</h3>
               <span className="text-sm text-gray-500">({faction.name})</span>
               <span
-                className={`px-2 py-0.5 rounded text-xs font-medium ${
+                className={`rounded px-2 py-0.5 text-xs font-medium ${
                   faction.is_active
                     ? "bg-green-100 text-green-700"
                     : "bg-gray-100 text-gray-500"
@@ -199,8 +231,11 @@ export function FactionItem({ faction }: FactionItemProps) {
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span>表示順: {faction.sort_order}</span>
               <span>見解: {faction.stance_count}件</span>
+              {faction.alternative_names.length > 0 && (
+                <span>別名: {faction.alternative_names.join(", ")}</span>
+              )}
               {faction.logo_url && (
-                <span className="truncate max-w-xs" title={faction.logo_url}>
+                <span className="max-w-xs truncate" title={faction.logo_url}>
                   ロゴ: {faction.logo_url}
                 </span>
               )}

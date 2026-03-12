@@ -4,8 +4,8 @@ import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/type
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { BillWithContent, FactionStance } from "../../shared/types";
 import {
+  findFactionStancesByBillId,
   findPublishedBillById,
-  findMiraiStanceByBillId,
   findTagsByBillId,
 } from "../repositories/bill-repository";
 import { getBillContentWithDifficulty } from "./helpers/get-bill-content";
@@ -23,10 +23,10 @@ const _getCachedBillById = unstable_cache(
   ): Promise<BillWithContent | null> => {
     // 基本的なbill情報、会派見解、コンテンツ、タグを並列取得
     // 公開ステータスの議案のみを取得
-    const [bill, factionStancesResult, billContent, tagsResult] =
+    const [bill, factionStancesRaw, billContent, tagsResult] =
       await Promise.all([
         findPublishedBillById(id),
-        findMiraiStanceByBillId(id),
+        findFactionStancesByBillId(id),
         getBillContentWithDifficulty(id, difficultyLevel),
         findTagsByBillId(id),
       ]);
@@ -38,8 +38,26 @@ const _getCachedBillById = unstable_cache(
 
     const billTags = tagsResult;
 
-    // 川崎版は会派見解なし（mirai_stancesは議会全体のスタンス）
-    const factionStances: FactionStance[] = [];
+    const factionStances: FactionStance[] = factionStancesRaw
+      .filter(
+        (
+          fs
+        ): fs is typeof fs & {
+          factions: NonNullable<(typeof fs)["factions"]>;
+        } => fs.factions !== null
+      )
+      .map((fs) => ({
+        id: fs.id,
+        stance: fs.type,
+        comment: fs.comment,
+        faction: {
+          id: fs.factions.id,
+          name: fs.factions.name,
+          display_name: fs.factions.display_name,
+          sort_order: fs.factions.sort_order,
+        },
+      }))
+      .sort((a, b) => a.faction.sort_order - b.faction.sort_order);
 
     // タグデータを整形
     const tags =

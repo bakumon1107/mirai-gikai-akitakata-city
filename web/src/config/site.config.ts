@@ -24,7 +24,7 @@ export const siteConfig = {
     "https://www.city.kawasaki.jp/shisei/category/40-7-25-0-0-0-0-0-0-0.html",
   twitterHashtag: "みらい議会川崎版", // # なし
   externalLinks: {
-    report: "https://forms.gle/wJXXMt6cv2ZdiCgg6",
+    report: "https://forms.gle/GM4oTN94ttPRjyjp9",
     aboutNote: "",
     donation: "https://team-mir.ai/support/donation",
     teamAbout: "https://team-mir.ai/about",

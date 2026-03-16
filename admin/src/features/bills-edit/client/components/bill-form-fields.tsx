@@ -56,18 +56,10 @@ export function BillFormFields({
           <FormItem>
             <FormLabel>議案番号 *</FormLabel>
             <FormControl>
-              <Input
-                type="number"
-                min={0}
-                {...field}
-                value={field.value ?? 0}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-              />
+              <Input {...field} value={field.value ?? ""} />
             </FormControl>
             <FormDescription>
-              議案番号を入力してください（例: 12 →
-              「第12号」と表示されます）。未設定の場合は 0
-              のままにしてください。
+              議案番号を入力してください（例:「第1号」「報告第1号」）。未設定の場合は空白のままにしてください。
             </FormDescription>
             <FormMessage />
           </FormItem>

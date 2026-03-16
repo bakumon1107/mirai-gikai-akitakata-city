@@ -13,6 +13,7 @@ import {
 import { BillActionsMenu } from "../../../client/components/bill-actions-menu/bill-actions-menu";
 import { PreviewButton } from "../../../client/components/bill-list/preview-button";
 import { PublishStatusBadge } from "../../../client/components/bill-list/publish-status-badge";
+import { SessionFilter } from "../../../client/components/bill-list/session-filter";
 import { SortableTableHead } from "../../../client/components/bill-list/sortable-table-head";
 import { ViewButton } from "../../../client/components/bill-list/view-button";
 import { BILL_STATUS_CONFIG } from "../../../shared/constants/bill-config";
@@ -23,6 +24,7 @@ import type {
 } from "../../../shared/types";
 import { getBillStatusLabel } from "../../../shared/types";
 import { getBills } from "../../loaders/get-bills";
+import { getCouncilSessions } from "../../loaders/get-council-sessions";
 
 function StatusBadge({ status }: { status: BillStatus }) {
   const config = BILL_STATUS_CONFIG[status];
@@ -36,8 +38,17 @@ function StatusBadge({ status }: { status: BillStatus }) {
   );
 }
 
-export async function BillList({ sortConfig }: { sortConfig: BillSortConfig }) {
-  const bills = await getBills(sortConfig);
+export async function BillList({
+  sortConfig,
+  sessionId,
+}: {
+  sortConfig: BillSortConfig;
+  sessionId?: string;
+}) {
+  const [bills, sessions] = await Promise.all([
+    getBills(sortConfig, sessionId),
+    getCouncilSessions(),
+  ]);
 
   return (
     <div>
@@ -59,12 +70,28 @@ export async function BillList({ sortConfig }: { sortConfig: BillSortConfig }) {
         </div>
       </div>
 
-      <div className="rounded-md border bg-white">
-        <Table>
+      <div className="mb-3">
+        <SessionFilter sessions={sessions} currentSessionId={sessionId} />
+      </div>
+
+      <div className="rounded-md border bg-white overflow-x-auto">
+        <Table className="min-w-[900px]">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">議案番号</TableHead>
-              <TableHead>議案名</TableHead>
+              <SortableTableHead
+                field="bill_number"
+                currentField={sortConfig.field}
+                currentOrder={sortConfig.order}
+              >
+                議案番号
+              </SortableTableHead>
+              <SortableTableHead
+                field="name"
+                currentField={sortConfig.field}
+                currentOrder={sortConfig.order}
+              >
+                議案名
+              </SortableTableHead>
               <TableHead>定例会</TableHead>
               <SortableTableHead
                 field="publish_status_order"
@@ -107,10 +134,10 @@ function BillRow({ bill }: { bill: BillWithCouncilSession }) {
       <TableCell className="text-sm text-gray-600 whitespace-nowrap">
         {bill.bill_number || "-"}
       </TableCell>
-      <TableCell className="max-w-[400px]">
+      <TableCell className="min-w-[200px]">
         <Link
           href={`/bills/${bill.id}/edit`}
-          className="block truncate font-medium hover:underline"
+          className="block font-medium hover:underline"
         >
           {bill.name}
         </Link>

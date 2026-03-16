@@ -5,6 +5,8 @@ const VALID_SORT_FIELDS: BillSortField[] = [
   "published_at",
   "status_order",
   "publish_status_order",
+  "bill_number",
+  "name",
 ];
 
 const VALID_SORT_ORDERS: SortOrder[] = ["asc", "desc"];

@@ -5,8 +5,9 @@ import type {
 import { findBillsWithCouncilSessions } from "../repositories/bill-repository";
 
 export async function getBills(
-  sortConfig?: BillSortConfig
+  sortConfig?: BillSortConfig,
+  sessionId?: string
 ): Promise<BillWithCouncilSession[]> {
-  const data = await findBillsWithCouncilSessions(sortConfig);
+  const data = await findBillsWithCouncilSessions(sortConfig, sessionId);
   return data || [];
 }

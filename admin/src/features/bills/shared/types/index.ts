@@ -21,7 +21,9 @@ export type BillSortField =
   | "created_at"
   | "published_at"
   | "status_order"
-  | "publish_status_order";
+  | "publish_status_order"
+  | "bill_number"
+  | "name";
 
 export type SortOrder = "asc" | "desc";
 

@@ -4,10 +4,16 @@ import { siteConfig } from "@/config/site.config";
 export function buildPrompt(
   startDate: string,
   endDate: string,
-  outputFilePath: string
+  outputFilePath: string,
+  existingBillNumbers: string[] = []
 ): string {
-  return `${siteConfig.councilName}の${startDate}から${endDate}の期間に審議された議案と各会派の賛否について、公式サイト等から調査してください。
+  const existingSection =
+    existingBillNumbers.length > 0
+      ? `\n既に登録済みの議案番号（重複収集不要）:\n${existingBillNumbers.map((n) => `- ${n}`).join("\n")}\n`
+      : "";
 
+  return `${siteConfig.councilName}の${startDate}から${endDate}の期間に審議された議案と各会派の賛否について、公式サイト等から調査してください。
+${existingSection}
 調査サイト:
 - ${siteConfig.councilBillsDetailUrl} （${siteConfig.councilName}）
 

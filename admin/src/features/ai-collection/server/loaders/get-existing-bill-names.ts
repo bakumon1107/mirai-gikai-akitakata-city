@@ -2,8 +2,11 @@ import "server-only";
 
 import { createAdminClient } from "@mirai-gikai/supabase";
 
-export async function getExistingBillNames(): Promise<string[]> {
+export async function getExistingBillNumbers(): Promise<string[]> {
   const supabase = createAdminClient();
-  const { data } = await supabase.from("bills").select("name");
-  return (data ?? []).map((b) => b.name);
+  const { data } = await supabase
+    .from("bills")
+    .select("bill_number")
+    .neq("bill_number", "");
+  return (data ?? []).map((b) => b.bill_number);
 }

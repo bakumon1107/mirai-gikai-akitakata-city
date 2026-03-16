@@ -3,15 +3,38 @@ import "server-only";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 
+export type BillContent = {
+  id: string;
+  difficulty_level: string;
+  title: string;
+  summary: string;
+  content: string;
+};
+
+export type BillStance = {
+  id: string;
+  faction_id: string;
+  faction_name: string;
+  type: string;
+  comment: string | null;
+};
+
 export type BillInGroup = {
   id: string;
+  bill_number: string;
   name: string;
   status: string;
-  publish_status: string;
   status_note: string | null;
+  publish_status: string;
+  published_at: string | null;
+  thumbnail_url: string | null;
+  share_thumbnail_url: string | null;
+  is_featured: boolean;
+  committee_id: string | null;
+  council_session_id: string | null;
   created_at: string;
-  contentsCount: number;
-  stancesCount: number;
+  contents: BillContent[];
+  stances: BillStance[];
 };
 
 export type DuplicateGroup = {
@@ -28,7 +51,7 @@ export async function getDuplicateGroups(): Promise<DuplicateGroup[]> {
   const { data: bills, error } = await supabase
     .from("bills")
     .select(
-      "id, bill_number, name, status, publish_status, status_note, created_at"
+      "id, bill_number, name, status, status_note, publish_status, published_at, thumbnail_url, share_thumbnail_url, is_featured, committee_id, council_session_id, created_at"
     )
     .neq("bill_number", "")
     .order("bill_number")
@@ -50,30 +73,50 @@ export async function getDuplicateGroups(): Promise<DuplicateGroup[]> {
 
   if (duplicateGroups.length === 0) return [];
 
-  // Fetch content and stance counts per bill
   const allIds = duplicateGroups.flatMap(([, list]) => list.map((b) => b.id));
 
-  const [{ data: contents }, { data: stances }] = await Promise.all([
-    supabase.from("bill_contents").select("bill_id").in("bill_id", allIds),
-    supabase.from("faction_stances").select("bill_id").in("bill_id", allIds),
+  const [{ data: allContents }, { data: allStances }] = await Promise.all([
+    supabase
+      .from("bill_contents")
+      .select("id, bill_id, difficulty_level, title, summary, content")
+      .in("bill_id", allIds),
+    supabase
+      .from("faction_stances")
+      .select(
+        "id, bill_id, faction_id, type, comment, factions(name, display_name)"
+      )
+      .in("bill_id", allIds),
   ]);
-
-  const contentCounts = new Map<string, number>();
-  for (const c of contents ?? []) {
-    contentCounts.set(c.bill_id, (contentCounts.get(c.bill_id) ?? 0) + 1);
-  }
-
-  const stanceCounts = new Map<string, number>();
-  for (const s of stances ?? []) {
-    stanceCounts.set(s.bill_id, (stanceCounts.get(s.bill_id) ?? 0) + 1);
-  }
 
   return duplicateGroups.map(([billNumber, list]) => ({
     billNumber,
     bills: list.map((b) => ({
       ...b,
-      contentsCount: contentCounts.get(b.id) ?? 0,
-      stancesCount: stanceCounts.get(b.id) ?? 0,
+      contents: (allContents ?? [])
+        .filter((c) => c.bill_id === b.id)
+        .map(({ id, difficulty_level, title, summary, content }) => ({
+          id,
+          difficulty_level,
+          title,
+          summary,
+          content,
+        })),
+      stances: (allStances ?? [])
+        .filter((s) => s.bill_id === b.id)
+        .map((s) => {
+          const faction = s.factions as {
+            name: string;
+            display_name: string;
+          } | null;
+          return {
+            id: s.id,
+            faction_id: s.faction_id,
+            faction_name:
+              faction?.display_name ?? faction?.name ?? s.faction_id,
+            type: s.type,
+            comment: s.comment,
+          };
+        }),
     })),
   }));
 }

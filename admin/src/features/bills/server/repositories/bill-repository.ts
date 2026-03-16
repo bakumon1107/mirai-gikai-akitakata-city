@@ -11,7 +11,8 @@ type BillContentInsert =
   Database["public"]["Tables"]["bill_contents"]["Insert"];
 
 export async function findBillsWithCouncilSessions(
-  sortConfig?: BillSortConfig
+  sortConfig?: BillSortConfig,
+  sessionId?: string
 ) {
   const supabase = createAdminClient();
   const field = sortConfig?.field ?? "created_at";
@@ -25,10 +26,13 @@ export async function findBillsWithCouncilSessions(
     orderOptions.nullsFirst = false;
   }
 
-  const { data, error } = await supabase
-    .from("bills")
-    .select("*, council_sessions(name)")
-    .order(field, orderOptions);
+  let query = supabase.from("bills").select("*, council_sessions(name)");
+
+  if (sessionId) {
+    query = query.eq("council_session_id", sessionId);
+  }
+
+  const { data, error } = await query.order(field, orderOptions);
 
   if (error) {
     throw new Error(`Failed to fetch bills: ${error.message}`);

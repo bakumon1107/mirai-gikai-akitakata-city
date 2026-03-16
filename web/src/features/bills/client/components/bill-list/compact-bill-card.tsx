@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
-import { formatDateWithDots } from "@/lib/utils/date";
+import { formatDateJST } from "@/lib/utils/date";
 import type { BillWithContent } from "../../../shared/types";
 import { BillStatusBadge } from "./bill-status-badge";
 
@@ -31,7 +31,7 @@ export function CompactBillCard({ bill, className }: CompactBillCardProps) {
             <BillStatusBadge status={bill.status} className="w-fit" />
             {bill.published_at && (
               <span className="text-xs text-muted-foreground">
-                {formatDateWithDots(bill.published_at)} {statusLabel}
+                {formatDateJST(bill.published_at)} {statusLabel}
               </span>
             )}
           </div>

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { RubySafeLineClamp } from "@/components/ruby-safe-line-clamp";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDateWithDots } from "@/lib/utils/date";
+import { formatDateJST } from "@/lib/utils/date";
 import type { BillWithContent } from "../../../shared/types";
 import { BillStatusBadge } from "./bill-status-badge";
 import { BillTag } from "./bill-tag";
@@ -52,7 +52,7 @@ export function BillCard({ bill }: BillCardProps) {
                 <BillStatusBadge status={bill.status} className="w-fit" />
                 <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                   {bill.published_at && (
-                    <time>{formatDateWithDots(bill.published_at)} 提出</time>
+                    <time>{formatDateJST(bill.published_at)} 提出</time>
                   )}
                 </div>
               </div>

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { formatDateWithDots } from "@/lib/utils/date";
+import { formatDateJST } from "@/lib/utils/date";
 import { getInterviewLPLink } from "@/features/interview-config/shared/utils/interview-links";
 import { BillDetailShareButton } from "../../../client/components/bill-detail/bill-detail-share-button";
 import { BillStatusBadge } from "../../../client/components/bill-list/bill-status-badge";
@@ -48,7 +48,7 @@ export async function BillDetailHeader({
           <BillStatusBadge status={bill.status} className="w-fit" />
           <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             {bill.published_at && (
-              <time>{formatDateWithDots(bill.published_at)} 提出</time>
+              <time>{formatDateJST(bill.published_at)} 提出</time>
             )}
           </div>
         </div>

@@ -6,17 +6,27 @@ import { ResizableBillTable } from "../../../client/components/bill-list/resizab
 import type { BillSortConfig } from "../../../shared/types";
 import { getBills } from "../../loaders/get-bills";
 import { getCouncilSessions } from "../../loaders/get-council-sessions";
+import { getTags } from "../../loaders/get-tags";
+
+type BillListProps = {
+  sortConfig: BillSortConfig;
+  sessionId?: string;
+  tagId?: string;
+  publishStatus?: string;
+  reviewStatus?: string;
+};
 
 export async function BillList({
   sortConfig,
   sessionId,
-}: {
-  sortConfig: BillSortConfig;
-  sessionId?: string;
-}) {
-  const [bills, sessions] = await Promise.all([
-    getBills(sortConfig, sessionId),
+  tagId,
+  publishStatus,
+  reviewStatus,
+}: BillListProps) {
+  const [bills, sessions, tags] = await Promise.all([
+    getBills(sortConfig, { sessionId, tagId, publishStatus, reviewStatus }),
     getCouncilSessions(),
+    getTags(),
   ]);
 
   return (
@@ -42,8 +52,12 @@ export async function BillList({
       <ResizableBillTable
         bills={bills}
         sessions={sessions}
+        tags={tags}
         sortConfig={sortConfig}
         sessionId={sessionId}
+        tagId={tagId}
+        publishStatus={publishStatus}
+        reviewStatus={reviewStatus}
       />
     </div>
   );

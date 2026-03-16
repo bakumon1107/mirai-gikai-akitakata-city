@@ -4,10 +4,17 @@ import type {
 } from "../../shared/types";
 import { findBillsWithCouncilSessions } from "../repositories/bill-repository";
 
+export type BillListFilters = {
+  sessionId?: string;
+  tagId?: string;
+  publishStatus?: string;
+  reviewStatus?: string;
+};
+
 export async function getBills(
   sortConfig?: BillSortConfig,
-  sessionId?: string
+  filters?: BillListFilters
 ): Promise<BillWithCouncilSession[]> {
-  const data = await findBillsWithCouncilSessions(sortConfig, sessionId);
+  const data = await findBillsWithCouncilSessions(sortConfig, filters);
   return data || [];
 }

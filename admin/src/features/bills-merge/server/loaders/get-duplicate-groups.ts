@@ -15,7 +15,7 @@ export type BillInGroup = {
 };
 
 export type DuplicateGroup = {
-  name: string;
+  billNumber: number;
   bills: BillInGroup[];
 };
 
@@ -24,31 +24,34 @@ export async function getDuplicateGroups(): Promise<DuplicateGroup[]> {
 
   const supabase = createAdminClient();
 
-  // Fetch all bills
+  // bill_number が 0 以外のものだけ対象（0 は「未設定」扱い）
   const { data: bills, error } = await supabase
     .from("bills")
-    .select("id, name, status, publish_status, status_note, created_at")
-    .order("name")
+    .select(
+      "id, bill_number, name, status, publish_status, status_note, created_at"
+    )
+    .gt("bill_number", 0)
+    .order("bill_number")
     .order("created_at");
 
   if (error || !bills) return [];
 
-  // Group by name and keep only groups with 2+ bills
-  const grouped = new Map<string, typeof bills>();
+  // Group by bill_number and keep only groups with 2+ bills
+  const grouped = new Map<number, typeof bills>();
   for (const bill of bills) {
-    const list = grouped.get(bill.name) ?? [];
+    const list = grouped.get(bill.bill_number) ?? [];
     list.push(bill);
-    grouped.set(bill.name, list);
+    grouped.set(bill.bill_number, list);
   }
 
-  const duplicateNames = [...grouped.entries()].filter(
+  const duplicateGroups = [...grouped.entries()].filter(
     ([, list]) => list.length >= 2
   );
 
-  if (duplicateNames.length === 0) return [];
+  if (duplicateGroups.length === 0) return [];
 
   // Fetch content and stance counts per bill
-  const allIds = duplicateNames.flatMap(([, list]) => list.map((b) => b.id));
+  const allIds = duplicateGroups.flatMap(([, list]) => list.map((b) => b.id));
 
   const [{ data: contents }, { data: stances }] = await Promise.all([
     supabase.from("bill_contents").select("bill_id").in("bill_id", allIds),
@@ -65,8 +68,8 @@ export async function getDuplicateGroups(): Promise<DuplicateGroup[]> {
     stanceCounts.set(s.bill_id, (stanceCounts.get(s.bill_id) ?? 0) + 1);
   }
 
-  return duplicateNames.map(([name, list]) => ({
-    name,
+  return duplicateGroups.map(([billNumber, list]) => ({
+    billNumber,
     bills: list.map((b) => ({
       ...b,
       contentsCount: contentCounts.get(b.id) ?? 0,

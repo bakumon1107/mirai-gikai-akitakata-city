@@ -1,8 +1,8 @@
+import { collectAskedQuestionIds } from "../../collect-asked-question-ids";
 import {
   buildBulkModeStageGuidance,
   buildTimeManagementGuidance,
 } from "../stage-transition-guidance";
-import { collectAskedQuestionIds } from "../../collect-asked-question-ids";
 import type { InterviewPromptInput, NextQuestionInput } from "./types";
 
 /**

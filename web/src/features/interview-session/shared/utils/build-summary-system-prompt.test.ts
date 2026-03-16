@@ -9,6 +9,7 @@ const makeBill = (
   overrides: Partial<BillWithContent> = {}
 ): BillWithContent => ({
   id: "bill-1",
+  bill_number: 0,
   name: "テスト議案",
   is_featured: false,
   council_session_id: null,

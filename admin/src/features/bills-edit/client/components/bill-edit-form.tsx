@@ -39,6 +39,7 @@ export function BillEditForm({
   const form = useForm<BillUpdateInput>({
     resolver: zodResolver(billUpdateSchema),
     defaultValues: {
+      bill_number: bill.bill_number,
       name: bill.name,
       status: bill.status,
       status_note: bill.status_note,

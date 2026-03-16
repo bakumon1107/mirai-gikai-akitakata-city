@@ -52,7 +52,7 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
       }
 
       toast.success(
-        `「${group.name}」の重複${result.mergedCount}件を統合しました`
+        `第${group.billNumber}号の重複${result.mergedCount}件を統合しました`
       );
 
       if (result.warnings.length > 0) {
@@ -73,7 +73,9 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">{group.name}</CardTitle>
+        <CardTitle className="text-base font-semibold">
+          第{group.billNumber}号
+        </CardTitle>
         <p className="text-sm text-gray-500">{group.bills.length}件の重複</p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -82,6 +84,7 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
             <thead>
               <tr className="border-b bg-gray-50">
                 <th className="w-10 px-3 py-2 text-center">保持</th>
+                <th className="px-3 py-2 text-left">議案名</th>
                 <th className="px-3 py-2 text-left">公開状態</th>
                 <th className="px-3 py-2 text-left">審議状態</th>
                 <th className="px-3 py-2 text-left">コンテンツ</th>
@@ -107,6 +110,9 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
                         onChange={() => setPrimaryId(bill.id)}
                         className="accent-blue-600"
                       />
+                    </td>
+                    <td className="px-3 py-2 max-w-[200px] truncate">
+                      {bill.name}
                     </td>
                     <td className="px-3 py-2">
                       <Badge
@@ -183,9 +189,8 @@ type BillsMergePageProps = {
 export function BillsMergePage({ initialGroups }: BillsMergePageProps) {
   const [groups, setGroups] = useState(initialGroups);
 
-  const handleMerged = (mergedName: string) => {
-    // Remove merged group (or reload; here we just filter it out optimistically)
-    setGroups((prev) => prev.filter((g) => g.name !== mergedName));
+  const handleMerged = (billNumber: number) => {
+    setGroups((prev) => prev.filter((g) => g.billNumber !== billNumber));
   };
 
   if (groups.length === 0) {
@@ -199,16 +204,16 @@ export function BillsMergePage({ initialGroups }: BillsMergePageProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-gray-600">
-        同じ名前の議案が{groups.length}グループ見つかりました。
+        同じ議案番号の議案が{groups.length}グループ見つかりました。
         各グループで「保持」する議案をラジオボタンで選択し、統合を実行してください。
         他の議案のコンテンツ・会派見解は保持する議案に（未設定分のみ）移行後、削除されます。
       </p>
 
       {groups.map((group) => (
         <GroupCard
-          key={group.name}
+          key={group.billNumber}
           group={group}
-          onMerged={() => handleMerged(group.name)}
+          onMerged={() => handleMerged(group.billNumber)}
         />
       ))}
     </div>

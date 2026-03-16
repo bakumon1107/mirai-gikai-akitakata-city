@@ -20,7 +20,9 @@ export default async function BillsMergeRoute() {
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">重複議案の統合</h1>
-        <p className="text-gray-600 mt-1">同名の議案をまとめて整理できます</p>
+        <p className="text-gray-600 mt-1">
+          同じ議案番号の議案をまとめて整理できます（議案番号が0の議案は対象外）
+        </p>
       </div>
 
       <BillsMergePage initialGroups={groups} />

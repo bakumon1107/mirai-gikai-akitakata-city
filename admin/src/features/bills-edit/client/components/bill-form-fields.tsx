@@ -19,9 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { BillStatus } from "@/features/bills/shared/types";
 import type { Committee } from "@/features/committees/shared/types";
 import type { CouncilSession } from "@/features/council-sessions/shared/types";
-import type { BillStatus } from "@/features/bills/shared/types";
 import type { BillCreateInput } from "../../shared/types";
 import { ThumbnailUpload } from "./thumbnail-upload";
 
@@ -49,6 +49,31 @@ export function BillFormFields({
 }: BillFormFieldsProps) {
   return (
     <>
+      <FormField
+        control={control}
+        name="bill_number"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>議案番号 *</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min={0}
+                {...field}
+                value={field.value ?? 0}
+                onChange={(e) => field.onChange(Number(e.target.value))}
+              />
+            </FormControl>
+            <FormDescription>
+              議案番号を入力してください（例: 12 →
+              「第12号」と表示されます）。未設定の場合は 0
+              のままにしてください。
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <FormField
         control={control}
         name="name"

@@ -77,6 +77,7 @@ export type Database = {
       }
       bills: {
         Row: {
+          bill_number: number
           committee_id: string | null
           council_session_id: string | null
           created_at: string
@@ -94,6 +95,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          bill_number?: number
           committee_id?: string | null
           council_session_id?: string | null
           created_at?: string
@@ -111,6 +113,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          bill_number?: number
           committee_id?: string | null
           council_session_id?: string | null
           created_at?: string

@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { GitMerge, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -43,12 +43,20 @@ export async function BillList({ sortConfig }: { sortConfig: BillSortConfig }) {
     <div>
       <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="text-sm text-gray-600">{bills.length}件の議案</div>
-        <Link href="/bills/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-1" />
-            新規作成
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/bills/merge">
+            <Button variant="outline">
+              <GitMerge className="h-4 w-4 mr-1" />
+              重複統合
+            </Button>
+          </Link>
+          <Link href="/bills/new">
+            <Button>
+              <Plus className="h-4 w-4 mr-1" />
+              新規作成
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="rounded-md border bg-white">

@@ -1,13 +1,18 @@
 "use client";
 
+import type { Database } from "@mirai-gikai/supabase";
 import { GitMerge, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { mergeBills } from "../../server/actions/merge-bills";
-import type { DuplicateGroup } from "../../server/loaders/get-duplicate-groups";
+import type {
+  BillInGroup,
+  DuplicateGroup,
+} from "../../server/loaders/get-duplicate-groups";
+
+// ---- ラベル定義 ----
 
 const PUBLISH_STATUS_LABELS: Record<string, string> = {
   draft: "下書き",
@@ -16,12 +21,125 @@ const PUBLISH_STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  submitted: "提出",
+  preparing: "上程前",
+  submitted: "上程済み",
   in_committee: "委員会審査",
   plenary_session: "本会議",
   approved: "可決",
   rejected: "否決",
 };
+
+const DIFFICULTY_LABELS: Record<string, string> = {
+  normal: "普通",
+  hard: "詳しく",
+};
+
+const STANCE_TYPE_LABELS: Record<string, string> = {
+  for: "賛成",
+  against: "反対",
+  neutral: "中立",
+  conditional_for: "条件付き賛成",
+  conditional_against: "条件付き反対",
+};
+
+// ---- スカラーフィールド定義 ----
+
+type ScalarField = {
+  key: string;
+  label: string;
+  format: (bill: BillInGroup) => string;
+};
+
+const SCALAR_FIELDS: ScalarField[] = [
+  { key: "name", label: "議案名", format: (b) => b.name },
+  {
+    key: "status",
+    label: "審議ステータス",
+    format: (b) => STATUS_LABELS[b.status] ?? b.status,
+  },
+  {
+    key: "status_note",
+    label: "ステータス備考",
+    format: (b) => b.status_note || "(なし)",
+  },
+  {
+    key: "publish_status",
+    label: "公開ステータス",
+    format: (b) => PUBLISH_STATUS_LABELS[b.publish_status] ?? b.publish_status,
+  },
+  {
+    key: "published_at",
+    label: "公開日時",
+    format: (b) =>
+      b.published_at
+        ? new Date(b.published_at).toLocaleDateString("ja-JP")
+        : "(未設定)",
+  },
+  {
+    key: "is_featured",
+    label: "注目の議案",
+    format: (b) => (b.is_featured ? "注目" : "通常"),
+  },
+  {
+    key: "committee_id",
+    label: "委員会",
+    format: (b) => (b.committee_id ? "設定あり" : "(未設定)"),
+  },
+  {
+    key: "council_session_id",
+    label: "定例会",
+    format: (b) => (b.council_session_id ? "設定あり" : "(未設定)"),
+  },
+  {
+    key: "thumbnail_url",
+    label: "サムネイル",
+    format: (b) => (b.thumbnail_url ? "設定あり" : "(なし)"),
+  },
+  {
+    key: "share_thumbnail_url",
+    label: "シェア用OGP",
+    format: (b) => (b.share_thumbnail_url ? "設定あり" : "(なし)"),
+  },
+];
+
+// ---- ラジオセル ----
+
+function RadioCell({
+  name,
+  value,
+  checked,
+  onChange,
+  children,
+}: {
+  name: string;
+  value: string;
+  checked: boolean;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <td
+      className={`px-3 py-2 cursor-pointer ${checked ? "bg-blue-50" : "hover:bg-gray-50"}`}
+      onClick={() => onChange(value)}
+      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onChange(value)}
+    >
+      <label className="flex items-start gap-2 cursor-pointer">
+        <input
+          type="radio"
+          name={name}
+          value={value}
+          checked={checked}
+          onChange={() => onChange(value)}
+          className="mt-0.5 accent-blue-600 shrink-0"
+          onClick={(e) => e.stopPropagation()}
+        />
+        <span className="text-sm">{children}</span>
+      </label>
+    </td>
+  );
+}
+
+// ---- GroupCard ----
 
 type GroupCardProps = {
   group: DuplicateGroup;
@@ -29,22 +147,97 @@ type GroupCardProps = {
 };
 
 function GroupCard({ group, onMerged }: GroupCardProps) {
-  const [primaryId, setPrimaryId] = useState<string>(group.bills[0].id);
+  const bills = group.bills;
+
+  // スカラーフィールド: fieldKey -> 選択中のbillId
+  const [fieldChoices, setFieldChoices] = useState<Record<string, string>>(() =>
+    Object.fromEntries(SCALAR_FIELDS.map((f) => [f.key, bills[0].id]))
+  );
+
+  // コンテンツ: difficultyLevel -> 選択中のcontentId
+  const allDifficulties = [
+    ...new Set(bills.flatMap((b) => b.contents.map((c) => c.difficulty_level))),
+  ];
+  const [contentChoices, setContentChoices] = useState<Record<string, string>>(
+    () => {
+      const initial: Record<string, string> = {};
+      for (const dl of allDifficulties) {
+        for (const bill of bills) {
+          const content = bill.contents.find((c) => c.difficulty_level === dl);
+          if (content) {
+            initial[dl] = content.id;
+            break;
+          }
+        }
+      }
+      return initial;
+    }
+  );
+
+  // 会派見解: factionId -> 選択中のstanceId
+  const allFactionIds = [
+    ...new Set(bills.flatMap((b) => b.stances.map((s) => s.faction_id))),
+  ];
+  const [stanceChoices, setStanceChoices] = useState<Record<string, string>>(
+    () => {
+      const initial: Record<string, string> = {};
+      for (const factionId of allFactionIds) {
+        for (const bill of bills) {
+          const stance = bill.stances.find((s) => s.faction_id === factionId);
+          if (stance) {
+            initial[factionId] = stance.id;
+            break;
+          }
+        }
+      }
+      return initial;
+    }
+  );
+
   const [isMerging, setIsMerging] = useState(false);
 
   const handleMerge = async () => {
-    const duplicateIds = group.bills
-      .filter((b) => b.id !== primaryId)
-      .map((b) => b.id);
+    const keepBill = bills[0];
+    const deleteBillIds = bills.slice(1).map((b) => b.id);
 
-    if (duplicateIds.length === 0) {
-      toast.error("統合対象がありません");
-      return;
-    }
+    // スカラーフィールドの値を選択済みbillから収集
+    const getField = <K extends keyof BillInGroup>(key: K): BillInGroup[K] =>
+      (bills.find((b) => b.id === fieldChoices[key]) ?? keepBill)[key];
+
+    const billUpdate = {
+      name: getField("name") as string,
+      status: getField(
+        "status"
+      ) as Database["public"]["Enums"]["bill_status_enum"],
+      status_note: getField("status_note") as string | null,
+      publish_status: getField(
+        "publish_status"
+      ) as Database["public"]["Enums"]["bill_publish_status"],
+      published_at: getField("published_at") as string | null,
+      thumbnail_url: getField("thumbnail_url") as string | null,
+      share_thumbnail_url: getField("share_thumbnail_url") as string | null,
+      is_featured: getField("is_featured") as boolean,
+      committee_id: getField("committee_id") as string | null,
+      council_session_id: getField("council_session_id") as string | null,
+    };
+
+    const contentSelections = Object.entries(contentChoices).map(
+      ([difficultyLevel, contentId]) => ({ contentId, difficultyLevel })
+    );
+
+    const stanceSelections = Object.entries(stanceChoices).map(
+      ([factionId, stanceId]) => ({ stanceId, factionId })
+    );
 
     setIsMerging(true);
     try {
-      const result = await mergeBills({ primaryId, duplicateIds });
+      const result = await mergeBills({
+        keepBillId: keepBill.id,
+        deleteBillIds,
+        billUpdate,
+        contentSelections,
+        stanceSelections,
+      });
 
       if (!result.success) {
         toast.error(result.error ?? "統合に失敗しました");
@@ -54,13 +247,9 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
       toast.success(
         `「${group.billNumber}」の重複${result.mergedCount}件を統合しました`
       );
-
-      if (result.warnings.length > 0) {
-        for (const w of result.warnings) {
-          toast.warning(w);
-        }
+      for (const w of result.warnings) {
+        toast.warning(w);
       }
-
       onMerged();
     } catch (err) {
       console.error("Merge error:", err);
@@ -76,90 +265,216 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
         <CardTitle className="text-base font-semibold">
           {group.billNumber}
         </CardTitle>
-        <p className="text-sm text-gray-500">{group.bills.length}件の重複</p>
+        <p className="text-sm text-gray-500">
+          {bills.length}件の重複 —
+          各項目でどちらの値を保持するか選択してください
+        </p>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="overflow-x-auto rounded-md border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="w-10 px-3 py-2 text-center">保持</th>
-                <th className="px-3 py-2 text-left">議案名</th>
-                <th className="px-3 py-2 text-left">公開状態</th>
-                <th className="px-3 py-2 text-left">審議状態</th>
-                <th className="px-3 py-2 text-left">コンテンツ</th>
-                <th className="px-3 py-2 text-left">会派見解</th>
-                <th className="px-3 py-2 text-left">作成日時</th>
-              </tr>
-            </thead>
-            <tbody>
-              {group.bills.map((bill) => {
-                const isPrimary = bill.id === primaryId;
-                return (
-                  <tr
-                    key={bill.id}
-                    className={`border-b last:border-0 cursor-pointer ${
-                      isPrimary ? "bg-blue-50" : "hover:bg-gray-50"
-                    }`}
-                    onClick={() => setPrimaryId(bill.id)}
-                  >
-                    <td className="px-3 py-2 text-center">
-                      <input
-                        type="radio"
-                        checked={isPrimary}
-                        onChange={() => setPrimaryId(bill.id)}
-                        className="accent-blue-600"
-                      />
+      <CardContent className="space-y-6">
+        {/* ---- スカラーフィールド ---- */}
+        <div>
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            基本情報
+          </p>
+          <div className="overflow-x-auto rounded-md border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="px-3 py-2 text-left w-[120px]">フィールド</th>
+                  {bills.map((b, i) => (
+                    <th
+                      key={b.id}
+                      className="px-3 py-2 text-left font-medium text-blue-700 bg-blue-50"
+                    >
+                      {i === 0 ? "【保持レコード】" : `【削除予定 ${i}】`}
+                      <div className="text-xs font-normal text-gray-500 truncate max-w-[180px]">
+                        {b.name}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {SCALAR_FIELDS.map((field) => (
+                  <tr key={field.key} className="border-b last:border-0">
+                    <td className="px-3 py-2 text-gray-500 text-xs font-medium whitespace-nowrap">
+                      {field.label}
                     </td>
-                    <td className="px-3 py-2 max-w-[200px] truncate">
-                      {bill.name}
-                    </td>
-                    <td className="px-3 py-2">
-                      <Badge
-                        variant={
-                          bill.publish_status === "published"
-                            ? "default"
-                            : "outline"
+                    {bills.map((bill) => (
+                      <RadioCell
+                        key={bill.id}
+                        name={`field-${group.billNumber}-${field.key}`}
+                        value={bill.id}
+                        checked={fieldChoices[field.key] === bill.id}
+                        onChange={(v) =>
+                          setFieldChoices((prev) => ({
+                            ...prev,
+                            [field.key]: v,
+                          }))
                         }
                       >
-                        {PUBLISH_STATUS_LABELS[bill.publish_status] ??
-                          bill.publish_status}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2">
-                      <Badge variant="outline">
-                        {STATUS_LABELS[bill.status] ?? bill.status}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {bill.contentsCount > 0 ? (
-                        <span className="text-green-600 font-medium">
-                          {bill.contentsCount}件
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">なし</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {bill.stancesCount > 0 ? (
-                        <span className="text-green-600 font-medium">
-                          {bill.stancesCount}件
-                        </span>
-                      ) : (
-                        <span className="text-gray-400">なし</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-gray-500 text-xs">
-                      {new Date(bill.created_at).toLocaleString("ja-JP")}
-                    </td>
+                        {field.format(bill)}
+                      </RadioCell>
+                    ))}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        {/* ---- コンテンツ ---- */}
+        {allDifficulties.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              コンテンツ（難易度別）
+            </p>
+            <div className="overflow-x-auto rounded-md border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="px-3 py-2 text-left w-[100px]">難易度</th>
+                    {bills.map((b, i) => (
+                      <th
+                        key={b.id}
+                        className="px-3 py-2 text-left font-medium text-blue-700 bg-blue-50"
+                      >
+                        {i === 0 ? "【保持】" : `【削除予定 ${i}】`}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {allDifficulties.map((dl) => (
+                    <tr key={dl} className="border-b last:border-0">
+                      <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
+                        {DIFFICULTY_LABELS[dl] ?? dl}
+                      </td>
+                      {bills.map((bill) => {
+                        const content = bill.contents.find(
+                          (c) => c.difficulty_level === dl
+                        );
+                        if (!content) {
+                          return (
+                            <td
+                              key={bill.id}
+                              className="px-3 py-2 text-gray-400 text-xs"
+                            >
+                              (なし)
+                            </td>
+                          );
+                        }
+                        return (
+                          <RadioCell
+                            key={bill.id}
+                            name={`content-${group.billNumber}-${dl}`}
+                            value={content.id}
+                            checked={contentChoices[dl] === content.id}
+                            onChange={(v) =>
+                              setContentChoices((prev) => ({
+                                ...prev,
+                                [dl]: v,
+                              }))
+                            }
+                          >
+                            <span className="font-medium">{content.title}</span>
+                            <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
+                              {content.summary}
+                            </span>
+                          </RadioCell>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ---- 会派見解 ---- */}
+        {allFactionIds.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              会派見解（会派別）
+            </p>
+            <div className="overflow-x-auto rounded-md border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="px-3 py-2 text-left w-[120px]">会派</th>
+                    {bills.map((b, i) => (
+                      <th
+                        key={b.id}
+                        className="px-3 py-2 text-left font-medium text-blue-700 bg-blue-50"
+                      >
+                        {i === 0 ? "【保持】" : `【削除予定 ${i}】`}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {allFactionIds.map((factionId) => {
+                    const factionName =
+                      bills
+                        .flatMap((b) => b.stances)
+                        .find((s) => s.faction_id === factionId)
+                        ?.faction_name ?? factionId;
+
+                    return (
+                      <tr key={factionId} className="border-b last:border-0">
+                        <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
+                          {factionName}
+                        </td>
+                        {bills.map((bill) => {
+                          const stance = bill.stances.find(
+                            (s) => s.faction_id === factionId
+                          );
+                          if (!stance) {
+                            return (
+                              <td
+                                key={bill.id}
+                                className="px-3 py-2 text-gray-400 text-xs"
+                              >
+                                (なし)
+                              </td>
+                            );
+                          }
+                          return (
+                            <RadioCell
+                              key={bill.id}
+                              name={`stance-${group.billNumber}-${factionId}`}
+                              value={stance.id}
+                              checked={stanceChoices[factionId] === stance.id}
+                              onChange={(v) =>
+                                setStanceChoices((prev) => ({
+                                  ...prev,
+                                  [factionId]: v,
+                                }))
+                              }
+                            >
+                              <span className="font-medium">
+                                {STANCE_TYPE_LABELS[stance.type] ?? stance.type}
+                              </span>
+                              {stance.comment && (
+                                <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
+                                  {stance.comment}
+                                </span>
+                              )}
+                            </RadioCell>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ---- 統合ボタン ---- */}
+        <div className="flex items-center gap-3 pt-2 border-t">
           <Button
             onClick={handleMerge}
             disabled={isMerging}
@@ -171,16 +486,18 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
             ) : (
               <GitMerge className="mr-2 h-4 w-4" />
             )}
-            ラジオボタン選択の議案に統合（他を削除）
+            選択内容で統合実行
           </Button>
           <p className="text-xs text-gray-500">
-            コンテンツ・会派見解は保持する議案に未設定分のみ移行されます
+            「保持レコード」のIDが残り、他は削除されます。タグは全議案の和集合になります。
           </p>
         </div>
       </CardContent>
     </Card>
   );
 }
+
+// ---- BillsMergePage ----
 
 type BillsMergePageProps = {
   initialGroups: DuplicateGroup[];
@@ -204,9 +521,8 @@ export function BillsMergePage({ initialGroups }: BillsMergePageProps) {
   return (
     <div className="space-y-6">
       <p className="text-sm text-gray-600">
-        同じ議案番号の議案が{groups.length}グループ見つかりました。
-        各グループで「保持」する議案をラジオボタンで選択し、統合を実行してください。
-        他の議案のコンテンツ・会派見解は保持する議案に（未設定分のみ）移行後、削除されます。
+        同じ議案番号の議案が{groups.length}
+        グループ見つかりました。各項目ごとにどちらの値を保持するか選択し、統合を実行してください。
       </p>
 
       {groups.map((group) => (

@@ -1,12 +1,34 @@
 "use server";
 
+import type { Database } from "@mirai-gikai/supabase";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 
+type ScalarUpdate = {
+  name: string;
+  status: Database["public"]["Enums"]["bill_status_enum"];
+  status_note: string | null;
+  publish_status: Database["public"]["Enums"]["bill_publish_status"];
+  published_at: string | null;
+  thumbnail_url: string | null;
+  share_thumbnail_url: string | null;
+  is_featured: boolean;
+  committee_id: string | null;
+  council_session_id: string | null;
+};
+
 type MergeBillsInput = {
-  primaryId: string;
-  duplicateIds: string[];
+  // 残すbill ID（このレコードが生き残る）
+  keepBillId: string;
+  // 削除するbill ID一覧
+  deleteBillIds: string[];
+  // 保持するスカラーフィールドの値
+  billUpdate: ScalarUpdate;
+  // 難易度ごとに保持するコンテンツID（どのbillのものでも可）
+  contentSelections: Array<{ contentId: string; difficultyLevel: string }>;
+  // 会派ごとに保持する会派見解ID（どのbillのものでも可）
+  stanceSelections: Array<{ stanceId: string; factionId: string }>;
 };
 
 type MergeResult = {
@@ -22,119 +44,126 @@ export async function mergeBills(input: MergeBillsInput): Promise<MergeResult> {
 
     const supabase = createAdminClient();
     const warnings: string[] = [];
-    let mergedCount = 0;
+    const allBillIds = [input.keepBillId, ...input.deleteBillIds];
 
-    // Fetch primary bill's existing difficulty levels and faction ids
-    const [
-      { data: primaryContents },
-      { data: primaryStances },
-      { data: primaryTags },
-    ] = await Promise.all([
-      supabase
-        .from("bill_contents")
-        .select("difficulty_level")
-        .eq("bill_id", input.primaryId),
-      supabase
-        .from("faction_stances")
-        .select("faction_id")
-        .eq("bill_id", input.primaryId),
-      supabase
-        .from("bills_tags")
-        .select("tag_id")
-        .eq("bill_id", input.primaryId),
-    ]);
+    // 1. スカラーフィールドを更新
+    const { error: updateError } = await supabase
+      .from("bills")
+      .update({ ...input.billUpdate, updated_at: new Date().toISOString() })
+      .eq("id", input.keepBillId);
+    if (updateError)
+      throw new Error(`フィールド更新に失敗: ${updateError.message}`);
 
-    const primaryDifficultyLevels = new Set(
-      (primaryContents ?? []).map((c) => c.difficulty_level)
+    // 2. bill_contents の処理（2パスで実行）
+    const { data: allContents } = await supabase
+      .from("bill_contents")
+      .select("id, bill_id, difficulty_level")
+      .in("bill_id", allBillIds);
+
+    const selectedContentIds = new Set(
+      input.contentSelections.map((s) => s.contentId)
     );
-    const primaryFactionIds = new Set(
-      (primaryStances ?? []).map((s) => s.faction_id)
+
+    // Pass 1: 非選択コンテンツを削除（keepBillId側の競合を先に解消）
+    for (const content of allContents ?? []) {
+      if (!selectedContentIds.has(content.id)) {
+        const { error } = await supabase
+          .from("bill_contents")
+          .delete()
+          .eq("id", content.id);
+        if (error)
+          warnings.push(
+            `コンテンツ削除に失敗(${content.difficulty_level}): ${error.message}`
+          );
+      }
+    }
+
+    // Pass 2: 選択コンテンツを keepBillId に移動
+    for (const content of allContents ?? []) {
+      if (
+        selectedContentIds.has(content.id) &&
+        content.bill_id !== input.keepBillId
+      ) {
+        const { error } = await supabase
+          .from("bill_contents")
+          .update({ bill_id: input.keepBillId })
+          .eq("id", content.id);
+        if (error)
+          warnings.push(
+            `コンテンツ移行に失敗(${content.difficulty_level}): ${error.message}`
+          );
+      }
+    }
+
+    // 3. faction_stances の処理（2パスで実行）
+    const { data: allStances } = await supabase
+      .from("faction_stances")
+      .select("id, bill_id, faction_id")
+      .in("bill_id", allBillIds);
+
+    const selectedStanceIds = new Set(
+      input.stanceSelections.map((s) => s.stanceId)
     );
-    const primaryTagIds = new Set((primaryTags ?? []).map((t) => t.tag_id));
 
-    for (const dupId of input.duplicateIds) {
-      // Move bill_contents not already in primary
-      const { data: dupContents } = await supabase
-        .from("bill_contents")
-        .select("id, difficulty_level")
-        .eq("bill_id", dupId);
-
-      for (const content of dupContents ?? []) {
-        if (!primaryDifficultyLevels.has(content.difficulty_level)) {
-          const { error } = await supabase
-            .from("bill_contents")
-            .update({ bill_id: input.primaryId })
-            .eq("id", content.id);
-
-          if (error) {
-            warnings.push(
-              `コンテンツ(${content.difficulty_level})の移行に失敗: ${error.message}`
-            );
-          } else {
-            primaryDifficultyLevels.add(content.difficulty_level);
-          }
-        }
+    // Pass 1: 非選択スタンスを削除
+    for (const stance of allStances ?? []) {
+      if (!selectedStanceIds.has(stance.id)) {
+        const { error } = await supabase
+          .from("faction_stances")
+          .delete()
+          .eq("id", stance.id);
+        if (error) warnings.push(`会派見解削除に失敗: ${error.message}`);
       }
+    }
 
-      // Move faction_stances not already in primary
-      const { data: dupStances } = await supabase
-        .from("faction_stances")
-        .select("id, faction_id")
-        .eq("bill_id", dupId);
-
-      for (const stance of dupStances ?? []) {
-        if (!primaryFactionIds.has(stance.faction_id)) {
-          const { error } = await supabase
-            .from("faction_stances")
-            .update({ bill_id: input.primaryId })
-            .eq("id", stance.id);
-
-          if (error) {
-            warnings.push(`会派スタンスの移行に失敗: ${error.message}`);
-          } else {
-            primaryFactionIds.add(stance.faction_id);
-          }
-        }
+    // Pass 2: 選択スタンスを keepBillId に移動
+    for (const stance of allStances ?? []) {
+      if (
+        selectedStanceIds.has(stance.id) &&
+        stance.bill_id !== input.keepBillId
+      ) {
+        const { error } = await supabase
+          .from("faction_stances")
+          .update({ bill_id: input.keepBillId })
+          .eq("id", stance.id);
+        if (error) warnings.push(`会派見解移行に失敗: ${error.message}`);
       }
+    }
 
-      // Move bills_tags not already in primary
-      // bills_tags has composite PK (bill_id, tag_id), so INSERT + DELETE
+    // 4. タグはすべてのbillの和集合を keepBillId に設定
+    const { data: existingTags } = await supabase
+      .from("bills_tags")
+      .select("tag_id")
+      .eq("bill_id", input.keepBillId);
+    const existingTagIds = new Set((existingTags ?? []).map((t) => t.tag_id));
+
+    for (const deleteBillId of input.deleteBillIds) {
       const { data: dupTags } = await supabase
         .from("bills_tags")
         .select("tag_id")
-        .eq("bill_id", dupId);
-
+        .eq("bill_id", deleteBillId);
       for (const tag of dupTags ?? []) {
-        if (!primaryTagIds.has(tag.tag_id)) {
-          const { error } = await supabase
+        if (!existingTagIds.has(tag.tag_id)) {
+          await supabase
             .from("bills_tags")
-            .insert({ bill_id: input.primaryId, tag_id: tag.tag_id });
-
-          if (error) {
-            warnings.push(`タグの移行に失敗: ${error.message}`);
-          } else {
-            primaryTagIds.add(tag.tag_id);
-          }
+            .insert({ bill_id: input.keepBillId, tag_id: tag.tag_id });
+          existingTagIds.add(tag.tag_id);
         }
       }
-
-      // Delete duplicate bill (ON DELETE CASCADE handles remaining relations)
-      const { error: deleteError } = await supabase
-        .from("bills")
-        .delete()
-        .eq("id", dupId);
-
-      if (deleteError) {
-        warnings.push(`議案(${dupId})の削除に失敗: ${deleteError.message}`);
-      } else {
-        mergedCount++;
-      }
     }
+
+    // 5. 重複議案を削除（ON DELETE CASCADE で残関連データも自動削除）
+    const { error: deleteError } = await supabase
+      .from("bills")
+      .delete()
+      .in("id", input.deleteBillIds);
+    if (deleteError)
+      throw new Error(`重複議案の削除に失敗: ${deleteError.message}`);
 
     revalidatePath("/bills");
     revalidatePath("/bills/merge");
 
-    return { success: true, mergedCount, warnings };
+    return { success: true, mergedCount: input.deleteBillIds.length, warnings };
   } catch (error) {
     console.error("Merge bills error:", error);
     return {

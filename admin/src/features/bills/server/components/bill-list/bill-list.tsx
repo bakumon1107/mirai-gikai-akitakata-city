@@ -63,6 +63,7 @@ export async function BillList({ sortConfig }: { sortConfig: BillSortConfig }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[100px]">議案番号</TableHead>
               <TableHead>議案名</TableHead>
               <TableHead>定例会</TableHead>
               <SortableTableHead
@@ -103,6 +104,9 @@ export async function BillList({ sortConfig }: { sortConfig: BillSortConfig }) {
 function BillRow({ bill }: { bill: BillWithCouncilSession }) {
   return (
     <TableRow>
+      <TableCell className="text-sm text-gray-600 whitespace-nowrap">
+        {bill.bill_number || "-"}
+      </TableCell>
       <TableCell className="max-w-[400px]">
         <Link
           href={`/bills/${bill.id}/edit`}

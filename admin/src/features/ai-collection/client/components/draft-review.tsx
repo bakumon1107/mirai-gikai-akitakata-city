@@ -29,7 +29,7 @@ import type {
 
 type DraftReviewProps = {
   run: CollectionRun;
-  existingBillNames: string[];
+  existingBillNumbers: string[];
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -154,11 +154,15 @@ function buildInitialOverride(diffs: DiffItem[]): OverrideState {
   };
 }
 
-export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
-  const existingSet = new Set(existingBillNames);
+export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
+  const existingSet = new Set(existingBillNumbers);
 
-  const newBills = run.bills.filter((b) => !existingSet.has(b.title));
-  const existingBills = run.bills.filter((b) => existingSet.has(b.title));
+  const newBills = run.bills.filter(
+    (b) => !b.billNumber || !existingSet.has(b.billNumber)
+  );
+  const existingBills = run.bills.filter(
+    (b) => b.billNumber != null && existingSet.has(b.billNumber)
+  );
 
   const [selectedNewIds, setSelectedNewIds] = useState<Set<string>>(
     new Set(newBills.map((b) => b.id))
@@ -484,7 +488,8 @@ export function DraftReview({ run, existingBillNames }: DraftReviewProps) {
             </thead>
             <tbody>
               {run.bills.map((bill) => {
-                const isExisting = existingSet.has(bill.title);
+                const isExisting =
+                  bill.billNumber != null && existingSet.has(bill.billNumber);
                 const isExpanded = expandedIds.has(bill.id);
                 const diffs = diffsMap.get(bill.id) ?? [];
                 const override = overrides.get(bill.id);

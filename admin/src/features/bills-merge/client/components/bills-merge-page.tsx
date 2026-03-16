@@ -52,7 +52,7 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
       }
 
       toast.success(
-        `第${group.billNumber}号の重複${result.mergedCount}件を統合しました`
+        `「${group.billNumber}」の重複${result.mergedCount}件を統合しました`
       );
 
       if (result.warnings.length > 0) {
@@ -74,7 +74,7 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base font-semibold">
-          第{group.billNumber}号
+          {group.billNumber}
         </CardTitle>
         <p className="text-sm text-gray-500">{group.bills.length}件の重複</p>
       </CardHeader>
@@ -189,7 +189,7 @@ type BillsMergePageProps = {
 export function BillsMergePage({ initialGroups }: BillsMergePageProps) {
   const [groups, setGroups] = useState(initialGroups);
 
-  const handleMerged = (billNumber: number) => {
+  const handleMerged = (billNumber: string) => {
     setGroups((prev) => prev.filter((g) => g.billNumber !== billNumber));
   };
 

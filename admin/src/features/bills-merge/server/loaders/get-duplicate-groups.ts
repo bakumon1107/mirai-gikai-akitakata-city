@@ -15,7 +15,7 @@ export type BillInGroup = {
 };
 
 export type DuplicateGroup = {
-  billNumber: number;
+  billNumber: string;
   bills: BillInGroup[];
 };
 
@@ -24,20 +24,20 @@ export async function getDuplicateGroups(): Promise<DuplicateGroup[]> {
 
   const supabase = createAdminClient();
 
-  // bill_number が 0 以外のものだけ対象（0 は「未設定」扱い）
+  // bill_number が空文字以外のものだけ対象（空文字は「未設定」扱い）
   const { data: bills, error } = await supabase
     .from("bills")
     .select(
       "id, bill_number, name, status, publish_status, status_note, created_at"
     )
-    .gt("bill_number", 0)
+    .neq("bill_number", "")
     .order("bill_number")
     .order("created_at");
 
   if (error || !bills) return [];
 
   // Group by bill_number and keep only groups with 2+ bills
-  const grouped = new Map<number, typeof bills>();
+  const grouped = new Map<string, typeof bills>();
   for (const bill of bills) {
     const list = grouped.get(bill.bill_number) ?? [];
     list.push(bill);

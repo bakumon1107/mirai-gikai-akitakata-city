@@ -14,7 +14,7 @@ export const allBillStatuses: BillStatusEnum[] = [
 
 const baseBill: BillWithContent = {
   id: "mock-bill-001",
-  bill_number: 0,
+  bill_number: "",
   name: "サンプル議案",
   status: "submitted",
   is_featured: false,

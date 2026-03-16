@@ -32,7 +32,7 @@ export function BillCreateForm({
   const form = useForm<BillCreateInput>({
     resolver: zodResolver(billCreateSchema),
     defaultValues: {
-      bill_number: 0,
+      bill_number: "",
       name: "",
       status: "preparing",
       status_note: null,

@@ -11,10 +11,7 @@ export type BillPublishStatus = "draft" | "published" | "coming_soon";
 
 // 共通のバリデーションスキーマ
 const billBaseSchema = z.object({
-  bill_number: z
-    .number()
-    .int("議案番号は整数で入力してください")
-    .min(0, "議案番号は0以上で入力してください"),
+  bill_number: z.string().max(50, "議案番号は50文字以内で入力してください"),
   name: z
     .string()
     .min(1, "議案名は必須です")

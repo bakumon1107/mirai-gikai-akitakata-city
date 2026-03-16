@@ -1,5 +1,5 @@
 import { AiCollectionPage } from "@/features/ai-collection/client/components/ai-collection-page";
-import { getExistingBillNames } from "@/features/ai-collection/server/loaders/get-existing-bill-names";
+import { getExistingBillNumbers } from "@/features/ai-collection/server/loaders/get-existing-bill-names";
 import { getRuns } from "@/features/ai-collection/server/loaders/get-runs";
 
 export default async function AiCollectionRoute() {
@@ -15,9 +15,9 @@ export default async function AiCollectionRoute() {
     );
   }
 
-  const [runs, existingBillNames] = await Promise.all([
+  const [runs, existingBillNumbers] = await Promise.all([
     getRuns(),
-    getExistingBillNames(),
+    getExistingBillNumbers(),
   ]);
 
   return (
@@ -25,7 +25,7 @@ export default async function AiCollectionRoute() {
       <h1 className="mb-8 text-2xl font-bold">AI情報収集</h1>
       <AiCollectionPage
         initialRuns={runs}
-        existingBillNames={existingBillNames}
+        existingBillNumbers={existingBillNumbers}
       />
     </div>
   );

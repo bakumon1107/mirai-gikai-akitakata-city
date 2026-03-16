@@ -77,8 +77,9 @@ export async function applyDrafts(
         .from("bills")
         .insert({
           name: draft.title,
+          bill_number: draft.billNumber ?? "",
           status: mapBillStatus(draft.status),
-          published_at: null,
+          published_at: run.startDate,
           is_featured: false,
           publish_status: "draft",
         })
@@ -131,7 +132,7 @@ export async function applyDrafts(
       const { data: existing } = await supabase
         .from("bills")
         .select("id")
-        .eq("name", draft.title)
+        .eq("bill_number", draft.billNumber ?? "")
         .maybeSingle();
 
       if (!existing) {

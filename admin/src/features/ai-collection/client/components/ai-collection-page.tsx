@@ -11,7 +11,7 @@ import type { CollectionRun } from "../../shared/types";
 
 type AiCollectionPageProps = {
   initialRuns: CollectionRun[];
-  existingBillNames: string[];
+  existingBillNumbers: string[];
 };
 
 const POLL_INTERVAL_MS = 3000;
@@ -39,7 +39,7 @@ function formatElapsed(seconds: number): string {
 
 export function AiCollectionPage({
   initialRuns,
-  existingBillNames,
+  existingBillNumbers,
 }: AiCollectionPageProps) {
   const [runs, setRuns] = useState<CollectionRun[]>(initialRuns);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
@@ -229,7 +229,7 @@ export function AiCollectionPage({
           {activeRun.status === "completed" && (
             <DraftReview
               run={activeRun}
-              existingBillNames={existingBillNames}
+              existingBillNumbers={existingBillNumbers}
             />
           )}
         </section>

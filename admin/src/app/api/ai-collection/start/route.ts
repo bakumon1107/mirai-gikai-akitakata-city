@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildPrompt } from "@/features/ai-collection/server/utils/build-prompt";
+import { getExistingBillNumbers } from "@/features/ai-collection/server/loaders/get-existing-bill-names";
 import {
   ClaudeUsageLimitError,
   cleanupTempFile,
@@ -51,7 +52,8 @@ export async function POST(request: Request) {
     await saveRun(initialRun);
 
     // Fire-and-forget: run Claude in background
-    runClaudeInBackground(runId, startDate, endDate);
+    const existingBillNumbers = await getExistingBillNumbers();
+    runClaudeInBackground(runId, startDate, endDate, existingBillNumbers);
 
     return NextResponse.json({ runId });
   } catch (error) {
@@ -66,12 +68,18 @@ export async function POST(request: Request) {
 async function runClaudeInBackground(
   runId: string,
   startDate: string,
-  endDate: string
+  endDate: string,
+  existingBillNumbers: string[]
 ): Promise<void> {
   const outputFilePath = getTempOutputPath(runId);
 
   try {
-    const prompt = buildPrompt(startDate, endDate, outputFilePath);
+    const prompt = buildPrompt(
+      startDate,
+      endDate,
+      outputFilePath,
+      existingBillNumbers
+    );
 
     // Claude を実行し、結果を outputFilePath に書き込ませる
     await executeClaudeToFile(prompt, outputFilePath);

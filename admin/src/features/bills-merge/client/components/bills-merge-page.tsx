@@ -295,29 +295,46 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
                 </tr>
               </thead>
               <tbody>
-                {SCALAR_FIELDS.map((field) => (
-                  <tr key={field.key} className="border-b last:border-0">
-                    <td className="px-3 py-2 text-gray-500 text-xs font-medium whitespace-nowrap">
-                      {field.label}
-                    </td>
-                    {bills.map((bill) => (
-                      <RadioCell
-                        key={bill.id}
-                        name={`field-${group.billNumber}-${field.key}`}
-                        value={bill.id}
-                        checked={fieldChoices[field.key] === bill.id}
-                        onChange={(v) =>
-                          setFieldChoices((prev) => ({
-                            ...prev,
-                            [field.key]: v,
-                          }))
-                        }
-                      >
-                        {field.format(bill)}
-                      </RadioCell>
-                    ))}
-                  </tr>
-                ))}
+                {SCALAR_FIELDS.map((field) => {
+                  const allSame = bills.every(
+                    (b) => field.format(b) === field.format(bills[0])
+                  );
+                  return (
+                    <tr key={field.key} className="border-b last:border-0">
+                      <td className="px-3 py-2 text-gray-500 text-xs font-medium whitespace-nowrap">
+                        {field.label}
+                      </td>
+                      {allSame ? (
+                        <td
+                          colSpan={bills.length}
+                          className="px-3 py-2 text-sm text-gray-700"
+                        >
+                          {field.format(bills[0])}
+                          <span className="ml-2 text-xs text-gray-400">
+                            （全議案同一）
+                          </span>
+                        </td>
+                      ) : (
+                        bills.map((bill) => (
+                          <RadioCell
+                            key={bill.id}
+                            name={`field-${group.billNumber}-${field.key}`}
+                            value={bill.id}
+                            checked={fieldChoices[field.key] === bill.id}
+                            onChange={(v) =>
+                              setFieldChoices((prev) => ({
+                                ...prev,
+                                [field.key]: v,
+                              }))
+                            }
+                          >
+                            {field.format(bill)}
+                          </RadioCell>
+                        ))
+                      )}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -345,47 +362,82 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {allDifficulties.map((dl) => (
-                    <tr key={dl} className="border-b last:border-0">
-                      <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
-                        {DIFFICULTY_LABELS[dl] ?? dl}
-                      </td>
-                      {bills.map((bill) => {
-                        const content = bill.contents.find(
-                          (c) => c.difficulty_level === dl
-                        );
-                        if (!content) {
-                          return (
-                            <td
-                              key={bill.id}
-                              className="px-3 py-2 text-gray-400 text-xs"
-                            >
-                              (なし)
-                            </td>
-                          );
-                        }
-                        return (
-                          <RadioCell
-                            key={bill.id}
-                            name={`content-${group.billNumber}-${dl}`}
-                            value={content.id}
-                            checked={contentChoices[dl] === content.id}
-                            onChange={(v) =>
-                              setContentChoices((prev) => ({
-                                ...prev,
-                                [dl]: v,
-                              }))
-                            }
+                  {allDifficulties.map((dl) => {
+                    const contentsForDl = bills.map((bill) =>
+                      bill.contents.find((c) => c.difficulty_level === dl)
+                    );
+                    const allBillsHaveContent = contentsForDl.every(
+                      (c) => c != null
+                    );
+                    const allSame =
+                      allBillsHaveContent &&
+                      contentsForDl.every(
+                        (c) =>
+                          c?.title === contentsForDl[0]?.title &&
+                          c?.summary === contentsForDl[0]?.summary
+                      );
+
+                    return (
+                      <tr key={dl} className="border-b last:border-0">
+                        <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
+                          {DIFFICULTY_LABELS[dl] ?? dl}
+                        </td>
+                        {allSame ? (
+                          <td
+                            colSpan={bills.length}
+                            className="px-3 py-2 text-sm"
                           >
-                            <span className="font-medium">{content.title}</span>
-                            <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
-                              {content.summary}
+                            <span className="font-medium">
+                              {contentsForDl[0]?.title}
                             </span>
-                          </RadioCell>
-                        );
-                      })}
-                    </tr>
-                  ))}
+                            <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
+                              {contentsForDl[0]?.summary}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              （全議案同一）
+                            </span>
+                          </td>
+                        ) : (
+                          bills.map((bill) => {
+                            const content = bill.contents.find(
+                              (c) => c.difficulty_level === dl
+                            );
+                            if (!content) {
+                              return (
+                                <td
+                                  key={bill.id}
+                                  className="px-3 py-2 text-gray-400 text-xs"
+                                >
+                                  (なし)
+                                </td>
+                              );
+                            }
+                            return (
+                              <RadioCell
+                                key={bill.id}
+                                name={`content-${group.billNumber}-${dl}`}
+                                value={content.id}
+                                checked={contentChoices[dl] === content.id}
+                                onChange={(v) =>
+                                  setContentChoices((prev) => ({
+                                    ...prev,
+                                    [dl]: v,
+                                  }))
+                                }
+                              >
+                                <span className="font-medium">
+                                  {content.title}
+                                </span>
+                                <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
+                                  {content.summary}
+                                </span>
+                              </RadioCell>
+                            );
+                          })
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -421,49 +473,85 @@ function GroupCard({ group, onMerged }: GroupCardProps) {
                         .find((s) => s.faction_id === factionId)
                         ?.faction_name ?? factionId;
 
+                    const stancesForFaction = bills.map((bill) =>
+                      bill.stances.find((s) => s.faction_id === factionId)
+                    );
+                    const allBillsHaveStance = stancesForFaction.every(
+                      (s) => s != null
+                    );
+                    const allSame =
+                      allBillsHaveStance &&
+                      stancesForFaction.every(
+                        (s) =>
+                          s?.type === stancesForFaction[0]?.type &&
+                          s?.comment === stancesForFaction[0]?.comment
+                      );
+
                     return (
                       <tr key={factionId} className="border-b last:border-0">
                         <td className="px-3 py-2 text-xs font-medium text-gray-500 whitespace-nowrap">
                           {factionName}
                         </td>
-                        {bills.map((bill) => {
-                          const stance = bill.stances.find(
-                            (s) => s.faction_id === factionId
-                          );
-                          if (!stance) {
-                            return (
-                              <td
-                                key={bill.id}
-                                className="px-3 py-2 text-gray-400 text-xs"
-                              >
-                                (なし)
-                              </td>
-                            );
-                          }
-                          return (
-                            <RadioCell
-                              key={bill.id}
-                              name={`stance-${group.billNumber}-${factionId}`}
-                              value={stance.id}
-                              checked={stanceChoices[factionId] === stance.id}
-                              onChange={(v) =>
-                                setStanceChoices((prev) => ({
-                                  ...prev,
-                                  [factionId]: v,
-                                }))
-                              }
-                            >
-                              <span className="font-medium">
-                                {STANCE_TYPE_LABELS[stance.type] ?? stance.type}
+                        {allSame ? (
+                          <td
+                            colSpan={bills.length}
+                            className="px-3 py-2 text-sm"
+                          >
+                            <span className="font-medium">
+                              {STANCE_TYPE_LABELS[
+                                stancesForFaction[0]?.type ?? ""
+                              ] ?? stancesForFaction[0]?.type}
+                            </span>
+                            {stancesForFaction[0]?.comment && (
+                              <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
+                                {stancesForFaction[0].comment}
                               </span>
-                              {stance.comment && (
-                                <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
-                                  {stance.comment}
+                            )}
+                            <span className="text-xs text-gray-400">
+                              （全議案同一）
+                            </span>
+                          </td>
+                        ) : (
+                          bills.map((bill) => {
+                            const stance = bill.stances.find(
+                              (s) => s.faction_id === factionId
+                            );
+                            if (!stance) {
+                              return (
+                                <td
+                                  key={bill.id}
+                                  className="px-3 py-2 text-gray-400 text-xs"
+                                >
+                                  (なし)
+                                </td>
+                              );
+                            }
+                            return (
+                              <RadioCell
+                                key={bill.id}
+                                name={`stance-${group.billNumber}-${factionId}`}
+                                value={stance.id}
+                                checked={stanceChoices[factionId] === stance.id}
+                                onChange={(v) =>
+                                  setStanceChoices((prev) => ({
+                                    ...prev,
+                                    [factionId]: v,
+                                  }))
+                                }
+                              >
+                                <span className="font-medium">
+                                  {STANCE_TYPE_LABELS[stance.type] ??
+                                    stance.type}
                                 </span>
-                              )}
-                            </RadioCell>
-                          );
-                        })}
+                                {stance.comment && (
+                                  <span className="block text-xs text-gray-500 line-clamp-2 mt-0.5">
+                                    {stance.comment}
+                                  </span>
+                                )}
+                              </RadioCell>
+                            );
+                          })
+                        )}
                       </tr>
                     );
                   })}

@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { formatDate, formatDateWithDots, getJapanTime } from "./date";
+import {
+  formatDate,
+  formatDateJST,
+  formatDateWithDots,
+  getJapanTime,
+} from "./date";
 
 describe("formatDate", () => {
   it("formats a date string in Japanese locale", () => {
@@ -27,6 +32,21 @@ describe("formatDateWithDots", () => {
 
   it("formats double-digit month and day", () => {
     expect(formatDateWithDots("2025-12-31")).toBe("2025.12.31");
+  });
+});
+
+describe("formatDateJST", () => {
+  it("formats a date in JST with slash separator and zero-padding", () => {
+    expect(formatDateJST("2026-02-12T00:00:00+09:00")).toBe("2026/02/12");
+  });
+
+  it("converts UTC midnight to JST next day correctly", () => {
+    // 2026-02-11T15:00:00Z = 2026-02-12T00:00:00+09:00
+    expect(formatDateJST("2026-02-11T15:00:00Z")).toBe("2026/02/12");
+  });
+
+  it("zero-pads single-digit month and day", () => {
+    expect(formatDateJST("2025-01-05T12:00:00+09:00")).toBe("2025/01/05");
   });
 });
 

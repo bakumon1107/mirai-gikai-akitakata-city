@@ -23,7 +23,8 @@ export type BillSortField =
   | "status_order"
   | "publish_status_order"
   | "bill_number"
-  | "name";
+  | "name"
+  | "council_session";
 
 export type SortOrder = "asc" | "desc";
 

@@ -3,12 +3,15 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BillActionsMenu } from "../bill-actions-menu/bill-actions-menu";
 import { PreviewButton } from "./preview-button";
 import { PublishStatusBadge } from "./publish-status-badge";
+import { PublishStatusFilter } from "./publish-status-filter";
+import { ReviewStatusFilter } from "./review-status-filter";
 import { SessionFilter } from "./session-filter";
+import { TagFilter } from "./tag-filter";
 import { ViewButton } from "./view-button";
 import { BILL_STATUS_CONFIG } from "../../../shared/constants/bill-config";
 import type {
@@ -20,6 +23,7 @@ import type {
 import { getBillStatusLabel } from "../../../shared/types";
 
 type Session = { id: string; name: string };
+type Tag = { id: string; label: string };
 
 type ColumnConfig = {
   key: string;
@@ -103,13 +107,21 @@ function SortableHeadButton({
 export function ResizableBillTable({
   bills,
   sessions,
+  tags,
   sortConfig,
   sessionId,
+  tagId,
+  publishStatus,
+  reviewStatus,
 }: {
   bills: BillWithCouncilSession[];
   sessions: Session[];
+  tags: Tag[];
   sortConfig: BillSortConfig;
   sessionId?: string;
+  tagId?: string;
+  publishStatus?: string;
+  reviewStatus?: string;
 }) {
   const [widths, setWidths] = useState(() =>
     COLUMNS.map((c) => c.defaultWidth)
@@ -145,8 +157,11 @@ export function ResizableBillTable({
 
   return (
     <div>
-      <div className="mb-3">
+      <div className="mb-3 space-y-2">
         <SessionFilter sessions={sessions} currentSessionId={sessionId} />
+        <TagFilter tags={tags} currentTagId={tagId} />
+        <PublishStatusFilter currentPublishStatus={publishStatus} />
+        <ReviewStatusFilter currentReviewStatus={reviewStatus} />
       </div>
 
       <div className="rounded-md border bg-white overflow-x-auto">
@@ -180,7 +195,14 @@ export function ResizableBillTable({
                       議案名
                     </SortableHeadButton>
                   )}
-                  {col.key === "council_session" && "定例会"}
+                  {col.key === "council_session" && (
+                    <SortableHeadButton
+                      field="council_session"
+                      sortConfig={sortConfig}
+                    >
+                      定例会
+                    </SortableHeadButton>
+                  )}
                   {col.key === "publish_status" && (
                     <SortableHeadButton
                       field="publish_status_order"

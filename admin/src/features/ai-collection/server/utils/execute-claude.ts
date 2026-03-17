@@ -48,7 +48,7 @@ type ClaudeJsonResponse = {
 };
 
 /** Claude CLI 実行のタイムアウト（ms）。WebSearch を伴うため長めに設定 */
-const CLAUDE_TIMEOUT_MS = 15 * 60 * 1000; // 15分
+const CLAUDE_TIMEOUT_MS = 30 * 60 * 1000; // 30分
 
 /** Claude を実行し、結果JSONが書き込まれた一時ファイルのパスを返す */
 export function executeClaudeToFile(

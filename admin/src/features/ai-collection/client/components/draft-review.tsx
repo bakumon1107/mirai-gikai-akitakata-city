@@ -396,7 +396,7 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
     }
   };
 
-  if (run.bills.length === 0) {
+  if (run.bills.length === 0 && run.factionStances.length === 0) {
     return (
       <p className="text-sm text-gray-500">収集された議案はありません。</p>
     );
@@ -463,225 +463,229 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       )}
 
       {/* Bills table */}
-      <div>
-        <h3 className="mb-3 text-base font-semibold">
-          議案一覧（{run.bills.length}件）
-          {existingBills.length > 0 && (
-            <span className="ml-2 text-sm font-normal text-amber-600">
-              うち{existingBills.length}件は既存議案
-            </span>
-          )}
-        </h3>
-        <div className="overflow-x-auto rounded-md border">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-gray-50">
-                <th className="w-10 px-3 py-2 text-center">選択</th>
-                <th className="px-3 py-2 text-left">状態</th>
-                <th className="px-3 py-2 text-left">議案番号</th>
-                <th className="px-3 py-2 text-left">タイトル</th>
-                <th className="px-3 py-2 text-left">ステータス</th>
-                <th className="px-3 py-2 text-left">提出者</th>
-                <th className="px-3 py-2 text-left">概要</th>
-                <th className="px-3 py-2 text-left">参照URL</th>
-              </tr>
-            </thead>
-            <tbody>
-              {run.bills.map((bill) => {
-                const isExisting =
-                  bill.billNumber != null && existingSet.has(bill.billNumber);
-                const isExpanded = expandedIds.has(bill.id);
-                const diffs = diffsMap.get(bill.id) ?? [];
-                const override = overrides.get(bill.id);
+      {run.bills.length === 0 ? (
+        <p className="text-sm text-gray-500">収集された議案はありません。</p>
+      ) : (
+        <div>
+          <h3 className="mb-3 text-base font-semibold">
+            議案一覧（{run.bills.length}件）
+            {existingBills.length > 0 && (
+              <span className="ml-2 text-sm font-normal text-amber-600">
+                うち{existingBills.length}件は既存議案
+              </span>
+            )}
+          </h3>
+          <div className="overflow-x-auto rounded-md border">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-gray-50">
+                  <th className="w-10 px-3 py-2 text-center">選択</th>
+                  <th className="px-3 py-2 text-left">状態</th>
+                  <th className="px-3 py-2 text-left">議案番号</th>
+                  <th className="px-3 py-2 text-left">タイトル</th>
+                  <th className="px-3 py-2 text-left">ステータス</th>
+                  <th className="px-3 py-2 text-left">提出者</th>
+                  <th className="px-3 py-2 text-left">概要</th>
+                  <th className="px-3 py-2 text-left">参照URL</th>
+                </tr>
+              </thead>
+              <tbody>
+                {run.bills.map((bill) => {
+                  const isExisting =
+                    bill.billNumber != null && existingSet.has(bill.billNumber);
+                  const isExpanded = expandedIds.has(bill.id);
+                  const diffs = diffsMap.get(bill.id) ?? [];
+                  const override = overrides.get(bill.id);
 
-                return (
-                  <React.Fragment key={bill.id}>
-                    <tr className="border-b last:border-0 hover:bg-gray-50">
-                      <td className="px-3 py-2 text-center">
-                        {isExisting ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => toggleExpanded(bill.id)}
-                            disabled={isLoadingDetails}
-                          >
-                            {isLoadingDetails ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : isExpanded ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </Button>
-                        ) : (
-                          <Checkbox
-                            checked={selectedNewIds.has(bill.id)}
-                            onCheckedChange={() => toggleNewBill(bill.id)}
-                          />
-                        )}
-                      </td>
-                      <td className="px-3 py-2">
-                        {isExisting ? (
-                          <Badge
-                            variant="outline"
-                            className="border-amber-400 text-amber-600"
-                          >
-                            既存
-                          </Badge>
-                        ) : (
-                          <Badge
-                            variant="outline"
-                            className="border-green-400 text-green-600"
-                          >
-                            新規
-                          </Badge>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 text-gray-500">
-                        {bill.billNumber ?? "—"}
-                      </td>
-                      <td className="px-3 py-2 font-medium">{bill.title}</td>
-                      <td className="px-3 py-2">
-                        <Badge variant="outline">
-                          {STATUS_LABELS[bill.status] ?? bill.status}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-2 text-gray-500">
-                        {bill.submitter ?? "—"}
-                      </td>
-                      <td className="max-w-xs px-3 py-2 text-gray-600">
-                        <p className="line-clamp-2">{bill.summary}</p>
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex flex-col gap-1">
-                          {bill.sourceUrls.map((url) => (
-                            <a
-                              key={url}
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-1 text-blue-600 hover:underline"
+                  return (
+                    <React.Fragment key={bill.id}>
+                      <tr className="border-b last:border-0 hover:bg-gray-50">
+                        <td className="px-3 py-2 text-center">
+                          {isExisting ? (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => toggleExpanded(bill.id)}
+                              disabled={isLoadingDetails}
                             >
-                              <ExternalLink className="h-3 w-3" />
-                              <span className="max-w-[200px] truncate text-xs">
-                                {url}
-                              </span>
-                            </a>
-                          ))}
-                        </div>
-                      </td>
-                    </tr>
-
-                    {/* Diff sub-rows for existing bills */}
-                    {isExisting &&
-                      isExpanded &&
-                      !isLoadingDetails &&
-                      (diffs.length === 0 ? (
-                        <tr className="border-b bg-amber-50">
-                          <td />
-                          <td
-                            colSpan={7}
-                            className="px-6 py-2 text-sm italic text-gray-500"
-                          >
-                            差分なし（DBの値とAI収集結果が一致しています）
-                          </td>
-                        </tr>
-                      ) : (
-                        diffs.map((diff) => {
-                          const isChecked =
-                            diff.key === "status"
-                              ? (override?.updateStatus ?? false)
-                              : diff.key === "contents"
-                                ? (override?.updateContents ?? false)
-                                : diff.key.startsWith("stance_") &&
-                                    "factionName" in diff
-                                  ? (override?.stances[diff.factionName] ??
-                                    false)
-                                  : false;
-
-                          const handleChange = (checked: boolean) => {
-                            updateOverride(bill.id, (prev) => {
-                              if (diff.key === "status") {
-                                return { ...prev, updateStatus: checked };
-                              }
-                              if (diff.key === "contents") {
-                                return { ...prev, updateContents: checked };
-                              }
-                              if (
-                                diff.key.startsWith("stance_") &&
-                                "factionName" in diff
-                              ) {
-                                return {
-                                  ...prev,
-                                  stances: {
-                                    ...prev.stances,
-                                    [diff.factionName]: checked,
-                                  },
-                                };
-                              }
-                              return prev;
-                            });
-                          };
-
-                          const isAbsentStance =
-                            diff.key.startsWith("stance_") &&
-                            "factionName" in diff &&
-                            run.factionStances.find(
-                              (s) =>
-                                s.factionName === diff.factionName &&
-                                s.billTitle === bill.title
-                            )?.stanceType === "absent";
-
-                          return (
-                            <tr
-                              key={diff.key}
-                              className="border-b bg-amber-50 last:border-0"
+                              {isLoadingDetails ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : isExpanded ? (
+                                <ChevronDown className="h-4 w-4" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4" />
+                              )}
+                            </Button>
+                          ) : (
+                            <Checkbox
+                              checked={selectedNewIds.has(bill.id)}
+                              onCheckedChange={() => toggleNewBill(bill.id)}
+                            />
+                          )}
+                        </td>
+                        <td className="px-3 py-2">
+                          {isExisting ? (
+                            <Badge
+                              variant="outline"
+                              className="border-amber-400 text-amber-600"
                             >
-                              <td className="px-3 py-2 text-center">
-                                <Checkbox
-                                  checked={isChecked}
-                                  onCheckedChange={(v) => handleChange(!!v)}
-                                  disabled={!!isAbsentStance}
-                                />
-                              </td>
-                              <td
-                                colSpan={2}
-                                className="px-6 py-2 text-xs font-medium text-gray-500"
+                              既存
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className="border-green-400 text-green-600"
+                            >
+                              新規
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-gray-500">
+                          {bill.billNumber ?? "—"}
+                        </td>
+                        <td className="px-3 py-2 font-medium">{bill.title}</td>
+                        <td className="px-3 py-2">
+                          <Badge variant="outline">
+                            {STATUS_LABELS[bill.status] ?? bill.status}
+                          </Badge>
+                        </td>
+                        <td className="px-3 py-2 text-gray-500">
+                          {bill.submitter ?? "—"}
+                        </td>
+                        <td className="max-w-xs px-3 py-2 text-gray-600">
+                          <p className="line-clamp-2">{bill.summary}</p>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex flex-col gap-1">
+                            {bill.sourceUrls.map((url) => (
+                              <a
+                                key={url}
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-blue-600 hover:underline"
                               >
-                                {diff.label}
-                              </td>
-                              <td colSpan={5} className="px-3 py-2 text-xs">
-                                <span className="text-gray-500 line-through">
-                                  {diff.key === "contents"
-                                    ? diff.from.slice(0, 80) +
-                                      (diff.from.length > 80 ? "…" : "")
-                                    : diff.from}
+                                <ExternalLink className="h-3 w-3" />
+                                <span className="max-w-[200px] truncate text-xs">
+                                  {url}
                                 </span>
-                                <span className="mx-2 text-gray-400">→</span>
-                                <span className="font-medium text-blue-700">
-                                  {diff.key === "contents"
-                                    ? diff.to.slice(0, 80) +
-                                      (diff.to.length > 80 ? "…" : "")
-                                    : diff.to}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      ))}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+                              </a>
+                            ))}
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Diff sub-rows for existing bills */}
+                      {isExisting &&
+                        isExpanded &&
+                        !isLoadingDetails &&
+                        (diffs.length === 0 ? (
+                          <tr className="border-b bg-amber-50">
+                            <td />
+                            <td
+                              colSpan={7}
+                              className="px-6 py-2 text-sm italic text-gray-500"
+                            >
+                              差分なし（DBの値とAI収集結果が一致しています）
+                            </td>
+                          </tr>
+                        ) : (
+                          diffs.map((diff) => {
+                            const isChecked =
+                              diff.key === "status"
+                                ? (override?.updateStatus ?? false)
+                                : diff.key === "contents"
+                                  ? (override?.updateContents ?? false)
+                                  : diff.key.startsWith("stance_") &&
+                                      "factionName" in diff
+                                    ? (override?.stances[diff.factionName] ??
+                                      false)
+                                    : false;
+
+                            const handleChange = (checked: boolean) => {
+                              updateOverride(bill.id, (prev) => {
+                                if (diff.key === "status") {
+                                  return { ...prev, updateStatus: checked };
+                                }
+                                if (diff.key === "contents") {
+                                  return { ...prev, updateContents: checked };
+                                }
+                                if (
+                                  diff.key.startsWith("stance_") &&
+                                  "factionName" in diff
+                                ) {
+                                  return {
+                                    ...prev,
+                                    stances: {
+                                      ...prev.stances,
+                                      [diff.factionName]: checked,
+                                    },
+                                  };
+                                }
+                                return prev;
+                              });
+                            };
+
+                            const isAbsentStance =
+                              diff.key.startsWith("stance_") &&
+                              "factionName" in diff &&
+                              run.factionStances.find(
+                                (s) =>
+                                  s.factionName === diff.factionName &&
+                                  s.billTitle === bill.title
+                              )?.stanceType === "absent";
+
+                            return (
+                              <tr
+                                key={diff.key}
+                                className="border-b bg-amber-50 last:border-0"
+                              >
+                                <td className="px-3 py-2 text-center">
+                                  <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={(v) => handleChange(!!v)}
+                                    disabled={!!isAbsentStance}
+                                  />
+                                </td>
+                                <td
+                                  colSpan={2}
+                                  className="px-6 py-2 text-xs font-medium text-gray-500"
+                                >
+                                  {diff.label}
+                                </td>
+                                <td colSpan={5} className="px-3 py-2 text-xs">
+                                  <span className="text-gray-500 line-through">
+                                    {diff.key === "contents"
+                                      ? diff.from.slice(0, 80) +
+                                        (diff.from.length > 80 ? "…" : "")
+                                      : diff.from}
+                                  </span>
+                                  <span className="mx-2 text-gray-400">→</span>
+                                  <span className="font-medium text-blue-700">
+                                    {diff.key === "contents"
+                                      ? diff.to.slice(0, 80) +
+                                        (diff.to.length > 80 ? "…" : "")
+                                      : diff.to}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        ))}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {existingWithDiffs.length > 0 && !isLoadingDetails && (
+            <p className="mt-2 text-xs text-amber-600">
+              ※ 既存議案の行の ▶ をクリックすると差分を確認・選択できます
+            </p>
+          )}
         </div>
-        {existingWithDiffs.length > 0 && !isLoadingDetails && (
-          <p className="mt-2 text-xs text-amber-600">
-            ※ 既存議案の行の ▶ をクリックすると差分を確認・選択できます
-          </p>
-        )}
-      </div>
+      )}
 
       {/* Faction stances table */}
       {run.factionStances.length > 0 && (

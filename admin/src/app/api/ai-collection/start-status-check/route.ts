@@ -15,6 +15,7 @@ import {
 import type {
   CollectionRun,
   DraftBill,
+  DraftFactionStance,
 } from "@/features/ai-collection/shared/types";
 
 export async function POST(request: Request) {
@@ -105,8 +106,20 @@ async function runStatusCheckInBackground(
       title: b.title,
       summary: summaryMap.get(b.billNumber ?? "") ?? "",
       status: b.status as DraftBill["status"],
+      statusNote: b.statusNote ?? null,
       submitter: null,
       sourceUrls: b.sourceUrls ?? [],
+    }));
+
+    const factionStances: DraftFactionStance[] = (
+      parsed.factionStances ?? []
+    ).map((s) => ({
+      id: crypto.randomUUID(),
+      billTitle: s.billTitle,
+      factionName: s.factionName,
+      stanceType: s.stanceType as DraftFactionStance["stanceType"],
+      comment: s.comment ?? null,
+      sourceUrls: s.sourceUrls ?? [],
     }));
 
     const updatedRun: CollectionRun = {
@@ -114,7 +127,7 @@ async function runStatusCheckInBackground(
       status: "completed",
       completedAt: new Date().toISOString(),
       bills,
-      factionStances: [],
+      factionStances,
       sources: parsed.sources,
     };
 
@@ -148,11 +161,21 @@ type RawBill = {
   title: string;
   summary: string;
   status: string;
+  statusNote?: string | null;
+  sourceUrls?: string[];
+};
+
+type RawFactionStance = {
+  billTitle: string;
+  factionName: string;
+  stanceType: string;
+  comment?: string | null;
   sourceUrls?: string[];
 };
 
 type RawCollectionResult = {
   bills: RawBill[];
+  factionStances?: RawFactionStance[];
   sources: string[];
 };
 

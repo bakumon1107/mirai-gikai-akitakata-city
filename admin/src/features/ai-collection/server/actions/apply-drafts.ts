@@ -79,6 +79,7 @@ export async function applyDrafts(
           name: draft.title,
           bill_number: draft.billNumber ?? "",
           status: mapBillStatus(draft.status),
+          status_note: draft.statusNote || null,
           published_at: run.startDate,
           is_featured: false,
           publish_status: "draft",
@@ -146,7 +147,10 @@ export async function applyDrafts(
       if (override.updateStatus) {
         const { error: updateError } = await supabase
           .from("bills")
-          .update({ status: mapBillStatus(draft.status) })
+          .update({
+            status: mapBillStatus(draft.status),
+            status_note: draft.statusNote || null,
+          })
           .eq("id", billId);
 
         if (updateError) {
@@ -309,13 +313,10 @@ export async function applyDrafts(
 
 function mapBillStatus(
   status: DraftBill["status"]
-):
-  | "submitted"
-  | "in_committee"
-  | "plenary_session"
-  | "approved"
-  | "rejected"
-  | "adopted"
-  | "partially_adopted" {
+): "submitted" | "in_committee" | "plenary_session" | "approved" | "rejected" {
+  // 採択・趣旨採択は可決（approved）として扱う（詳細はstatus_noteに記録）
+  if (status === "adopted" || status === "partially_adopted") {
+    return "approved";
+  }
   return status;
 }

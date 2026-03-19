@@ -9,6 +9,7 @@ export type BillListFilters = {
   tagId?: string;
   publishStatus?: string;
   reviewStatus?: string;
+  isFeatured?: string;
 };
 
 export async function getBills(

@@ -468,13 +468,27 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       ) : (
         <div>
           <h3 className="mb-3 text-base font-semibold">
-            議案一覧（{run.bills.length}件）
-            {existingBills.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-amber-600">
-                うち{existingBills.length}件は既存議案
-              </span>
+            {run.mode === "status_check" ? (
+              <>ステータス更新チェック結果（{run.bills.length}件）</>
+            ) : (
+              <>
+                議案一覧（{run.bills.length}件）
+                {existingBills.length > 0 && (
+                  <span className="ml-2 text-sm font-normal text-amber-600">
+                    うち{existingBills.length}件は既存議案
+                  </span>
+                )}
+              </>
             )}
           </h3>
+          {run.mode === "status_check" &&
+            !isLoadingDetails &&
+            existingWithDiffs.length === 0 && (
+              <p className="mb-3 text-sm text-gray-500">
+                ステータスに変化のある議案はありませんでした。各行の ▶
+                を展開して確認できます。
+              </p>
+            )}
           <div className="overflow-x-auto rounded-md border">
             <table className="w-full text-sm">
               <thead>

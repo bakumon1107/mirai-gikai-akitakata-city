@@ -14,6 +14,7 @@ type BillListProps = {
   tagId?: string;
   publishStatus?: string;
   reviewStatus?: string;
+  isFeatured?: string;
 };
 
 export async function BillList({
@@ -22,9 +23,16 @@ export async function BillList({
   tagId,
   publishStatus,
   reviewStatus,
+  isFeatured,
 }: BillListProps) {
   const [bills, sessions, tags] = await Promise.all([
-    getBills(sortConfig, { sessionId, tagId, publishStatus, reviewStatus }),
+    getBills(sortConfig, {
+      sessionId,
+      tagId,
+      publishStatus,
+      reviewStatus,
+      isFeatured,
+    }),
     getCouncilSessions(),
     getTags(),
   ]);
@@ -58,6 +66,7 @@ export async function BillList({
         tagId={tagId}
         publishStatus={publishStatus}
         reviewStatus={reviewStatus}
+        isFeatured={isFeatured}
       />
     </div>
   );

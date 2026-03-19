@@ -9,11 +9,12 @@ interface BillsPageProps {
     tag?: string;
     publishStatus?: string;
     reviewStatus?: string;
+    isFeatured?: string;
   }>;
 }
 
 export default async function BillsPage({ searchParams }: BillsPageProps) {
-  const { sort, order, session, tag, publishStatus, reviewStatus } =
+  const { sort, order, session, tag, publishStatus, reviewStatus, isFeatured } =
     await searchParams;
   const sortConfig = parseBillSortParams(sort, order);
 
@@ -30,6 +31,7 @@ export default async function BillsPage({ searchParams }: BillsPageProps) {
         tagId={tag}
         publishStatus={publishStatus}
         reviewStatus={reviewStatus}
+        isFeatured={isFeatured}
       />
     </div>
   );

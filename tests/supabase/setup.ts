@@ -8,7 +8,7 @@ const SERVICE_ROLE_KEY =
 export async function setup() {
   // Supabase 接続確認
   const client = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-  const { error } = await client.from("diet_sessions").select("id").limit(1);
+  const { error } = await client.from("council_sessions").select("id").limit(1);
   if (error) {
     throw new Error(
       [

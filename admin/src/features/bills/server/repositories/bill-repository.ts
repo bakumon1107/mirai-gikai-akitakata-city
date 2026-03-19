@@ -15,6 +15,7 @@ type BillFilters = {
   tagId?: string;
   publishStatus?: string;
   reviewStatus?: string;
+  isFeatured?: string;
 };
 
 export async function findBillsWithCouncilSessions(
@@ -66,6 +67,10 @@ export async function findBillsWithCouncilSessions(
       .eq("tag_id", filters.tagId);
     const billIds = (taggedBills ?? []).map((b) => b.bill_id);
     query = query.in("id", billIds);
+  }
+
+  if (filters?.isFeatured !== undefined && filters.isFeatured !== "") {
+    query = query.eq("is_featured", filters.isFeatured === "true");
   }
 
   const result =

@@ -7,6 +7,6 @@ export async function getTags() {
   const { data } = await supabase
     .from("tags")
     .select("id, label")
-    .order("name");
+    .order("label");
   return data ?? [];
 }

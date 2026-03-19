@@ -20,27 +20,42 @@ ${existingSection}
 収集情報:
 1. 議案一覧（議案番号・議案名・提出者・審議ステータス・概要）
 2. 会派見解（${siteConfig.councilFactionExamples}）
+   - 議決結果を掲載したPDF（「議決結果」「採決結果」等のリンク）がある場合は優先的に参照してください
+   - PDFは表形式で会派ごとの賛否が記載されています
+   - 列名が空白の会派列は「自由民主党川崎市議会議員団」として扱ってください
+   - 無所属議員の情報は収集不要です
 
 調査完了後、以下のJSON形式のデータを Writeツールを使って ${outputFilePath} に書き込んでください:
 {
-  "bills": [{"billNumber": null, "title": "議案名", "summary": "概要", "status": "submitted", "submitter": null, "sourceUrls": []}],
+  "bills": [{"billNumber": null, "title": "議案名", "summary": "概要", "status": "submitted", "statusNote": null, "submitter": null, "sourceUrls": []}],
   "factionStances": [{"billTitle": "議案名", "factionName": "会派名", "stanceType": "for", "comment": null, "sourceUrls": []}],
   "sources": []
 }
 
 stanceTypeの値: "for"(賛成) | "against"(反対) | "neutral"(中立) | "absent"(欠席)
+
 statusの値:
-- "submitted": 提出
+- "submitted": 提出・上程
 - "in_committee": 委員会審査中
 - "plenary_session": 本会議審議中
-- "approved": 可決（条例案・予算案など通常の議案）
-- "rejected": 否決（条例案・予算案など通常の議案）
-- "adopted": 採択（請願・陳情が採択された場合）
-- "partially_adopted": 趣旨採択（請願の趣旨のみ採択された場合）
+- "approved": 可決・承認・同意・採択（以下のstatusNoteに詳細を記載）
+- "rejected": 否決・不採択
+
+statusNoteの設定ルール（statusが "approved" の場合）:
+- 「可決」→ statusNote: null
+- 「原案可決」→ statusNote: "原案可決"
+- 「修正可決」→ statusNote: "修正可決"
+- 「承認」→ statusNote: "承認"
+- 「同意」→ statusNote: "同意"
+- 「採択」（請願・陳情）→ statusNote: "採択"
+- 「趣旨採択」（請願）→ statusNote: "趣旨採択"
+
+statusNoteの設定ルール（statusが "rejected" の場合）:
+- 「否決」→ statusNote: null
+- 「不採択」（請願・陳情）→ statusNote: "不採択"
 
 ステータスの判定に関する注意:
 - 附帯決議案は本体議案（例: 議案第XX号）とは別個に扱い、附帯決議案自体のステータスを記録してください
-- 請願・陳情は「採択」→ "adopted"、「趣旨採択」→ "partially_adopted"、「不採択」→ "rejected" を使用してください
 - 意見書案のステータスも本体議案とは独立して調査してください
 
 ファイルへの書き込みが完了したら「収集完了」とだけ返してください。`;

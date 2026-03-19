@@ -309,6 +309,13 @@ export async function applyDrafts(
 
 function mapBillStatus(
   status: DraftBill["status"]
-): "submitted" | "in_committee" | "plenary_session" | "approved" | "rejected" {
+):
+  | "submitted"
+  | "in_committee"
+  | "plenary_session"
+  | "approved"
+  | "rejected"
+  | "adopted"
+  | "partially_adopted" {
   return status;
 }

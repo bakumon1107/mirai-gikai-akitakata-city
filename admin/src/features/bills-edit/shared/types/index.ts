@@ -23,6 +23,8 @@ const billBaseSchema = z.object({
     "plenary_session",
     "approved",
     "rejected",
+    "adopted",
+    "partially_adopted",
   ]),
   status_note: z
     .string()

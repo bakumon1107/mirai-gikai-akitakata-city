@@ -39,4 +39,12 @@ export const BILL_STATUS_CONFIG: Record<
     icon: XCircle,
     color: "text-red-600 bg-red-50",
   },
+  adopted: {
+    icon: CheckCircle,
+    color: "text-teal-600 bg-teal-50",
+  },
+  partially_adopted: {
+    icon: CheckCircle,
+    color: "text-cyan-600 bg-cyan-50",
+  },
 };

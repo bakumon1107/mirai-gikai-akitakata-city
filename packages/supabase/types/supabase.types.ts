@@ -951,6 +951,8 @@ export type Database = {
         | "plenary_session"
         | "approved"
         | "rejected"
+        | "adopted"
+        | "partially_adopted"
       chat_role_enum: "user" | "system" | "assistant"
       difficulty_level_enum: "normal" | "hard"
       interview_config_status_enum: "public" | "closed"
@@ -1107,6 +1109,8 @@ export const Constants = {
         "plenary_session",
         "approved",
         "rejected",
+        "adopted",
+        "partially_adopted",
       ],
       chat_role_enum: ["user", "system", "assistant"],
       difficulty_level_enum: ["normal", "hard"],

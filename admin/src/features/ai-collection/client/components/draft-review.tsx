@@ -38,6 +38,8 @@ const STATUS_LABELS: Record<string, string> = {
   plenary_session: "本会議",
   approved: "可決",
   rejected: "否決",
+  adopted: "採択",
+  partially_adopted: "趣旨採択",
   preparing: "準備中",
 };
 

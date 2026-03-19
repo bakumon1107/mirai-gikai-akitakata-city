@@ -1,5 +1,7 @@
 export type CollectionStatus = "running" | "completed" | "failed" | "paused";
 
+export type CollectionMode = "full" | "status_check";
+
 export type FactionMatchStatus = {
   factionName: string;
   matchedFactionId: string | null;
@@ -58,6 +60,7 @@ export type CollectionRun = {
   id: string;
   startDate: string;
   endDate: string;
+  mode?: CollectionMode;
   status: CollectionStatus;
   createdAt: string;
   completedAt: string | null;

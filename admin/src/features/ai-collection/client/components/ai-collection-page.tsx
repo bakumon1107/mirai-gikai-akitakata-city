@@ -178,7 +178,9 @@ export function AiCollectionPage({
               <div className="flex items-center gap-3 text-blue-600">
                 <Loader2 className="h-5 w-5 animate-spin" />
                 <span className="font-medium">
-                  Claude がウェブ検索・情報収集中です...
+                  {activeRun.mode === "status_check"
+                    ? "Claude がステータスをチェック中です..."
+                    : "Claude がウェブ検索・情報収集中です..."}
                 </span>
                 <span className="tabular-nums text-sm text-blue-400">
                   {formatElapsed(elapsed)} 経過

@@ -110,6 +110,7 @@ async function runClaudeInBackground(
       title: b.title,
       summary: b.summary,
       status: b.status as DraftBill["status"],
+      statusNote: b.statusNote ?? null,
       submitter: b.submitter ?? null,
       sourceUrls: b.sourceUrls ?? [],
     }));
@@ -167,6 +168,7 @@ type RawCollectionResult = {
     title: string;
     summary: string;
     status: string;
+    statusNote?: string | null;
     submitter?: string | null;
     sourceUrls?: string[];
   }>;

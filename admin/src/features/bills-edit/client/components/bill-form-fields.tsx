@@ -32,6 +32,8 @@ const BILL_STATUS_OPTIONS: Array<{ value: BillStatus; label: string }> = [
   { value: "plenary_session", label: "本会議採決中" },
   { value: "approved", label: "可決" },
   { value: "rejected", label: "否決" },
+  { value: "adopted", label: "採択" },
+  { value: "partially_adopted", label: "趣旨採択" },
 ];
 
 interface BillFormFieldsProps {

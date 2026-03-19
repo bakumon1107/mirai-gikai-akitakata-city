@@ -42,7 +42,9 @@ export type DraftBill = {
     | "in_committee"
     | "plenary_session"
     | "approved"
-    | "rejected";
+    | "rejected"
+    | "adopted"
+    | "partially_adopted";
   submitter: string | null;
   sourceUrls: string[];
 };

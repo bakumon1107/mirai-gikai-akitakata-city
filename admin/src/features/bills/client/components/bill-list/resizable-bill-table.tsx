@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { BillActionsMenu } from "../bill-actions-menu/bill-actions-menu";
 import { PreviewButton } from "./preview-button";
 import { PublishStatusBadge } from "./publish-status-badge";
+import { FeaturedFilter } from "./featured-filter";
 import { PublishStatusFilter } from "./publish-status-filter";
 import { ReviewStatusFilter } from "./review-status-filter";
 import { SessionFilter } from "./session-filter";
@@ -113,6 +114,7 @@ export function ResizableBillTable({
   tagId,
   publishStatus,
   reviewStatus,
+  isFeatured,
 }: {
   bills: BillWithCouncilSession[];
   sessions: Session[];
@@ -122,6 +124,7 @@ export function ResizableBillTable({
   tagId?: string;
   publishStatus?: string;
   reviewStatus?: string;
+  isFeatured?: string;
 }) {
   const [widths, setWidths] = useState(() =>
     COLUMNS.map((c) => c.defaultWidth)
@@ -162,6 +165,7 @@ export function ResizableBillTable({
         <TagFilter tags={tags} currentTagId={tagId} />
         <PublishStatusFilter currentPublishStatus={publishStatus} />
         <ReviewStatusFilter currentReviewStatus={reviewStatus} />
+        <FeaturedFilter currentIsFeatured={isFeatured} />
       </div>
 
       <div className="rounded-md border bg-white overflow-x-auto">

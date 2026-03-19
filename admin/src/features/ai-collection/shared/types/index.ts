@@ -45,6 +45,7 @@ export type DraftBill = {
     | "rejected"
     | "adopted"
     | "partially_adopted";
+  statusNote: string | null;
   submitter: string | null;
   sourceUrls: string[];
 };

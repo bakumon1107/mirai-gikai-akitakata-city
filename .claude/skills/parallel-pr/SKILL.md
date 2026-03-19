@@ -81,7 +81,7 @@ Task(
 - ...
 
 ## 作業手順
-1. `git checkout -b {branch} develop` でブランチ作成
+1. `git checkout -b {branch} kawasaki/develop` でブランチ作成
 2. 対象ファイルを読んで理解
 3. 実装・修正
 4. push前のローカル検証（CIと同じコマンドを全て実行し、全て通過すること）:
@@ -92,8 +92,8 @@ Task(
 5. エラーがあれば修正して再度ステップ4を実行
 6. コミット（Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>）
 7. `git push -u origin {branch}`
-8. `gh pr create --base develop --title "{title}" --body "..."`
-9. 次のPRがあれば `git checkout -b {next-branch} develop` で次へ
+8. `gh pr create --base kawasaki/develop --title "{title}" --body "..."`
+9. 次のPRがあれば `git checkout -b {next-branch} kawasaki/develop` で次へ
 10. 全完了後、リーダーにメッセージで報告（PR番号・URL）
 ```
 

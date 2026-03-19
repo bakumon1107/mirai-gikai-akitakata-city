@@ -16,21 +16,23 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
   const [endDate, setEndDate] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const validateDates = (): boolean => {
     if (!startDate || !endDate) {
       toast.error("開始日と終了日を入力してください");
-      return;
+      return false;
     }
-
     if (new Date(endDate) < new Date(startDate)) {
       toast.error("終了日は開始日以降の日付を指定してください");
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateDates()) return;
 
     setIsLoading(true);
-
     try {
       const res = await fetch("/api/ai-collection/start", {
         method: "POST",
@@ -50,6 +52,34 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
     } catch (err) {
       console.error("Collection start error:", err);
       toast.error("収集の開始に失敗しました");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStatusCheck = async () => {
+    if (!validateDates()) return;
+
+    setIsLoading(true);
+    try {
+      const res = await fetch("/api/ai-collection/start-status-check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ startDate, endDate }),
+      });
+
+      const data = (await res.json()) as { runId?: string; error?: string };
+
+      if (!res.ok || !data.runId) {
+        toast.error(data.error ?? "ステータスチェックの開始に失敗しました");
+        return;
+      }
+
+      toast.success("ステータスチェックを開始しました");
+      onRunStarted(data.runId);
+    } catch (err) {
+      console.error("Status check start error:", err);
+      toast.error("ステータスチェックの開始に失敗しました");
     } finally {
       setIsLoading(false);
     }
@@ -80,6 +110,15 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
       <Button type="submit" disabled={isLoading}>
         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         収集開始
+      </Button>
+      <Button
+        type="button"
+        variant="outline"
+        disabled={isLoading}
+        onClick={() => void handleStatusCheck()}
+      >
+        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        ステータス更新チェック
       </Button>
     </form>
   );

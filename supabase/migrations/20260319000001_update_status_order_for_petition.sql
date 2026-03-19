@@ -1,7 +1,7 @@
 -- status_order の GENERATED COLUMN を再作成して adopted / partially_adopted を含める
 -- NOTE: ALTER TYPE ADD VALUE は前のマイグレーションで実施済み（同一トランザクション内では使用不可のため分割）
 
-ALTER TABLE bills DROP COLUMN status_order;
+ALTER TABLE bills DROP COLUMN IF EXISTS status_order;
 
 ALTER TABLE bills ADD COLUMN status_order INT GENERATED ALWAYS AS (
   CASE status

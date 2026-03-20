@@ -10,6 +10,7 @@ const STATUS_TO_STEP: Record<BillStatusEnum, number> = {
   rejected: 4,
   adopted: 4,
   partially_adopted: 4,
+  reported: 4,
 } as const;
 
 // プログレス比率

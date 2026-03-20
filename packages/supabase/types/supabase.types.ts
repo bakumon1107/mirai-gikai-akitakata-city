@@ -953,6 +953,7 @@ export type Database = {
         | "rejected"
         | "adopted"
         | "partially_adopted"
+        | "reported"
       chat_role_enum: "user" | "system" | "assistant"
       difficulty_level_enum: "normal" | "hard"
       interview_config_status_enum: "public" | "closed"
@@ -1111,6 +1112,7 @@ export const Constants = {
         "rejected",
         "adopted",
         "partially_adopted",
+        "reported",
       ],
       chat_role_enum: ["user", "system", "assistant"],
       difficulty_level_enum: ["normal", "hard"],

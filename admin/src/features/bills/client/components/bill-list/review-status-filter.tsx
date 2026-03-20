@@ -11,6 +11,7 @@ const REVIEW_STATUSES = [
   { value: "plenary_session", label: "本会議採決中" },
   { value: "approved", label: "可決" },
   { value: "rejected", label: "否決" },
+  { value: "reported", label: "専決処分報告" },
 ] as const;
 
 type ReviewStatusFilterProps = {

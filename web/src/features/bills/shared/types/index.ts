@@ -83,6 +83,7 @@ export type BillsByTag = {
 export const BILL_STATUS_ORDER: Record<BillStatusEnum, number> = {
   approved: 0,
   adopted: 0,
+  reported: 0,
   partially_adopted: 1,
   rejected: 2,
   plenary_session: 3,
@@ -110,6 +111,8 @@ export function getBillStatusLabel(status: BillStatusEnum): string {
       return "採択";
     case "partially_adopted":
       return "趣旨採択";
+    case "reported":
+      return "専決処分報告";
     default:
       return status;
   }

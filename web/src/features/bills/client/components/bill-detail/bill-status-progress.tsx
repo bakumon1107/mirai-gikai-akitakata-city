@@ -40,6 +40,7 @@ const STATUS_LABELS: Record<BillStatusEnum, string> = {
   rejected: "否決",
   adopted: "採択",
   partially_adopted: "趣旨採択",
+  reported: "専決処分報告",
 };
 
 // ステータスバッジコンポーネント

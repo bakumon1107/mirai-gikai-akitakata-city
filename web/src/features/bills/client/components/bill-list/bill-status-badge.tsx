@@ -18,6 +18,8 @@ function getCardStatusLabel(status: BillStatusEnum): string {
       return "可決";
     case "rejected":
       return "否決";
+    case "reported":
+      return "専決処分報告";
     default:
       return "議案上程前";
   }
@@ -31,6 +33,7 @@ export function BillStatusBadge({ status, className }: BillStatusBadgeProps) {
       case "plenary_session":
         return "light";
       case "approved":
+      case "reported":
         return "default";
       case "rejected":
         return "dark";

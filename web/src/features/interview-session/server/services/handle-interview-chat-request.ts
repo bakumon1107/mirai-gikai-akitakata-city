@@ -82,7 +82,7 @@ export async function handleInterviewChatRequest({
   // 日次コスト制限チェック（fail-closed: エラー時もリクエストをブロック）
   const isWithinLimit = await isWithinDailyCostLimit(
     userId,
-    env.chat.dailyCostLimitUsd
+    env.chat.dailyUserCostLimitUsd
   );
   if (!isWithinLimit) {
     throw new ChatError(ChatErrorCode.DAILY_COST_LIMIT_REACHED);
@@ -244,15 +244,15 @@ async function generateStreamingResponse({
     ? (summaryModel ?? AI_MODELS.gemini3_flash)
     : (chatModel ?? configChatModel ?? DEFAULT_INTERVIEW_CHAT_MODEL);
 
+  const modelName =
+    typeof model === "string" ? model : (model.modelId ?? "unknown");
+
   const handleError = (error: unknown) => {
     console.error("LLM generation error:", error);
     throw new Error(
       `LLM generation failed: ${error instanceof Error ? error.message : String(error)}`
     );
   };
-
-  const modelName =
-    typeof model === "string" ? model : (model.modelId ?? "unknown");
 
   const handleFinish = async (event: {
     text?: string;

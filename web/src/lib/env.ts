@@ -13,13 +13,30 @@ if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
   );
 }
 
-const chatDailyCostLimitUsdRaw = process.env.CHAT_DAILY_COST_LIMIT_USD || "0.5";
+const chatDailyUserCostLimitUsdRaw =
+  process.env.CHAT_DAILY_USER_COST_LIMIT_USD ||
+  process.env.CHAT_DAILY_COST_LIMIT_USD ||
+  "0.5";
 
-const chatDailyCostLimitUsd = Number(chatDailyCostLimitUsdRaw);
+const chatDailyUserCostLimitUsd = Number(chatDailyUserCostLimitUsdRaw);
 
-if (Number.isNaN(chatDailyCostLimitUsd) || chatDailyCostLimitUsd <= 0) {
+if (Number.isNaN(chatDailyUserCostLimitUsd) || chatDailyUserCostLimitUsd <= 0) {
   throw new Error(
-    "環境変数 CHAT_DAILY_COST_LIMIT_USD は正の数値で指定してください"
+    "環境変数 CHAT_DAILY_USER_COST_LIMIT_USD は正の数値で指定してください"
+  );
+}
+
+const chatDailyTotalCostLimitUsdRaw =
+  process.env.CHAT_DAILY_TOTAL_COST_LIMIT_USD || "50";
+
+const chatDailyTotalCostLimitUsd = Number(chatDailyTotalCostLimitUsdRaw);
+
+if (
+  Number.isNaN(chatDailyTotalCostLimitUsd) ||
+  chatDailyTotalCostLimitUsd <= 0
+) {
+  throw new Error(
+    "環境変数 CHAT_DAILY_TOTAL_COST_LIMIT_USD は正の数値で指定してください"
   );
 }
 
@@ -39,7 +56,8 @@ export const env = {
     promptLabel: process.env.LANGFUSE_PROMPT_LABEL || "production",
   },
   chat: {
-    dailyCostLimitUsd: chatDailyCostLimitUsd,
+    dailyUserCostLimitUsd: chatDailyUserCostLimitUsd,
+    dailyTotalCostLimitUsd: chatDailyTotalCostLimitUsd,
   },
 } as const;
 

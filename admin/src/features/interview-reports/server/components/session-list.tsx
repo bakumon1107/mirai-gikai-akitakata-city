@@ -35,10 +35,10 @@ import {
 } from "../../shared/types";
 import { generatePageNumbers } from "../../shared/utils/pagination-utils";
 import { SESSIONS_PER_PAGE } from "../loaders/get-interview-sessions";
+import { ReportVisibilityListToggle } from "../../client/components/report-visibility-list-toggle";
 import { RatingStars } from "./rating-stars";
 import { SessionStatusBadge } from "./session-status-badge";
 import { StanceBadge } from "./stance-badge";
-import { VisibilityBadge } from "./visibility-badge";
 
 interface SessionListProps {
   billId: string;
@@ -167,8 +167,8 @@ export function SessionList({
                   </TableCell>
                   <TableCell className="text-center">
                     {hasReport ? (
-                      <VisibilityBadge
-                        isPublic={
+                      <BooleanIcon
+                        value={
                           session.interview_report?.is_public_by_user ?? false
                         }
                       />
@@ -177,10 +177,16 @@ export function SessionList({
                     )}
                   </TableCell>
                   <TableCell className="text-center">
-                    {hasReport ? (
-                      <VisibilityBadge
+                    {hasReport && session.interview_report ? (
+                      <ReportVisibilityListToggle
+                        reportId={session.interview_report.id}
+                        sessionId={session.id}
+                        billId={billId}
                         isPublic={
-                          session.interview_report?.is_public_by_admin ?? false
+                          session.interview_report.is_public_by_admin ?? false
+                        }
+                        isPublicByUser={
+                          session.interview_report.is_public_by_user ?? false
                         }
                       />
                     ) : (

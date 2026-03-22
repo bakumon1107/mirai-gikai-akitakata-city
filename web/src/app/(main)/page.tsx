@@ -17,8 +17,13 @@ import { CurrentCouncilSession } from "@/features/council-sessions/client/compon
 import { getJapanTime } from "@/lib/utils/date";
 
 export default async function Home() {
-  const { billsByTag, featuredBills, comingSoonBills, previousSessionData } =
-    await loadHomeData();
+  const {
+    billsByTag,
+    featuredBills,
+    comingSoonBills,
+    previousSessionData,
+    activeSessionSlug,
+  } = await loadHomeData();
 
   // ゆくゆくタグ機能がマージされたらBFFに統合する
   const [currentSession, currentDifficulty] = await Promise.all([
@@ -50,7 +55,10 @@ export default async function Home() {
             <FeaturedBillSection bills={featuredBills} />
 
             {/* タグ別議案一覧セクション */}
-            <BillsByTagSection billsByTag={billsByTag} />
+            <BillsByTagSection
+              billsByTag={billsByTag}
+              sessionSlug={activeSessionSlug}
+            />
 
             {/* Coming soonセクション */}
             <ComingSoonSection bills={comingSoonBills} />

@@ -1,6 +1,6 @@
 import { Container } from "@/components/layouts/container";
 import { About } from "@/components/top/about";
-import { ComingSoonSection } from "@/components/top/coming-soon-section";
+
 import { Hero } from "@/components/top/hero";
 import { TeamMirai } from "@/components/top/team-mirai";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
@@ -17,13 +17,8 @@ import { CurrentCouncilSession } from "@/features/council-sessions/client/compon
 import { getJapanTime } from "@/lib/utils/date";
 
 export default async function Home() {
-  const {
-    billsByTag,
-    featuredBills,
-    comingSoonBills,
-    previousSessionData,
-    activeSessionSlug,
-  } = await loadHomeData();
+  const { billsByTag, featuredBills, previousSessionData, activeSessionSlug } =
+    await loadHomeData();
 
   // ゆくゆくタグ機能がマージされたらBFFに統合する
   const [currentSession, currentDifficulty] = await Promise.all([
@@ -59,9 +54,6 @@ export default async function Home() {
               billsByTag={billsByTag}
               sessionSlug={activeSessionSlug}
             />
-
-            {/* Coming soonセクション */}
-            <ComingSoonSection bills={comingSoonBills} />
           </main>
         </div>
       </Container>

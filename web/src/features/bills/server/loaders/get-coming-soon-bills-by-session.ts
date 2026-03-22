@@ -49,6 +49,7 @@ const _getCachedComingSoonBillsBySession = unstable_cache(
         name: bill.name,
         title: preferredContent?.title || fallbackContent?.title || null,
         council_url: bill.council_sessions?.council_url ?? null,
+        status: bill.status,
         tags: tagsByBillId.get(bill.id) ?? [],
       };
     });

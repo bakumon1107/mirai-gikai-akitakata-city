@@ -37,6 +37,24 @@ function filterBillsByStatus(
   }
 }
 
+function filterComingSoonByStatus(
+  bills: ComingSoonBill[],
+  filter: StatusFilterType
+): ComingSoonBill[] {
+  switch (filter) {
+    case "approved":
+      return bills.filter((b) => b.status === "approved");
+    case "rejected":
+      return bills.filter((b) => b.status === "rejected");
+    case "other":
+      return bills.filter(
+        (b) => b.status !== "approved" && b.status !== "rejected"
+      );
+    default:
+      return bills;
+  }
+}
+
 function filterByTag<T extends { tags: BillTag[] }>(
   items: T[],
   tagId: string | null
@@ -88,13 +106,13 @@ export function BillListWithStatusFilter({
     return filterByTag(byStatus, activeTagId);
   }, [bills, activeStatusFilter, activeTagId]);
 
-  // coming soon は「ALL」と「その他」で表示、タグフィルターも適用
-  const showComingSoon =
-    activeStatusFilter === "all" || activeStatusFilter === "other";
   const filteredComingSoon = useMemo(() => {
-    if (!showComingSoon) return [];
-    return filterByTag(comingSoonBills, activeTagId);
-  }, [comingSoonBills, activeTagId, showComingSoon]);
+    const byStatus = filterComingSoonByStatus(
+      comingSoonBills,
+      activeStatusFilter
+    );
+    return filterByTag(byStatus, activeTagId);
+  }, [comingSoonBills, activeStatusFilter, activeTagId]);
 
   const statusFilters: {
     key: StatusFilterType;

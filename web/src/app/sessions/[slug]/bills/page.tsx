@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/layouts/container";
 import { siteConfig } from "@/config/site.config";
@@ -35,7 +36,9 @@ export default async function SessionBillsPage({ params }: Props) {
 
   return (
     <Container className="py-8">
-      <CouncilSessionBillList session={session} bills={bills} />
+      <Suspense>
+        <CouncilSessionBillList session={session} bills={bills} />
+      </Suspense>
     </Container>
   );
 }

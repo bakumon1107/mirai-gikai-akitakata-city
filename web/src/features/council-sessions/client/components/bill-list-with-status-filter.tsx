@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import type { BillTag, BillWithContent } from "@/features/bills/shared/types";
 import { CompactBillCard } from "@/features/bills/client/components/bill-list/compact-bill-card";
@@ -11,14 +12,6 @@ type StatusFilterType = "all" | "approved" | "rejected" | "other";
 type Props = {
   bills: BillWithContent[];
 };
-
-function getStatusFilterCounts(bills: BillWithContent[]) {
-  const approved = bills.filter((b) => b.status === "approved").length;
-  const rejected = bills.filter((b) => b.status === "rejected").length;
-  const other = bills.length - approved - rejected;
-
-  return { all: bills.length, approved, rejected, other };
-}
 
 function filterBillsByStatus(
   bills: BillWithContent[],
@@ -59,11 +52,13 @@ function getUniqueTags(bills: BillWithContent[]): BillTag[] {
 }
 
 export function BillListWithStatusFilter({ bills }: Props) {
+  const searchParams = useSearchParams();
+  const initialTagId = searchParams.get("tag");
+
   const [activeStatusFilter, setActiveStatusFilter] =
     useState<StatusFilterType>("all");
-  const [activeTagId, setActiveTagId] = useState<string | null>(null);
+  const [activeTagId, setActiveTagId] = useState<string | null>(initialTagId);
 
-  const statusCounts = getStatusFilterCounts(bills);
   const uniqueTags = useMemo(() => getUniqueTags(bills), [bills]);
 
   const filteredBills = useMemo(() => {
@@ -74,12 +69,11 @@ export function BillListWithStatusFilter({ bills }: Props) {
   const statusFilters: {
     key: StatusFilterType;
     label: string;
-    count: number;
   }[] = [
-    { key: "all", label: "ALL", count: statusCounts.all },
-    { key: "approved", label: "可決", count: statusCounts.approved },
-    { key: "rejected", label: "否決", count: statusCounts.rejected },
-    { key: "other", label: "その他", count: statusCounts.other },
+    { key: "all", label: "ALL" },
+    { key: "approved", label: "可決" },
+    { key: "rejected", label: "否決" },
+    { key: "other", label: "その他" },
   ];
 
   return (
@@ -97,7 +91,7 @@ export function BillListWithStatusFilter({ bills }: Props) {
                 : "bg-mirai-surface-grouped text-mirai-text-muted hover:bg-mirai-surface-muted"
             }`}
           >
-            {filter.label} {filter.count}
+            {filter.label}
           </Button>
         ))}
       </div>

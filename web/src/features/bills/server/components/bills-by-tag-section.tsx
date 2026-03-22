@@ -1,6 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import type { BillsByTag } from "../../shared/types";
+import { Card, CardContent } from "@/components/ui/card";
+import type { BillWithContent, BillsByTag } from "../../shared/types";
 import { BillCard } from "../../client/components/bill-list/bill-card";
 
 const MAX_DISPLAY_COUNT = 3;
@@ -8,6 +9,14 @@ const MAX_DISPLAY_COUNT = 3;
 interface BillsByTagSectionProps {
   billsByTag: BillsByTag[];
   sessionSlug?: string | null;
+}
+
+function pickRandom(
+  bills: BillWithContent[],
+  count: number
+): BillWithContent[] {
+  const shuffled = [...bills].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
 }
 
 export function BillsByTagSection({
@@ -23,7 +32,7 @@ export function BillsByTagSection({
       {billsByTag.map(({ tag, bills }) => {
         const hasMore = bills.length > MAX_DISPLAY_COUNT;
         const displayBills = hasMore
-          ? bills.slice(0, MAX_DISPLAY_COUNT)
+          ? pickRandom(bills, MAX_DISPLAY_COUNT)
           : bills;
 
         return (
@@ -49,14 +58,20 @@ export function BillsByTagSection({
               ))}
             </div>
 
-            {/* もっと見るリンク */}
+            {/* もっと見るカード */}
             {hasMore && sessionSlug && (
               <Link
                 href={`/sessions/${sessionSlug}/bills?tag=${tag.id}`}
-                className="flex items-center justify-center gap-1 text-sm font-bold text-primary-accent hover:opacity-70 transition-opacity"
+                className="block"
               >
-                その他の{tag.label}議案はこちら
-                <ChevronRight className="h-4 w-4" />
+                <Card className="border border-black hover:bg-gray-50 transition-colors cursor-pointer">
+                  <CardContent className="flex items-center justify-between py-4 px-5">
+                    <span className="font-bold text-base text-black">
+                      その他の{tag.label}議案はこちら
+                    </span>
+                    <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                  </CardContent>
+                </Card>
               </Link>
             )}
           </section>

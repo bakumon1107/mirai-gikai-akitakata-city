@@ -126,10 +126,10 @@ pnpm typecheck
 
 ```bash
 # メインリポジトリのルートで実行
-git worktree add ../mirai-gikai-<branch-name> -b <branch-name>
-mkdir -p ../mirai-gikai-<branch-name>/.claude
-cp .claude/settings.local.json ../mirai-gikai-<branch-name>/.claude/
-cp .env ../mirai-gikai-<branch-name>/
+git worktree add ../mirai-gikai-kawasaki-worktree/<branch-name> -b <branch-name>
+mkdir -p ../mirai-gikai-kawasaki-worktree/<branch-name>/.claude
+cp .claude/settings.local.json ../mirai-gikai-kawasaki-worktree/<branch-name>/.claude/
+cp .env ../mirai-gikai-kawasaki-worktree/<branch-name>/
 ```
 
 - ブランチ名は `chore/codify-<変更内容の要約>` とする（例: `chore/codify-add-pr-step`）
@@ -138,7 +138,7 @@ cp .env ../mirai-gikai-<branch-name>/
 #### 7b. コミットとpush
 
 ```bash
-cd ../mirai-gikai-<branch-name>
+cd ../mirai-gikai-kawasaki-worktree/<branch-name>
 git add <変更ファイル>
 git commit -m "<コミットメッセージ>"
 git push -u origin <branch-name>
@@ -156,5 +156,5 @@ gh pr create --title "<タイトル>" --body "<本文>"
 #### 7d. worktreeクリーンアップ
 
 ```bash
-git worktree remove ../mirai-gikai-<branch-name>
+git worktree remove ../mirai-gikai-kawasaki-worktree/<branch-name>
 ```

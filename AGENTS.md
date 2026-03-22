@@ -7,17 +7,17 @@
 
 ```bash
 # 1. worktreeを作成
-git worktree add ../mirai-gikai-<branch-name> -b <branch-name>
+git worktree add ../mirai-gikai-kawasaki-worktree/<branch-name> -b <branch-name>
 
 # 2. settings.local.jsonをコピー（権限設定のため必須）
-mkdir -p ../mirai-gikai-<branch-name>/.claude
-cp .claude/settings.local.json ../mirai-gikai-<branch-name>/.claude/
+mkdir -p ../mirai-gikai-kawasaki-worktree/<branch-name>/.claude
+cp .claude/settings.local.json ../mirai-gikai-kawasaki-worktree/<branch-name>/.claude/
 
 # 3. .envをコピー（環境変数の引き継ぎ）
-cp .env ../mirai-gikai-<branch-name>/
+cp .env ../mirai-gikai-kawasaki-worktree/<branch-name>/
 
 # 4. 依存パッケージをインストール
-cd ../mirai-gikai-<branch-name> && pnpm install --frozen-lockfile
+cd ../mirai-gikai-kawasaki-worktree/<branch-name> && pnpm install --frozen-lockfile
 ```
 
 - **目的**: kawasaki/developブランチを常にクリーンに保ち、作業の分離と並列作業を容易にする

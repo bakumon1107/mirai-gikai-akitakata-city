@@ -4,7 +4,10 @@ import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/type
 import { getActiveCouncilSession } from "@/features/council-sessions/server/loaders/get-active-council-session";
 import { CACHE_TAGS } from "@/lib/cache-tags";
 import type { ComingSoonBill } from "../../shared/types";
-import { findComingSoonBills } from "../repositories/bill-repository";
+import {
+  findComingSoonBills,
+  findTagsByBillIds,
+} from "../repositories/bill-repository";
 
 /**
  * Coming Soon議案を取得する
@@ -29,6 +32,10 @@ const _getCachedComingSoonBills = unstable_cache(
       return [];
     }
 
+    // タグ情報を一括取得
+    const billIds = data.map((bill) => bill.id);
+    const tagsByBillId = await findTagsByBillIds(billIds);
+
     // bill_contentsからtitleを抽出（ユーザーの難易度設定を使用）
     return data.map((bill) => {
       const contents = bill.bill_contents as Array<{
@@ -49,6 +56,7 @@ const _getCachedComingSoonBills = unstable_cache(
         name: bill.name,
         title: preferredContent?.title || fallbackContent?.title || null,
         council_url: bill.council_sessions?.council_url ?? null,
+        tags: tagsByBillId.get(bill.id) ?? [],
       };
     });
   },

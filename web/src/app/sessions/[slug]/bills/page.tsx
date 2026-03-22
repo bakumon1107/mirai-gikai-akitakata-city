@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layouts/container";
 import { siteConfig } from "@/config/site.config";
 import { getBillsByCouncilSession } from "@/features/bills/server/loaders/get-bills-by-council-session";
+import { getComingSoonBillsBySession } from "@/features/bills/server/loaders/get-coming-soon-bills-by-session";
 import { CouncilSessionBillList } from "@/features/council-sessions/client/components/council-session-bill-list";
 import { getCouncilSessionBySlug } from "@/features/council-sessions/server/loaders/get-council-session-by-slug";
 
@@ -32,12 +33,19 @@ export default async function SessionBillsPage({ params }: Props) {
     notFound();
   }
 
-  const bills = await getBillsByCouncilSession(session.id);
+  const [bills, comingSoonBills] = await Promise.all([
+    getBillsByCouncilSession(session.id),
+    getComingSoonBillsBySession(session.id),
+  ]);
 
   return (
     <Container className="py-8">
       <Suspense>
-        <CouncilSessionBillList session={session} bills={bills} />
+        <CouncilSessionBillList
+          session={session}
+          bills={bills}
+          comingSoonBills={comingSoonBills}
+        />
       </Suspense>
     </Container>
   );

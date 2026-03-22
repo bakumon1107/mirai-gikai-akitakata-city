@@ -49,6 +49,25 @@ export async function findCurrentCouncilSession(
 }
 
 /**
+ * 全定例会を開始日の降順で取得
+ */
+export async function findAllCouncilSessions(): Promise<CouncilSession[]> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase
+    .from("council_sessions")
+    .select("*")
+    .order("start_date", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch all council sessions:", error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
+/**
  * 指定日より前の直近の定例会を取得
  */
 export async function findPreviousCouncilSession(

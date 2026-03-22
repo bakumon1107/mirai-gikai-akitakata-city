@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DifficultySelector } from "@/features/bill-difficulty/client/components/difficulty-selector";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
+import type { CouncilSession } from "@/features/council-sessions/shared/types";
 import { InterviewHeaderActions } from "@/features/interview-session/client/components/interview-header-actions";
 import { isInterviewPage, isMainPage } from "@/lib/page-layout-utils";
 import { siteConfig } from "@/config/site.config";
@@ -12,9 +13,10 @@ import { HamburgerMenu } from "./hamburger-menu";
 
 interface HeaderClientProps {
   difficultyLevel: DifficultyLevelEnum;
+  sessions: CouncilSession[];
 }
 
-export function HeaderClient({ difficultyLevel }: HeaderClientProps) {
+export function HeaderClient({ difficultyLevel, sessions }: HeaderClientProps) {
   const pathname = usePathname();
   const showDifficultySelector = isMainPage(pathname);
   const showInterviewActions = isInterviewPage(pathname);
@@ -51,7 +53,7 @@ export function HeaderClient({ difficultyLevel }: HeaderClientProps) {
               <DifficultySelector currentLevel={difficultyLevel} />
             )}
             {showInterviewActions && <InterviewHeaderActions />}
-            <HamburgerMenu />
+            <HamburgerMenu sessions={sessions} />
           </nav>
         </div>
       </div>

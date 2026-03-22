@@ -4,7 +4,6 @@ import type {
   BillWithContent,
   ComingSoonBill,
 } from "@/features/bills/shared/types";
-import { Card, CardContent } from "@/components/ui/card";
 import type { CouncilSession } from "../../shared/types";
 import { BillListWithStatusFilter } from "./bill-list-with-status-filter";
 
@@ -52,45 +51,16 @@ export function CouncilSessionBillList({
         </p>
       </div>
 
-      {/* フィルター付き議案リスト */}
-      {bills.length === 0 ? (
+      {/* フィルター付き議案リスト（coming soon含む） */}
+      {bills.length === 0 && comingSoonBills.length === 0 ? (
         <p className="text-center py-12 text-muted-foreground">
           この定例会の議案はまだありません
         </p>
       ) : (
-        <BillListWithStatusFilter bills={bills} />
-      )}
-
-      {/* これから掲載される議案 */}
-      {comingSoonBills.length > 0 && (
-        <section className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <h2 className="text-[22px] font-bold text-black leading-[1.48]">
-              これから掲載される議案
-            </h2>
-            <p className="text-xs text-mirai-text-secondary">
-              順次掲載されていきます
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            {comingSoonBills.map((bill) => (
-              <Card key={bill.id} className="border border-black">
-                <CardContent className="flex items-center justify-between py-4 px-5">
-                  <div className="flex flex-col gap-1 min-w-0">
-                    <h3 className="font-bold text-base text-black leading-tight">
-                      {bill.title || bill.name}
-                    </h3>
-                    {bill.title && bill.title !== bill.name && (
-                      <p className="text-xs text-mirai-text-subtle">
-                        {bill.name}
-                      </p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
+        <BillListWithStatusFilter
+          bills={bills}
+          comingSoonBills={comingSoonBills}
+        />
       )}
 
       {/* 市議会リンク */}

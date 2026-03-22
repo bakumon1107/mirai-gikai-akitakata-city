@@ -35,6 +35,8 @@ export type ComingSoonBill = {
   name: string; // 正式名称
   title: string | null; // わかりやすいタイトル（bill_contentsから）
   council_url: string | null;
+  status: BillStatusEnum;
+  tags: BillTag[];
 };
 
 // Combined types for UI

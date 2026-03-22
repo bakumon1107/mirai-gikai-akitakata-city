@@ -27,38 +27,48 @@ export function rehypeEmbedYouTube() {
   return (tree: Root) => {
     visit(tree, "element", (node: Element, index, parent) => {
       if (node.tagName === "p" && parent && typeof index === "number") {
-        // p要素の中のテキストノードをチェック
+        // p要素の中のテキストノードまたはaタグをチェック
         for (const child of node.children) {
-          if (child.type === "text") {
-            const text = child.value;
-            const lines = text.split("\n");
+          let youtubeId: string | null = null;
 
+          if (child.type === "text") {
+            // 平文のURLの場合
+            const lines = child.value.split("\n");
             for (const line of lines) {
               const trimmedLine = line.trim();
               if (trimmedLine.startsWith("https://")) {
-                const youtubeId = extractYouTubeId(trimmedLine);
-                if (youtubeId) {
-                  // YouTube URLを見つけた場合、iframe要素に置き換え
-                  const iframe: Element = {
-                    type: "element",
-                    tagName: "iframe",
-                    properties: {
-                      src: `https://www.youtube.com/embed/${youtubeId}`,
-                      frameborder: "0",
-                      allow:
-                        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
-                      allowfullscreen: true,
-                      className: ["youtube-embed"],
-                    },
-                    children: [],
-                  };
-
-                  // p要素をiframe要素に置き換え
-                  parent.children[index] = iframe;
-                  return;
-                }
+                youtubeId = extractYouTubeId(trimmedLine);
+                if (youtubeId) break;
               }
             }
+          } else if (
+            child.type === "element" &&
+            child.tagName === "a" &&
+            typeof child.properties?.href === "string"
+          ) {
+            // remark-gfmによって自動リンク化されたURLの場合
+            youtubeId = extractYouTubeId(child.properties.href);
+          }
+
+          if (youtubeId) {
+            // YouTube URLを見つけた場合、iframe要素に置き換え
+            const iframe: Element = {
+              type: "element",
+              tagName: "iframe",
+              properties: {
+                src: `https://www.youtube.com/embed/${youtubeId}`,
+                frameborder: "0",
+                allow:
+                  "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture",
+                allowfullscreen: true,
+                className: ["youtube-embed"],
+              },
+              children: [],
+            };
+
+            // p要素をiframe要素に置き換え
+            parent.children[index] = iframe;
+            return;
           }
         }
       }

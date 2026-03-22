@@ -37,6 +37,10 @@ export async function BillContent({ bill }: BillContentProps) {
             [&_section:has(>iframe)]:p-0
             [&_iframe.youtube-embed]:w-full [&_iframe.youtube-embed]:aspect-video [&_iframe.youtube-embed]:mb-4
             [&_iframe.youtube-embed]:rounded-lg [&_iframe.youtube-embed]:shadow-md
+            [&_table]:w-full [&_table]:border-collapse [&_table]:mb-4 [&_table]:text-sm
+            [&_th]:border [&_th]:border-gray-300 [&_th]:px-3 [&_th]:py-2 [&_th]:bg-gray-50 [&_th]:font-semibold [&_th]:text-left
+            [&_td]:border [&_td]:border-gray-300 [&_td]:px-3 [&_td]:py-2
+            [&_tr:nth-child(even)]:bg-gray-50
           "
     >
       {content}

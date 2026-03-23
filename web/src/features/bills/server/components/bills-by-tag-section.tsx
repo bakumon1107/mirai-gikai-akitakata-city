@@ -1,6 +1,8 @@
 import { ChevronRight } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import { routes } from "@/lib/routes";
 import type { BillWithContent, BillsByTag } from "../../shared/types";
 import { BillCard } from "../../client/components/bill-list/bill-card";
 
@@ -52,7 +54,7 @@ export function BillsByTagSection({
             {/* 議案カード一覧 */}
             <div className="flex flex-col gap-4">
               {displayBills.map((bill) => (
-                <Link key={bill.id} href={`/bills/${bill.id}`}>
+                <Link key={bill.id} href={routes.billDetail(bill.id) as Route}>
                   <BillCard bill={bill} />
                 </Link>
               ))}
@@ -61,7 +63,7 @@ export function BillsByTagSection({
             {/* もっと見るカード */}
             {hasMore && sessionSlug && (
               <Link
-                href={`/sessions/${sessionSlug}/bills?tag=${tag.id}`}
+                href={`/sessions/${sessionSlug}/bills?tag=${tag.id}` as Route}
                 className="block"
               >
                 <Card className="border border-black hover:bg-gray-50 transition-colors cursor-pointer">

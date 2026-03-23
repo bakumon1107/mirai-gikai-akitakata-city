@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -90,7 +91,7 @@ function SortableHeadButton({
       params.set("sort", field);
       params.set("order", "desc");
     }
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}` as Route);
   }
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,7 @@ export function SessionFilter({
     } else {
       params.delete("session");
     }
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}` as Route);
   }
 
   if (sessions.length === 0) return null;

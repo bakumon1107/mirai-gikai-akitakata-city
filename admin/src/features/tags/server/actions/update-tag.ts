@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 import {
   invalidateWebCache,
   WEB_CACHE_TAGS,
@@ -30,7 +31,7 @@ export async function updateTag(input: UpdateTagInput) {
       return { error: mapTagDbError(result.error, "更新") };
     }
 
-    revalidatePath("/tags");
+    revalidatePath(routes.tags());
     // web側のキャッシュを無効化
     await invalidateWebCache([WEB_CACHE_TAGS.BILLS]);
 

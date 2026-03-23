@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -200,7 +201,7 @@ export function CouncilSessionItem({ session }: CouncilSessionItemProps) {
             <div className="text-sm text-gray-500">
               {session.slug && (
                 <Link
-                  href={`${env.webUrl}/sessions/${session.slug}/bills`}
+                  href={`${env.webUrl}/sessions/${session.slug}/bills` as Route}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mr-2 text-blue-600 hover:underline"

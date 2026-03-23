@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { siteConfig } from "@/config/site.config";
@@ -87,7 +88,7 @@ function ComingSoonBillCard({ bill }: { bill: ComingSoonBill }) {
   if (bill.council_url) {
     return (
       <Link
-        href={bill.council_url}
+        href={bill.council_url as Route}
         target="_blank"
         rel="noopener noreferrer"
         className="block"

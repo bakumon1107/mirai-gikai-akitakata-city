@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/config/site.config";
+import { routes } from "@/lib/routes";
 
 /**
  * デスクトップメニュー: ロゴ (画面左上)
@@ -8,7 +9,7 @@ import { siteConfig } from "@/config/site.config";
 export function DesktopMenuLogo() {
   return (
     <Link
-      href="/"
+      href={routes.home()}
       className="fixed top-6 left-6 z-50 flex items-center gap-6 hover:opacity-90 transition-opacity"
     >
       {/* ロゴ */}

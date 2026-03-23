@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/layouts/container";
+import { routes } from "@/lib/routes";
 import {
   LegalPageLayout,
   LegalParagraph,
@@ -36,14 +37,14 @@ const faqs: FaqItem[] = [
         はチームみらいの公式サービスではありません。「チームみらい」が開発・公開した「みらい議会」をベースに、有志が独自に運営している非公式サービスです。
         <br />
         ご意見・不具合等は、チームみらい公式ではなく、開発者（
-        <Link
+        <a
           href={siteConfig.operator.contactUrl}
           target="_blank"
           rel="noreferrer"
           className="underline underline-offset-2"
         >
           {siteConfig.operator.name}
-        </Link>
+        </a>
         ）にご連絡ください。
       </>
     ),
@@ -52,14 +53,14 @@ const faqs: FaqItem[] = [
     question: "議案の情報はどこから取得していますか？",
     answer: (
       <>
-        <Link
+        <a
           href={siteConfig.councilBillsDetailUrl}
           target="_blank"
           rel="noreferrer"
           className="underline underline-offset-2"
         >
           {siteConfig.councilName}公式サイト
-        </Link>
+        </a>
         に公開されている情報をもとに掲載しています。最新情報や正確な内容については公式サイトをご確認ください。
       </>
     ),
@@ -74,7 +75,7 @@ const faqs: FaqItem[] = [
     answer: (
       <>
         詳細は
-        <Link href="/privacy" className="underline underline-offset-2">
+        <Link href={routes.privacy()} className="underline underline-offset-2">
           プライバシーポリシー
         </Link>
         をご確認ください。AIチャット・インタビュー機能への入力内容には個人情報を含めないようお願いします。
@@ -86,14 +87,14 @@ const faqs: FaqItem[] = [
     answer: (
       <>
         開発者（
-        <Link
+        <a
           href={siteConfig.operator.contactUrl}
           target="_blank"
           rel="noreferrer"
           className="underline underline-offset-2"
         >
           {siteConfig.operator.name}
-        </Link>
+        </a>
         ）までご連絡ください。なお、チームみらいの公式窓口への連絡はご遠慮ください。
       </>
     ),

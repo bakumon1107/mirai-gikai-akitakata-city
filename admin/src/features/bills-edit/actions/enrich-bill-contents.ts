@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import * as os from "node:os";
 import * as path from "node:path";
+import { createAdminClient } from "@mirai-gikai/supabase";
 import { siteConfig } from "@/config/site.config";
 import {
   ClaudeTimeoutError,
@@ -30,13 +31,36 @@ export type EnrichBillContentsResult =
   | { success: true; foundNewInfo: false }
   | { success: false; error: string; isUsageLimit?: boolean };
 
+/** 日付文字列をJST(YYYY/MM/DD)にフォーマット */
+function formatDateJST(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+/** billId から議案＋定例会情報を取得 */
+async function fetchBillWithSession(billId: string) {
+  const supabase = createAdminClient();
+  const { data } = await supabase
+    .from("bills")
+    .select("council_session_id, council_sessions(name, start_date, end_date)")
+    .eq("id", billId)
+    .single();
+  return data;
+}
+
 function buildPrompt(
   billName: string,
   existingHardTitle: string,
-  outputFilePath: string
+  outputFilePath: string,
+  sessionInfo?: string
 ): string {
   return `${siteConfig.councilName}の議案「${billName}」について、Web検索で関連情報を収集し、詳細なコンテンツを作成してください。
-
+${sessionInfo ? `\n## この議案が審議される定例会の情報\n\n${sessionInfo}\n\n**重要**: コンテンツ内で定例会の日程（開会日・閉会日等）に言及する場合は、必ず上記の正確な日付を使用してください。Web検索結果の日付がズレている場合でも、上記の日付を優先してください。\n` : ""}
 ## 手順
 
 1. 「${siteConfig.councilName} ${billName}」をWebで検索し、以下のサイトを中心に情報を収集してください：
@@ -92,7 +116,28 @@ export async function enrichBillContents(
     const tempId = randomUUID();
     const outputFilePath = path.join(os.tmpdir(), `bill_enrich_${tempId}.json`);
 
-    const prompt = buildPrompt(billName, existingHardTitle, outputFilePath);
+    // 定例会の日程情報を取得してプロンプトに含める
+    let sessionInfo: string | undefined;
+    try {
+      const billData = await fetchBillWithSession(_billId);
+      const session = billData?.council_sessions;
+      if (session && !Array.isArray(session)) {
+        const startDate = formatDateJST(session.start_date);
+        const endDate = session.end_date
+          ? formatDateJST(session.end_date)
+          : "未定";
+        sessionInfo = `- 定例会名: ${session.name}\n- 開会日: ${startDate}\n- 閉会日: ${endDate}`;
+      }
+    } catch {
+      // 定例会情報が取得できなくても処理は続行
+    }
+
+    const prompt = buildPrompt(
+      billName,
+      existingHardTitle,
+      outputFilePath,
+      sessionInfo
+    );
 
     try {
       await executeClaudeToFile(prompt, outputFilePath);

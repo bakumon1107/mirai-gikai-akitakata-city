@@ -11,6 +11,7 @@ import { createAdminClient } from "@mirai-gikai/supabase";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
+import { routes } from "@/lib/routes";
 import { loadRun } from "../utils/storage";
 import {
   findFactionByName,
@@ -295,7 +296,7 @@ export async function applyDrafts(
       }
     }
 
-    revalidatePath("/bills");
+    revalidatePath(routes.bills());
     await invalidateWebCache();
 
     return { success: true, appliedCount, warnings };

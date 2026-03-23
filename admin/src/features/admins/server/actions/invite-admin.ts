@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 import { getErrorMessage } from "@/lib/utils/get-error-message";
 import type { CreateAdminInput } from "../../shared/types";
 import { validateEmail } from "../../shared/utils/validate-email";
@@ -56,7 +57,7 @@ export async function createAdmin(input: CreateAdminInput) {
       };
     }
 
-    revalidatePath("/admins");
+    revalidatePath(routes.admins());
     return { success: true };
   } catch (error) {
     console.error("Create admin error:", error);

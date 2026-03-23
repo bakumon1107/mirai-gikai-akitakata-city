@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
+import { routes } from "@/lib/routes";
 import type { StanceInput } from "../../shared/types";
 
 export async function upsertStance(
@@ -29,7 +30,7 @@ export async function upsertStance(
       throw new Error("会派見解の保存に失敗しました");
     }
 
-    revalidatePath("/bills", "layout");
+    revalidatePath(routes.bills(), "layout");
     await invalidateWebCache();
     return { success: true };
   } catch (error) {

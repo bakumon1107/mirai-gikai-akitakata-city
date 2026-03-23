@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 
 interface RunTopicAnalysisResult {
   success: boolean;
@@ -38,7 +39,7 @@ export async function runTopicAnalysisAction(
       };
     }
 
-    revalidatePath(`/bills/${billId}/topic-analysis`);
+    revalidatePath(routes.billTopicAnalysis(billId));
 
     return { success: true, versionId: data.versionId };
   } catch (error) {

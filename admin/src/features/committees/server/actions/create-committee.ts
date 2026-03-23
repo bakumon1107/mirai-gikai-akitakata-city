@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
+import { routes } from "@/lib/routes";
 import type { CreateCommitteeInput } from "../../shared/types";
 
 export async function createCommittee(input: CreateCommitteeInput) {
@@ -33,7 +34,7 @@ export async function createCommittee(input: CreateCommitteeInput) {
       return { error: `委員会の作成に失敗しました: ${error.message}` };
     }
 
-    revalidatePath("/committees");
+    revalidatePath(routes.committees());
     await invalidateWebCache();
 
     return { data };

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
+import { routes } from "@/lib/routes";
 import type { DeleteCommitteeInput } from "../../shared/types";
 
 export async function deleteCommittee(input: DeleteCommitteeInput) {
@@ -41,7 +42,7 @@ export async function deleteCommittee(input: DeleteCommitteeInput) {
       return { error: `委員会の削除に失敗しました: ${error.message}` };
     }
 
-    revalidatePath("/committees");
+    revalidatePath(routes.committees());
     await invalidateWebCache();
 
     return { success: true };

@@ -16,6 +16,8 @@ export type BillWithCouncilSession = Bill & {
   council_sessions: { name: string } | null;
 };
 
+import type { SortConfig } from "@/lib/sort";
+
 // ソート関連の型定義
 export type BillSortField =
   | "created_at"
@@ -26,11 +28,18 @@ export type BillSortField =
   | "name"
   | "council_session";
 
-export type SortOrder = "asc" | "desc";
+export const BILL_SORT_FIELDS: readonly BillSortField[] = [
+  "created_at",
+  "published_at",
+  "status_order",
+  "publish_status_order",
+] as const;
 
-export type BillSortConfig = {
-  field: BillSortField;
-  order: SortOrder;
+export type BillSortConfig = SortConfig<BillSortField>;
+
+export const DEFAULT_BILL_SORT: BillSortConfig = {
+  field: "created_at",
+  order: "desc",
 };
 
 // ステータスのソート順（DBのstatus_order generated columnと一致させる）

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 import { getErrorMessage } from "@/lib/utils/get-error-message";
 import type { DeleteAdminInput } from "../../shared/types";
 import { deleteAuthUser } from "../repositories/admin-repository";
@@ -22,7 +23,7 @@ export async function deleteAdmin(input: DeleteAdminInput) {
       };
     }
 
-    revalidatePath("/admins");
+    revalidatePath(routes.admins());
     return { success: true };
   } catch (error) {
     console.error("Delete admin error:", error);

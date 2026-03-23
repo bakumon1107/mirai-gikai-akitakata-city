@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
+import { routes } from "@/lib/routes";
 import type { UpdateCommitteeInput } from "../../shared/types";
 
 export async function updateCommittee(input: UpdateCommitteeInput) {
@@ -39,7 +40,7 @@ export async function updateCommittee(input: UpdateCommitteeInput) {
       return { error: `委員会の更新に失敗しました: ${error.message}` };
     }
 
-    revalidatePath("/committees");
+    revalidatePath(routes.committees());
     await invalidateWebCache();
 
     return { data };

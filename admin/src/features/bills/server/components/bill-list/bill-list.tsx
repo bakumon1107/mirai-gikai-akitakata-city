@@ -43,7 +43,7 @@ export async function BillList({
       <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="text-sm text-gray-600">{bills.length}件の議案</div>
         <div className="flex items-center gap-2">
-          <Link href="/bills/merge">
+          <Link href={routes.billMerge()}>
             <Button variant="outline">
               <GitMerge className="h-4 w-4 mr-1" />
               重複統合

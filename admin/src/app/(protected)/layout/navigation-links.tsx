@@ -8,11 +8,11 @@ import { cn } from "@/lib/utils";
 
 const navigationLinks = [
   { href: routes.bills(), label: "議案管理" },
-  { href: "/council-sessions", label: "定例会管理" },
+  { href: routes.councilSessions(), label: "定例会管理" },
   { href: routes.tags(), label: "タグ管理" },
-  { href: "/factions", label: "会派管理" },
-  { href: "/committees", label: "委員会管理" },
-  { href: "/ai-collection", label: "AI情報収集" },
+  { href: routes.factions(), label: "会派管理" },
+  { href: routes.committees(), label: "委員会管理" },
+  { href: routes.aiCollection(), label: "AI情報収集" },
   { href: routes.admins(), label: "管理者" },
 ];
 

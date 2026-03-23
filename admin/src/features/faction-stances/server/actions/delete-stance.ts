@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { invalidateWebCache } from "@/lib/utils/cache-invalidation";
+import { routes } from "@/lib/routes";
 
 export async function deleteStance(stanceId: string) {
   try {
@@ -18,7 +19,7 @@ export async function deleteStance(stanceId: string) {
       throw new Error("会派見解の削除に失敗しました");
     }
 
-    revalidatePath("/bills", "layout");
+    revalidatePath(routes.bills(), "layout");
     await invalidateWebCache();
     return { success: true };
   } catch (error) {

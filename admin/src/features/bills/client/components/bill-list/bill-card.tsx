@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { routes } from "@/lib/routes";
 import {
   Card,
   CardContent,
@@ -107,25 +108,25 @@ export function BillCard({ bill }: BillCardProps) {
       <CardFooter>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
           <div className="flex items-center gap-2">
-            <Link href={`/bills/${bill.id}/edit`}>
+            <Link href={routes.billEdit(bill.id)}>
               <Button variant="outline" size="sm">
                 <Edit className="h-4 w-4 mr-1" />
                 基本情報
               </Button>
             </Link>
-            <Link href={`/bills/${bill.id}/contents/edit`}>
+            <Link href={routes.billContentsEdit(bill.id)}>
               <Button variant="outline" size="sm">
                 <FileText className="h-4 w-4 mr-1" />
                 コンテンツ
               </Button>
             </Link>
-            <Link href={`/bills/${bill.id}/interview`}>
+            <Link href={routes.billInterview(bill.id)}>
               <Button variant="outline" size="sm">
                 <MessageCircle className="h-4 w-4 mr-1" />
                 インタビュー設定
               </Button>
             </Link>
-            <Link href={`/bills/${bill.id}/reports`}>
+            <Link href={routes.billReports(bill.id)}>
               <Button variant="outline" size="sm">
                 <BarChart3 className="h-4 w-4 mr-1" />
                 レポート一覧

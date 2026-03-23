@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 import {
   invalidateWebCache,
   WEB_CACHE_TAGS,
@@ -35,7 +36,7 @@ export async function updateBillTags(billId: string, tagIds: string[]) {
       await createBillsTags(billId, toAdd);
     }
 
-    revalidatePath("/bills", "layout");
+    revalidatePath(routes.bills(), "layout");
     // キャッシュを更新
     await invalidateWebCache([WEB_CACHE_TAGS.BILLS]);
 

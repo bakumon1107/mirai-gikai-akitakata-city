@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { siteConfig } from "@/config/site.config";
 import { LinkButton } from "./link-button";
 
@@ -94,14 +93,14 @@ export function About() {
                   ご意見や不具合等がございましたら党公式への連絡ではなく、
                   <br />
                   開発者の
-                  <Link
+                  <a
                     href={siteConfig.operator.contactUrl}
                     target="_blank"
                     rel="noreferrer"
                     className="underline underline-offset-2 hover:opacity-70 transition-opacity"
                   >
                     {siteConfig.operator.name}
-                  </Link>
+                  </a>
                   にご連絡お願いします。
                 </p>
               </div>

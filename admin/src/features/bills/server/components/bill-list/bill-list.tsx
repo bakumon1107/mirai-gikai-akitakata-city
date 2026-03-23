@@ -2,6 +2,7 @@ import { GitMerge, Plus } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { routes } from "@/lib/routes";
 import { ResizableBillTable } from "../../../client/components/bill-list/resizable-bill-table";
 import type { BillSortConfig } from "../../../shared/types";
 import { getBills } from "../../loaders/get-bills";
@@ -48,7 +49,7 @@ export async function BillList({
               重複統合
             </Button>
           </Link>
-          <Link href="/bills/new">
+          <Link href={routes.billNew()}>
             <Button>
               <Plus className="h-4 w-4 mr-1" />
               新規作成

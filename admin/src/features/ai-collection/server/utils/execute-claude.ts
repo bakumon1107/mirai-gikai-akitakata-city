@@ -4,7 +4,23 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 
-const CLAUDE_PATH = process.env.CLAUDE_CLI_PATH ?? "claude";
+function resolveClaudePath(): string {
+  if (process.env.CLAUDE_CLI_PATH) return process.env.CLAUDE_CLI_PATH;
+  if (process.platform === "win32") {
+    // Windows: npm グローバルの .cmd ラッパーをフルパスで指定
+    const npmGlobal = path.join(
+      os.homedir(),
+      "AppData",
+      "Roaming",
+      "npm",
+      "claude.cmd"
+    );
+    return npmGlobal;
+  }
+  return "claude";
+}
+
+const CLAUDE_PATH = resolveClaudePath();
 
 /** Claude の使用制限に達したことを示すエラー */
 export class ClaudeUsageLimitError extends Error {
@@ -60,22 +76,28 @@ export function executeClaudeToFile(
     const env = { ...process.env };
     delete env.CLAUDECODE;
 
+    // プロンプトを stdin 経由で渡す（コマンドライン長制限を回避）
     const proc = spawn(
       CLAUDE_PATH,
       [
         "-p",
-        prompt,
+        "-",
         "--output-format",
         "json",
         "--allowedTools",
         "WebSearch,WebFetch,Write",
       ],
       {
-        // stdin を 'ignore' にしないと Claude CLI が入力待ちでブロックする
-        stdio: ["ignore", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
         env,
+        // Windows では claude が .cmd ラッパー経由のため shell: true が必要
+        shell: process.platform === "win32",
       }
     );
+
+    // プロンプトを stdin に書き込んで閉じる
+    proc.stdin.write(prompt);
+    proc.stdin.end();
 
     let stdout = "";
     let stderr = "";

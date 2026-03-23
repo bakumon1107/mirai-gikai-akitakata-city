@@ -21,6 +21,21 @@ cd ../mirai-gikai-kawasaki-worktree/<branch-name> && pnpm install --frozen-lockf
 ```
 
 - **目的**: kawasaki/developブランチを常にクリーンに保ち、作業の分離と並列作業を容易にする
+- **重要**: worktreeは必ずプロジェクト外（`../mirai-gikai-kawasaki-worktree/`）に作成すること。プロジェクト内（`.claude/worktrees/` 等）に作成するとBiomeが「nested root configuration」エラーを起こす。
+
+### Worktreeクリーンアップ（必須）
+PR作成・マージ完了後は、不要になったworktreeを速やかに削除すること。放置するとディスクを圧迫し、Biome等のツールがエラーを起こす原因になる。
+
+```bash
+# 1. worktreeを削除
+git worktree remove ../mirai-gikai-kawasaki-worktree/<branch-name>
+
+# 2. マージ済みブランチを削除
+git branch -d <branch-name>
+
+# 3. 孤立したworktree参照を整理（任意）
+git worktree prune
+```
 
 ### 実装完了後は即PR作成
 実装完了後は「コミットしますか？」等の確認を挟まず、コミット → push → PR作成まで一気に進めること。ユーザーへの確認は不要。

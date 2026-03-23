@@ -3,6 +3,7 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { routes } from "@/lib/routes";
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BillActionsMenu } from "../bill-actions-menu/bill-actions-menu";
@@ -284,7 +285,7 @@ function BillRow({ bill }: { bill: BillWithCouncilSession }) {
       </td>
       <td className="p-2 align-middle overflow-hidden">
         <Link
-          href={`/bills/${bill.id}/edit`}
+          href={routes.billEdit(bill.id)}
           className="block truncate font-medium hover:underline"
           title={bill.name}
         >

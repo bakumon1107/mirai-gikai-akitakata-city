@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 import {
   invalidateWebCache,
   WEB_CACHE_TAGS,
@@ -26,7 +27,7 @@ export async function setActiveCouncilSession(
 
     const data = await findCouncilSessionById(input.id);
 
-    revalidatePath("/council-sessions");
+    revalidatePath(routes.councilSessions());
     await invalidateWebCache([
       WEB_CACHE_TAGS.COUNCIL_SESSIONS,
       WEB_CACHE_TAGS.BILLS,

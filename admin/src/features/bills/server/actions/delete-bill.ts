@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 import { getErrorMessage } from "@/lib/utils/get-error-message";
 import { deleteBillById } from "../repositories/bill-repository";
 
@@ -13,7 +14,7 @@ export async function deleteBill(id: string) {
     await deleteBillById(id);
 
     // キャッシュをリフレッシュ
-    revalidatePath("/bills");
+    revalidatePath(routes.bills());
   } catch (error) {
     console.error("Delete bill error:", error);
     throw new Error(

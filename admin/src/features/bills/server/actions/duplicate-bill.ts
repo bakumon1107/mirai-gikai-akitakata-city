@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 import type { Bill } from "../../shared/types";
 import {
   prepareBillContentsForDuplication,
@@ -39,7 +40,7 @@ export async function duplicateBill(billId: string) {
     return contentResult;
   }
 
-  revalidatePath("/bills");
+  revalidatePath(routes.bills());
   return { success: true, data: { billId: newBill.data.id } };
 }
 

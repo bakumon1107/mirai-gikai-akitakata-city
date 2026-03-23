@@ -4,6 +4,7 @@ import type { Database } from "@mirai-gikai/supabase";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { routes } from "@/lib/routes";
 
 type ScalarUpdate = {
   name: string;
@@ -160,8 +161,8 @@ export async function mergeBills(input: MergeBillsInput): Promise<MergeResult> {
     if (deleteError)
       throw new Error(`重複議案の削除に失敗: ${deleteError.message}`);
 
-    revalidatePath("/bills");
-    revalidatePath("/bills/merge");
+    revalidatePath(routes.bills());
+    revalidatePath(routes.billMerge());
 
     return { success: true, mergedCount: input.deleteBillIds.length, warnings };
   } catch (error) {

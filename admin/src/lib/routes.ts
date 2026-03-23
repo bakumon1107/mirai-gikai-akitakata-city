@@ -11,9 +11,13 @@ export const routes = {
   login: () => "/login" as const,
   bills: () => "/bills" as const,
   billNew: () => "/bills/new" as const,
+  billMerge: () => "/bills/merge" as const,
   admins: () => "/admins" as const,
   tags: () => "/tags" as const,
-  dietSessions: () => "/diet-sessions" as const,
+  councilSessions: () => "/council-sessions" as const,
+  committees: () => "/committees" as const,
+  factions: () => "/factions" as const,
+  aiCollection: () => "/ai-collection" as const,
 
   // ── 議案配下 ──────────────────────────────────────
   billEdit: (billId: string) => `/bills/${billId}/edit` as const,

@@ -15,7 +15,8 @@ interface ReactionButtonsProps {
   initialData: ReportReactionData;
   billName: string;
   shareUrl: string;
-  thumbnailUrl?: string | null;
+  /** OGP画像のURL */
+  ogImageUrl: string;
   /** シェア時のメッセージ（レポートのsummary等） */
   shareMessage?: string | null;
   /** 共有ボタンを表示するかどうか（非公開レポートでは非表示） */
@@ -27,7 +28,7 @@ export function ReactionButtons({
   initialData,
   billName,
   shareUrl,
-  thumbnailUrl,
+  ogImageUrl,
   shareMessage,
   showShare = true,
 }: ReactionButtonsProps) {
@@ -114,7 +115,7 @@ export function ReactionButtons({
         onClose={() => setIsShareModalOpen(false)}
         billName={billName}
         shareUrl={shareUrl}
-        thumbnailUrl={thumbnailUrl}
+        ogImageUrl={ogImageUrl}
         shareMessage={shareMessage}
       />
     </>

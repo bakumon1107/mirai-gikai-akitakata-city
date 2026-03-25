@@ -5,6 +5,7 @@ import "server-only";
 import OpenAI from "openai";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { findBillContentsByBillId } from "../repositories/bill-edit-repository";
 import { buildThumbnailPrompt } from "../../shared/utils/build-thumbnail-prompt";
 
 export type GenerateThumbnailResult =
@@ -76,8 +77,22 @@ export async function generateBillThumbnail(
       deps?.imageGenerator ??
       createDalleGenerator(apiKey as string, dalleModel);
 
-    // 1. 画像生成
-    const prompt = buildThumbnailPrompt(billName);
+    // 1. 議案コンテンツ（ふつう）を取得してプロンプトに含める
+    let normalContent: string | undefined;
+    if (billId !== "new") {
+      try {
+        const contents = await findBillContentsByBillId(billId);
+        const normalEntry = contents.find(
+          (c) => c.difficulty_level === "normal"
+        );
+        normalContent = normalEntry?.content || undefined;
+      } catch {
+        // コンテンツ取得失敗時はタイトルのみで生成
+      }
+    }
+
+    // 2. 画像生成
+    const prompt = buildThumbnailPrompt(billName, normalContent);
     const result = await generator.generate(prompt);
     if (!result) {
       return {
@@ -86,7 +101,7 @@ export async function generateBillThumbnail(
       };
     }
 
-    // 2. 生成画像をfetchしてバイナリ取得
+    // 3. 生成画像をfetchしてバイナリ取得
     const imageResponse = await fetch(result.url);
     if (!imageResponse.ok) {
       return {
@@ -96,7 +111,7 @@ export async function generateBillThumbnail(
     }
     const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
 
-    // 3. Supabase Storageにアップロード
+    // 4. Supabase Storageにアップロード
     const supabase = createAdminClient();
     const fileName = `ai_${billId}_${Date.now()}.png`;
 

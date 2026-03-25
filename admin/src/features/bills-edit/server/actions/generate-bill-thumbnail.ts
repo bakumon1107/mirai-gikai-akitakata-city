@@ -78,21 +78,29 @@ export async function generateBillThumbnail(
       createDalleGenerator(apiKey as string, dalleModel);
 
     // 1. 議案コンテンツ（ふつう）を取得してプロンプトに含める
-    let normalContent: string | undefined;
+    // DALL-E 2はプロンプト上限1000文字のため要約を使用、
+    // DALL-E 3は4000文字まで使えるので内容を使用
+    let billContext: string | undefined;
     if (billId !== "new") {
       try {
         const contents = await findBillContentsByBillId(billId);
         const normalEntry = contents.find(
           (c) => c.difficulty_level === "normal"
         );
-        normalContent = normalEntry?.content || undefined;
+        if (normalEntry) {
+          billContext =
+            dalleModel === "dall-e-2"
+              ? normalEntry.summary || undefined
+              : normalEntry.content || undefined;
+        }
       } catch {
         // コンテンツ取得失敗時はタイトルのみで生成
       }
     }
 
     // 2. 画像生成
-    const prompt = buildThumbnailPrompt(billName, normalContent);
+    const maxPromptLength = dalleModel === "dall-e-2" ? 1000 : 4000;
+    const prompt = buildThumbnailPrompt(billName, billContext, maxPromptLength);
     const result = await generator.generate(prompt);
     if (!result) {
       return {

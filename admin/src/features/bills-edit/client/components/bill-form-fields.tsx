@@ -1,6 +1,6 @@
 "use client";
 
-import type { Control } from "react-hook-form";
+import { type Control, useFormContext, useWatch } from "react-hook-form";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
@@ -23,6 +23,7 @@ import type { BillStatus } from "@/features/bills/shared/types";
 import type { Committee } from "@/features/committees/shared/types";
 import type { CouncilSession } from "@/features/council-sessions/shared/types";
 import type { BillCreateInput } from "../../shared/types";
+import { GenerateThumbnailButton } from "./generate-thumbnail-button";
 import { ThumbnailUpload } from "./thumbnail-upload";
 
 const BILL_STATUS_OPTIONS: Array<{ value: BillStatus; label: string }> = [
@@ -48,6 +49,14 @@ export function BillFormFields({
   councilSessions,
   committees,
 }: BillFormFieldsProps) {
+  const { setValue } = useFormContext<BillCreateInput>();
+  const billName = useWatch({ control, name: "name" });
+  const thumbnailUrl = useWatch({ control, name: "thumbnail_url" });
+  const shareThumbnailUrl = useWatch({
+    control,
+    name: "share_thumbnail_url",
+  });
+
   return (
     <>
       <FormField
@@ -168,6 +177,22 @@ export function BillFormFields({
           </FormItem>
         )}
       />
+
+      <FormItem>
+        <FormDescription>
+          議案名からAIでサムネイル画像を自動生成します。生成した画像はサムネイルとOGP画像の両方に設定されます。
+        </FormDescription>
+        <GenerateThumbnailButton
+          billId={billId}
+          billName={billName}
+          currentThumbnailUrl={thumbnailUrl}
+          currentShareThumbnailUrl={shareThumbnailUrl}
+          onGenerated={(url) => {
+            setValue("thumbnail_url", url);
+            setValue("share_thumbnail_url", url);
+          }}
+        />
+      </FormItem>
 
       <FormField
         control={control}

@@ -1,12 +1,11 @@
 const REQUIREMENTS = `Requirements:
+- Focus on objects, places, or symbols that directly represent the bill's topic — the viewer should immediately understand what the bill is about
 - No text or letters in the image
-- Style: editorial stock photo by a professional photographer, NOT AI illustration
-- Show a concrete real-world scene with people or environments related to the topic
-- Candid, documentary-style composition — no perfect symmetry or staged poses
-- Natural depth of field, realistic shadows, slight lens imperfections
-- Calm, professional tone for a civic context
-- Soft natural lighting — no HDR or dramatic effects
-- Muted, realistic colors — no oversaturation
+- Photorealistic style resembling a stock photo — avoid flat illustration, isometric, or 3D-render looks
+- Avoid showing faces up close — use objects, hands, buildings, or wide environmental shots instead
+- Natural lighting with soft shadows — no HDR or overly dramatic effects
+- Muted, professional color palette — no oversaturation
+- Calm, professional tone suitable for a civic/government context
 - Landscape 16:9`;
 
 /**
@@ -21,7 +20,7 @@ export function buildThumbnailPrompt(
   billContext?: string,
   maxPromptLength = 4000
 ): string {
-  const header = `Generate an image that looks like an editorial stock photo for this Japanese municipal government bill: "${billName}". Depict a specific, realistic scene that a photojournalist might capture to illustrate this topic.`;
+  const header = `Create a photorealistic image that visually represents the key topic of this Japanese municipal government bill: "${billName}". Choose objects, places, or scenes that best symbolize what this bill is about.`;
 
   // ヘッダー + 改行 + Requirements の固定部分の長さを算出
   const fixedLength = header.length + 2 + REQUIREMENTS.length;

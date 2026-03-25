@@ -51,6 +51,7 @@ export function BillEditForm({
       is_featured: bill.is_featured,
       committee_id: bill.committee_id,
       council_session_id: defaultCouncilSessionId,
+      pdf_url: bill.pdf_url,
     },
   });
 

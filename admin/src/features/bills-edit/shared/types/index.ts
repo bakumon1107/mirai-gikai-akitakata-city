@@ -37,6 +37,12 @@ const billBaseSchema = z.object({
   is_featured: z.boolean(),
   committee_id: z.string().uuid().nullable().optional(),
   council_session_id: z.string().uuid().nullable().optional(),
+  pdf_url: z
+    .string()
+    .url("有効なURLを入力してください")
+    .nullable()
+    .optional()
+    .or(z.literal("").transform(() => null)),
 });
 
 // 更新用スキーマ（既存）

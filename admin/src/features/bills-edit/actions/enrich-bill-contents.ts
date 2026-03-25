@@ -47,7 +47,9 @@ async function fetchBillWithSession(billId: string) {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("bills")
-    .select("council_session_id, council_sessions(name, start_date, end_date)")
+    .select(
+      "pdf_url, council_session_id, council_sessions(name, start_date, end_date)"
+    )
     .eq("id", billId)
     .single();
   return data;
@@ -57,12 +59,24 @@ function buildPrompt(
   billName: string,
   existingHardTitle: string,
   outputFilePath: string,
-  sessionInfo?: string
+  sessionInfo?: string,
+  pdfUrl?: string | null
 ): string {
+  const pdfStep = pdfUrl
+    ? `
+0. **【重要】まず以下の議案PDFを読み取ってください：**
+   PDF URL: ${pdfUrl}
+   - WebFetchでこのURLを取得してください。PDFの内容がテキストとして取得できた場合は、その内容を議案の一次情報として使用してください。
+   - WebFetchでテキストが取得できない場合（バイナリ、文字化け等）は、WebFetchの結果に含まれるローカル保存先パスをReadで読み取ってください。Readツールは画像化されたPDFも視覚的に読み取れます。
+   - PDFから得られた情報（提案理由、経緯、金額、当事者等）は、コンテンツ作成の最も重要な情報源として活用してください。
+
+`
+    : "";
+
   return `${siteConfig.councilName}の議案「${billName}」について、Web検索で関連情報を収集し、詳細なコンテンツを作成してください。
 ${sessionInfo ? `\n## この議案が審議される定例会の情報\n\n${sessionInfo}\n\n**重要**: コンテンツ内で定例会の日程（開会日・閉会日等）に言及する場合は、必ず上記の正確な日付を使用してください。Web検索結果の日付がズレている場合でも、上記の日付を優先してください。\n` : ""}
 ## 手順
-
+${pdfStep}
 1. 「${siteConfig.councilName} ${billName}」をWebで検索し、以下のサイトを中心に情報を収集してください：
    - ${siteConfig.councilName}公式サイト（${siteConfig.councilBillsDetailUrl}）
    - ${siteConfig.cityName}公式サイト
@@ -116,10 +130,12 @@ export async function enrichBillContents(
     const tempId = randomUUID();
     const outputFilePath = path.join(os.tmpdir(), `bill_enrich_${tempId}.json`);
 
-    // 定例会の日程情報を取得してプロンプトに含める
+    // 定例会の日程情報とPDF URLを取得してプロンプトに含める
     let sessionInfo: string | undefined;
+    let pdfUrl: string | null | undefined;
     try {
       const billData = await fetchBillWithSession(_billId);
+      pdfUrl = billData?.pdf_url;
       const session = billData?.council_sessions;
       if (session && !Array.isArray(session)) {
         const startDate = formatDateJST(session.start_date);
@@ -136,7 +152,8 @@ export async function enrichBillContents(
       billName,
       existingHardTitle,
       outputFilePath,
-      sessionInfo
+      sessionInfo,
+      pdfUrl
     );
 
     try {

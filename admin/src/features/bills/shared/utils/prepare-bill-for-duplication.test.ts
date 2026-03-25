@@ -15,6 +15,7 @@ const baseBill: Bill = {
   council_session_id: "session-001",
   committee_id: null,
   is_featured: true,
+  pdf_url: null,
   publish_status: "published",
   published_at: null,
   share_thumbnail_url: null,

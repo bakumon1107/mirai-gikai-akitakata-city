@@ -1,11 +1,13 @@
 const REQUIREMENTS = `Requirements:
-- No text, letters, words, or characters of any kind in the image
-- Professional, calm tone suitable for a government/civic context
-- Photorealistic style with soft, natural lighting
-- Use muted, professional colors (blues, greens, warm neutrals)
-- Abstract or conceptual representation of the bill's topic
-- Suitable as a web thumbnail at various sizes
-- Landscape orientation (16:9 aspect ratio)`;
+- No text or letters in the image
+- Style: editorial stock photo by a professional photographer, NOT AI illustration
+- Show a concrete real-world scene with people or environments related to the topic
+- Candid, documentary-style composition — no perfect symmetry or staged poses
+- Natural depth of field, realistic shadows, slight lens imperfections
+- Calm, professional tone for a civic context
+- Soft natural lighting — no HDR or dramatic effects
+- Muted, realistic colors — no oversaturation
+- Landscape 16:9`;
 
 /**
  * 議案タイトルと内容からDALL-E用の画像生成プロンプトを構築する
@@ -19,7 +21,7 @@ export function buildThumbnailPrompt(
   billContext?: string,
   maxPromptLength = 4000
 ): string {
-  const header = `Create a photorealistic, high-quality image that visually represents the concept of this Japanese municipal government bill: "${billName}".`;
+  const header = `Generate an image that looks like an editorial stock photo for this Japanese municipal government bill: "${billName}". Depict a specific, realistic scene that a photojournalist might capture to illustrate this topic.`;
 
   // ヘッダー + 改行 + Requirements の固定部分の長さを算出
   const fixedLength = header.length + 2 + REQUIREMENTS.length;

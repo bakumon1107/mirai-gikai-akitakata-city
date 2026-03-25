@@ -18,6 +18,7 @@ const baseBill: BillWithContent = {
   name: "サンプル議案",
   status: "submitted",
   is_featured: false,
+  pdf_url: null,
   thumbnail_url: null,
   share_thumbnail_url: null,
   published_at: "2026-02-15",

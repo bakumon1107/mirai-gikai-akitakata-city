@@ -258,6 +258,28 @@ export function BillFormFields({
 
       <FormField
         control={control}
+        name="pdf_url"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>議案PDF URL</FormLabel>
+            <FormControl>
+              <Input
+                type="url"
+                placeholder="https://www.city.kawasaki.jp/..."
+                {...field}
+                value={field.value ?? ""}
+              />
+            </FormControl>
+            <FormDescription>
+              議案PDFのURLを入力してください（任意）。Web検索補完時にPDFの内容を参照します。
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={control}
         name="is_featured"
         render={({ field }) => (
           <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">

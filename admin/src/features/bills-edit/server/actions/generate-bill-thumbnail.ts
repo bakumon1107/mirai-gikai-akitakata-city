@@ -37,7 +37,8 @@ function createDalleGenerator(
         prompt,
         n: 1,
         size: getImageSize(model),
-        quality: "standard",
+        // DALL-E 2 は quality パラメータに対応していない
+        ...(model === "dall-e-3" ? { quality: "standard" } : {}),
       });
       const url = response.data?.[0]?.url;
       return url ? { url } : null;

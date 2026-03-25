@@ -16,16 +16,27 @@ export interface ImageGenerator {
   generate(prompt: string): Promise<{ url: string } | null>;
 }
 
-/** OpenAI DALL-E 3 を使ったデフォルト実装 */
-function createDalleGenerator(apiKey: string): ImageGenerator {
+type DalleModel = "dall-e-2" | "dall-e-3";
+
+/** モデルに応じた画像サイズを返す */
+function getImageSize(model: DalleModel): "1792x1024" | "1024x1024" {
+  // DALL-E 2 は 1792x1024 に対応していないため 1024x1024 を使用
+  return model === "dall-e-2" ? "1024x1024" : "1792x1024";
+}
+
+/** OpenAI DALL-E を使ったデフォルト実装 */
+function createDalleGenerator(
+  apiKey: string,
+  model: DalleModel
+): ImageGenerator {
   const openai = new OpenAI({ apiKey });
   return {
     async generate(prompt: string) {
       const response = await openai.images.generate({
-        model: "dall-e-3",
+        model,
         prompt,
         n: 1,
-        size: "1792x1024",
+        size: getImageSize(model),
         quality: "standard",
       });
       const url = response.data?.[0]?.url;
@@ -58,8 +69,11 @@ export async function generateBillThumbnail(
       };
     }
 
+    const dalleModel: DalleModel =
+      process.env.DALLE_MODEL === "dall-e-2" ? "dall-e-2" : "dall-e-3";
     const generator =
-      deps?.imageGenerator ?? createDalleGenerator(apiKey as string);
+      deps?.imageGenerator ??
+      createDalleGenerator(apiKey as string, dalleModel);
 
     // 1. 画像生成
     const prompt = buildThumbnailPrompt(billName);

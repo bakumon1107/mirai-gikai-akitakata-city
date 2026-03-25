@@ -41,6 +41,7 @@ export function BillCreateForm({
       share_thumbnail_url: null,
       is_featured: false,
       council_session_id: defaultCouncilSessionId,
+      pdf_url: null,
     },
   });
 

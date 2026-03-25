@@ -85,7 +85,7 @@ export function executeClaudeToFile(
         "--output-format",
         "json",
         "--allowedTools",
-        "WebSearch,WebFetch,Write",
+        "WebSearch,WebFetch,Write,Read",
       ],
       {
         stdio: ["pipe", "pipe", "pipe"],

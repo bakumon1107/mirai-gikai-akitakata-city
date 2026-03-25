@@ -3,26 +3,19 @@ import type { Route } from "next";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { routes } from "@/lib/routes";
-import type { BillWithContent, BillsByTag } from "../../shared/types";
+import type { BillsByTag } from "../../shared/types";
+import { selectBillsForDisplay } from "../../shared/utils/select-bills-for-display";
 import { BillCard } from "../../client/components/bill-list/bill-card";
-
-const MAX_DISPLAY_COUNT = 3;
 
 interface BillsByTagSectionProps {
   billsByTag: BillsByTag[];
+  featuredBillIds: Set<string>;
   sessionSlug?: string | null;
-}
-
-function pickRandom(
-  bills: BillWithContent[],
-  count: number
-): BillWithContent[] {
-  const shuffled = [...bills].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
 }
 
 export function BillsByTagSection({
   billsByTag,
+  featuredBillIds,
   sessionSlug,
 }: BillsByTagSectionProps) {
   if (billsByTag.length === 0) {
@@ -32,10 +25,14 @@ export function BillsByTagSection({
   return (
     <div className="flex flex-col gap-12">
       {billsByTag.map(({ tag, bills }) => {
-        const hasMore = bills.length > MAX_DISPLAY_COUNT;
-        const displayBills = hasMore
-          ? pickRandom(bills, MAX_DISPLAY_COUNT)
-          : bills;
+        const { displayBills, showMoreLink } = selectBillsForDisplay(
+          bills,
+          featuredBillIds
+        );
+
+        if (displayBills.length === 0) {
+          return null;
+        }
 
         return (
           <section key={tag.id} className="flex flex-col gap-6">
@@ -61,7 +58,7 @@ export function BillsByTagSection({
             </div>
 
             {/* もっと見るカード */}
-            {hasMore && sessionSlug && (
+            {showMoreLink && sessionSlug && (
               <Link
                 href={`/sessions/${sessionSlug}/bills?tag=${tag.id}` as Route}
                 className="block"

@@ -26,6 +26,8 @@ export default async function Home() {
     getDifficultyLevel(),
   ]);
 
+  const featuredBillIds = new Set(featuredBills.map((b) => b.id));
+
   const toBillChatContext = (bill: BillWithContent) => {
     return {
       name: `${bill.bill_content?.title}（${bill.name}）`,
@@ -52,6 +54,7 @@ export default async function Home() {
             {/* タグ別議案一覧セクション */}
             <BillsByTagSection
               billsByTag={billsByTag}
+              featuredBillIds={featuredBillIds}
               sessionSlug={activeSessionSlug}
             />
           </main>

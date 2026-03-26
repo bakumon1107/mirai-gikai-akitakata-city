@@ -2,10 +2,10 @@
 
 import { Loader2 } from "lucide-react";
 import { useCallback, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useAnonymousSupabaseUser } from "@/features/chat/client/hooks/use-anonymous-supabase-user";
 import { ReactionButtonsInline } from "@/features/report-reaction/client/components/reaction-buttons-inline";
 import type { ReportReactionData } from "@/features/report-reaction/shared/types";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { fetchMorePublicReports } from "../../server/actions/fetch-more-public-reports";
 import type { PublicInterviewReport } from "../../server/loaders/get-public-reports-by-bill-id";
@@ -151,7 +151,7 @@ export function PublicOpinionsList({
       </div>
 
       {/* フィルター + ソート */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3">
         <div className="flex gap-3 overflow-x-auto">
           {stanceFilterOrder.map((filter) => (
             <_FilterChip

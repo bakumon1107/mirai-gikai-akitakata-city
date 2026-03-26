@@ -54,19 +54,7 @@ export async function ReportChatLogPage({
       : getPublicReportLink(reportId);
 
   return (
-    <div className="min-h-dvh bg-mirai-surface">
-      {/* 法案サムネイル画像 */}
-      {bill.thumbnail_url && (
-        <div className="relative w-full h-[320px]">
-          <Image
-            src={bill.thumbnail_url}
-            alt={billName}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-
+    <div className="min-h-dvh bg-mirai-surface pt-20 md:pt-4">
       {/* Back to Report Link */}
       <div className="px-4 pt-4">
         <Link
@@ -83,7 +71,7 @@ export async function ReportChatLogPage({
         <div className="flex flex-col items-center">
           {/* Title */}
           <h1 className="text-2xl font-bold text-center text-gray-800">
-            インタビューレポート
+            実際のインタビュー
           </h1>
 
           {/* Bill Name */}
@@ -112,9 +100,6 @@ export async function ReportChatLogPage({
       {/* Content Sections */}
       <div className="px-4 py-8">
         <div className="flex flex-col gap-9">
-          {/* Interviewee Info */}
-          <IntervieweeInfo roleDescription={report.role_description} />
-
           {/* Chat Log Section */}
           <div className="flex flex-col gap-4">
             <h2 className="text-xl font-bold text-gray-800">

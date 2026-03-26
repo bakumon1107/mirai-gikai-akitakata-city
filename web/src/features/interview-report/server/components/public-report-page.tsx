@@ -35,21 +35,9 @@ export async function PublicReportPage({ reportId }: PublicReportPageProps) {
   const ogImageUrl = `${origin}/api/og/report?id=${reportId}`;
 
   return (
-    <div className="min-h-dvh bg-mirai-surface pb-15">
-      {/* 法案サムネイル画像 */}
-      {data.bill.thumbnail_url && (
-        <div className="relative w-full h-[320px]">
-          <Image
-            src={data.bill.thumbnail_url}
-            alt={billName}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-
+    <div className="min-h-dvh bg-mirai-surface pb-12 pt-20 md:pt-4">
       {/* ヘッダーセクション */}
-      <div className="px-4 pt-8 pb-4">
+      <div className="px-4 pt-8">
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-2xl font-bold text-center text-gray-800">
             インタビューレポート

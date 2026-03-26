@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port ${WEB_PORT:-3002}",
+    "dev": "node -e \"const p=process.env.WEB_PORT||3002;require('child_process').execSync('next dev --turbopack --port '+p,{stdio:'inherit'})\"",
     "build": "next build --turbopack",
     "start": "next start",
     "typecheck": "tsc --noEmit",

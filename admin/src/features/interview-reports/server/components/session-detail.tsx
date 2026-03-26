@@ -1,12 +1,5 @@
 import "server-only";
-import {
-  Bot,
-  Clock,
-  Frown,
-  Lightbulb,
-  MessageCircle,
-  User,
-} from "lucide-react";
+import { Bot, Clock, Lightbulb, MessageCircle, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RegenerateContentRichnessButton } from "../../client/components/regenerate-content-richness-button";
@@ -138,26 +131,15 @@ export function SessionDetail({ session, billId }: SessionDetailProps) {
               </div>
             )}
             {reactionCounts && (
-              <>
-                <div>
-                  <div className="text-sm text-gray-500">参考になる</div>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <Lightbulb className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-semibold">
-                      {reactionCounts.helpful}
-                    </span>
-                  </div>
+              <div>
+                <div className="text-sm text-gray-500">参考になる</div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Lightbulb className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-semibold">
+                    {reactionCounts.helpful}
+                  </span>
                 </div>
-                <div>
-                  <div className="text-sm text-gray-500">うーん...</div>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <Frown className="h-4 w-4 text-orange-500" />
-                    <span className="text-sm font-semibold">
-                      {reactionCounts.hmm}
-                    </span>
-                  </div>
-                </div>
-              </>
+              </div>
             )}
           </div>
         </CardContent>

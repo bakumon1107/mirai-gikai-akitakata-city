@@ -187,7 +187,7 @@ export function AiCollectionPage({
                 </span>
               </div>
               <p className="ml-8 text-xs text-gray-400">
-                ウェブ検索を伴うため数分〜10分程度かかります。このページを開いたままお待ちください。
+                ウェブ検索を伴うため数分〜十数分程度かかります。このページを開いたままお待ちください。
               </p>
             </div>
           )}

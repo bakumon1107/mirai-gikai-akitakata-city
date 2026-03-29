@@ -121,16 +121,20 @@ export function BillContentsEditForm({
     setIsSubmitting(true);
     setError(null);
 
-    const result = await updateBillContents(bill.id, data);
+    try {
+      const result = await updateBillContents(bill.id, data);
 
-    if (result.success) {
-      toast.success("議案コンテンツを更新しました");
-    } else {
-      setError(result.error);
+      if (result.success) {
+        toast.success("議案コンテンツを更新しました");
+      } else {
+        setError(result.error);
+        toast.error("更新に失敗しました");
+      }
+    } catch {
       toast.error("更新に失敗しました");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   }
 
   return (

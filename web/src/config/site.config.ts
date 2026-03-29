@@ -55,7 +55,7 @@ export const siteConfig = {
     /** AIチャット機能（議案への質問・テキスト選択からの質問）*/
     aiChat: true,
     /** AIインタビュー機能（議案当事者へのヒアリング）*/
-    aiInterview: true,
+    aiInterview: false,
     /**
      * チームみらいセクションの表示（トップページ・フッター・デスクトップメニュー）
      * 非公式運営など、党の公式サービスとして出さない場合は false にする。

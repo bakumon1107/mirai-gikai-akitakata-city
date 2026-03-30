@@ -165,7 +165,7 @@ describe("bill-repository 統合テスト", () => {
   // ============================================================
 
   describe("findMiraiStanceByBillId", () => {
-    it("川崎市議会DBにはmirai_stancesテーブルが存在しないため常にnullを返す", async () => {
+    it("現在のDBにはmirai_stancesテーブルが存在しないため常にnullを返す", async () => {
       const bill = await createTestBill();
       billIds.push(bill.id);
 

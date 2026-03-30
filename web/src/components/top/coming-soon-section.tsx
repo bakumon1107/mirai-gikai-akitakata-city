@@ -37,7 +37,7 @@ export function ComingSoonSection({ bills }: ComingSoonSectionProps) {
         </div>
       )}
 
-      {/* 川崎市議会情報へのリンク */}
+      {/* 議会情報へのリンク */}
       <div className="text-right text-sm text-mirai-text-secondary">
         <Link
           href={siteConfig.councilBillsDetailUrl}

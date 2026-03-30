@@ -1,18 +1,21 @@
-import type { Route } from "next";
 import { ArrowRight, Undo2 } from "lucide-react";
+import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site.config";
 import type { BillWithContent } from "@/features/bills/shared/types";
-import { InterviewStatusBadge } from "@/features/interview-session/client/components/interview-status-badge";
-import type { LatestInterviewSession } from "@/features/interview-session/server/loaders/get-latest-interview-session";
-import type { InterviewConfig } from "../../server/loaders/get-interview-config";
+import { formatEstimatedDuration } from "@/features/interview-config/shared/utils/format-estimated-duration";
 import {
   getBillDetailLink,
   getInterviewDisclosureLink,
 } from "@/features/interview-config/shared/utils/interview-links";
-import { formatEstimatedDuration } from "@/features/interview-config/shared/utils/format-estimated-duration";
+import { PastReportsSection } from "@/features/interview-report/client/components/past-reports-section";
+import type { UserReportsResult } from "@/features/interview-report/server/loaders/get-user-reports-by-interview-config";
+import { InterviewStatusBadge } from "@/features/interview-session/client/components/interview-status-badge";
+import { NewInterviewButton } from "@/features/interview-session/client/components/new-interview-button";
+import type { LatestInterviewSession } from "@/features/interview-session/server/loaders/get-latest-interview-session";
+import type { InterviewConfig } from "../../server/loaders/get-interview-config";
 import { InterviewActionButtons } from "./interview-action-buttons";
 
 interface InterviewLPPageProps {
@@ -20,6 +23,7 @@ interface InterviewLPPageProps {
   interviewConfig: InterviewConfig;
   sessionInfo: LatestInterviewSession | null;
   previewToken?: string;
+  userReports?: UserReportsResult | null;
 }
 
 const FEATURES: {
@@ -30,7 +34,7 @@ const FEATURES: {
   {
     iconSrc: "/icons/interview-ear.svg",
     iconSize: { w: 21, h: 29 },
-    text: "AIがあなたの課題感や\nご経験をお聞きします",
+    text: "あなたの経験や考えをAIがチャットで深堀りします",
   },
   {
     iconSrc: "/icons/interview-messages.svg",
@@ -52,7 +56,7 @@ const FEATURES: {
 
 function _InterviewLPHeader({ bill }: { bill: BillWithContent }) {
   return (
-    <div className="relative w-full h-72 md:h-80">
+    <div className="relative w-full h-50 md:h-80">
       {bill.thumbnail_url ? (
         <Image
           src={bill.thumbnail_url}
@@ -85,8 +89,8 @@ function _InterviewLPHero({
   return (
     <div className="flex flex-col items-center gap-6 px-4">
       <div className="flex flex-col items-center gap-3">
-        <div className="inline-flex items-center justify-center gap-2 px-6 py-2 mb-3 bg-primary rounded-2xl">
-          <span className="text-[15px] font-medium text-white leading-tight">
+        <div className="inline-flex items-center justify-center gap-2 px-6 py-1 mb-3 bg-primary rounded-2xl">
+          <span className="text-[13px] font-medium text-white leading-tight">
             当事者・有識者の方へ
           </span>
         </div>
@@ -95,7 +99,7 @@ function _InterviewLPHero({
         </h1>
         <Link href={billLink as Route}>
           <div className="inline-flex items-center justify-center gap-2.5 px-4 py-2 bg-white rounded-xl hover:bg-gray-50 transition-opacity cursor-pointer">
-            <span className="text-[15px] font-bold text-black leading-[1.87]">
+            <span className="text-[13px] font-medium text-black leading-[1.87]">
               {bill.bill_content?.title ?? bill.name}
             </span>
           </div>
@@ -121,13 +125,15 @@ function _InterviewLPHero({
         ))}
       </div>
 
-      <div className="w-full max-w-[370px] mt-2 flex flex-col gap-3">
-        <InterviewActionButtons
-          billId={billId}
-          sessionInfo={sessionInfo}
-          previewToken={previewToken}
-        />
-      </div>
+      {sessionInfo?.status !== "completed" && (
+        <div className="w-full max-w-[560px] mt-2 flex flex-col gap-3">
+          <InterviewActionButtons
+            billId={billId}
+            sessionInfo={sessionInfo}
+            previewToken={previewToken}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -144,7 +150,7 @@ function _InterviewOverviewSection({
   const billLink = getBillDetailLink(billId, previewToken);
 
   return (
-    <div className="w-full max-w-[370px] mx-auto bg-white rounded-2xl p-6 space-y-4">
+    <div className="w-full max-w-[560px] mx-auto bg-white rounded-2xl p-6 space-y-4">
       <h2 className="text-[22px] font-bold text-black leading-[1.64]">
         インタビュー概要
       </h2>
@@ -191,7 +197,7 @@ function _InterviewDurationSection({
   }
 
   return (
-    <div className="w-full max-w-[370px] mx-auto bg-white rounded-2xl p-6 space-y-2">
+    <div className="w-full max-w-[560px] mx-auto bg-white rounded-2xl p-6 space-y-2">
       <h2 className="text-[22px] font-bold text-black leading-[1.64]">
         予定時間
       </h2>
@@ -212,7 +218,7 @@ function _InterviewThemesSection({
   }
 
   return (
-    <div className="w-full max-w-[370px] mx-auto bg-white rounded-2xl p-6 space-y-4">
+    <div className="w-full max-w-[560px] mx-auto bg-white rounded-2xl p-6 space-y-4">
       <h2 className="text-[22px] font-bold text-black leading-[1.64]">
         質問テーマ
       </h2>
@@ -240,7 +246,7 @@ function _InterviewThemesSection({
 
 function _InterviewNoticeSection() {
   return (
-    <div className="w-full max-w-[370px] mx-auto bg-white rounded-2xl p-6 space-y-4">
+    <div className="w-full max-w-[560px] mx-auto bg-white rounded-2xl p-6 space-y-4">
       <h2 className="text-[22px] font-bold text-black leading-[1.64]">
         注意事項
       </h2>
@@ -267,7 +273,7 @@ function _InterviewDisclosureLink({
   const disclosureLink = getInterviewDisclosureLink(billId, previewToken);
 
   return (
-    <div className="w-full max-w-[370px] mx-auto">
+    <div className="w-full max-w-[560px] mx-auto">
       <Link
         href={disclosureLink as Route}
         className="text-xs text-black leading-[1.83] underline underline-offset-2 hover:opacity-70 transition-opacity"
@@ -311,6 +317,7 @@ export function InterviewLPPage({
   interviewConfig,
   sessionInfo,
   previewToken,
+  userReports,
 }: InterviewLPPageProps) {
   return (
     <div className="flex flex-col gap-8 pb-8 bg-mirai-light-gradient">
@@ -322,6 +329,14 @@ export function InterviewLPPage({
           sessionInfo={sessionInfo}
           previewToken={previewToken}
         />
+        {userReports && userReports.reports.length > 0 && (
+          <PastReportsSection reports={userReports.reports} />
+        )}
+        {sessionInfo?.status === "completed" && sessionInfo?.reportId && (
+          <div className="w-full max-w-[560px]">
+            <NewInterviewButton billId={bill.id} previewToken={previewToken} />
+          </div>
+        )}
         <_InterviewOverviewSection
           billId={bill.id}
           billName={bill.bill_content?.title ?? bill.name}

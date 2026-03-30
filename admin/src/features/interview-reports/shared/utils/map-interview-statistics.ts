@@ -7,7 +7,7 @@ type RawStatistics = {
   stance_for_count: number;
   stance_against_count: number;
   stance_neutral_count: number;
-  avg_total_score: number | null;
+  avg_total_content_richness: number | null;
   role_subject_expert_count: number;
   role_work_related_count: number;
   role_daily_life_affected_count: number;
@@ -15,6 +15,11 @@ type RawStatistics = {
   avg_message_count: number | null;
   median_duration_seconds: number | null;
   public_by_user_count: number;
+  feedback_irrelevant_questions: number;
+  feedback_not_aligned: number;
+  feedback_misunderstood: number;
+  feedback_too_many_questions: number;
+  feedback_other: number;
 };
 
 export function mapInterviewStatistics(
@@ -29,7 +34,7 @@ export function mapInterviewStatistics(
     stanceFor: raw.stance_for_count,
     stanceAgainst: raw.stance_against_count,
     stanceNeutral: raw.stance_neutral_count,
-    avgTotalScore: raw.avg_total_score,
+    avgTotalContentRichness: raw.avg_total_content_richness,
     roleSubjectExpert: raw.role_subject_expert_count,
     roleWorkRelated: raw.role_work_related_count,
     roleDailyLifeAffected: raw.role_daily_life_affected_count,
@@ -41,5 +46,10 @@ export function mapInterviewStatistics(
       raw.completed_sessions > 0
         ? (raw.public_by_user_count / raw.completed_sessions) * 100
         : 0,
+    feedbackIrrelevantQuestions: raw.feedback_irrelevant_questions,
+    feedbackNotAligned: raw.feedback_not_aligned,
+    feedbackMisunderstood: raw.feedback_misunderstood,
+    feedbackTooManyQuestions: raw.feedback_too_many_questions,
+    feedbackOther: raw.feedback_other,
   };
 }

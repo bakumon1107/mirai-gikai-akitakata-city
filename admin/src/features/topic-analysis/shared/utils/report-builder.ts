@@ -6,6 +6,15 @@ import type {
 
 export type TocEntry = { id: string; label: string };
 
+/**
+ * CommonMarkではCJK文字に隣接する**がemphasisデリミタとして認識されない。
+ * thin space(U+2009, Unicodeカテゴリ Zs)を挿入してフランキングルールを回避する。
+ * U+200B(ZWS)はCfカテゴリのためCommonMarkのwhitespace判定に該当せず効果がない。
+ */
+export function fixCjkBold(md: string): string {
+  return md.replace(/\*\*(.+?)\*\*/g, "\u2009**$1**\u2009");
+}
+
 export function toSlug(text: string): string {
   return text
     .toLowerCase()
@@ -57,9 +66,10 @@ export function buildReportMarkdown(
       if (representatives.length > 0) {
         topicSection += "\n\n### 代表的な意見\n";
         for (const op of representatives) {
-          const refLabel = op.ref_id ? ` （インタビュー#${op.ref_id}）` : "";
-          const content = op.source_message_content || op.opinion_content;
-          topicSection += `\n> **${op.opinion_title}**${refLabel}\n>\n> ${content}\n`;
+          const refLabel = op.ref_id ? ` [${op.ref_id}]` : "";
+          const raw = op.source_message_content || op.opinion_content;
+          const content = raw.replace(/\n/g, "\n> ");
+          topicSection += `\n> ${content}${refLabel}\n`;
         }
       }
 

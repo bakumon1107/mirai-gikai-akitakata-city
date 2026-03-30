@@ -1,20 +1,17 @@
 import "server-only";
-import {
-  Bot,
-  Clock,
-  Frown,
-  Lightbulb,
-  MessageCircle,
-  User,
-} from "lucide-react";
+import { Bot, Clock, Lightbulb, MessageCircle, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RegenerateContentRichnessButton } from "../../client/components/regenerate-content-richness-button";
+import { RegenerateModerationButton } from "../../client/components/regenerate-moderation-button";
 import { ReportVisibilityToggle } from "../../client/components/report-visibility-toggle";
 import { formatRoleLabel } from "../../shared/constants";
+import { FEEDBACK_TAG_LABELS } from "../../shared/constants/feedback-tags";
 import type { InterviewSessionDetail } from "../../shared/types";
 import { formatDuration, getSessionStatus } from "../../shared/types";
 import { getMessageDisplayText } from "../../shared/utils/get-message-display-text";
 import { parseOpinions } from "../../shared/utils/parse-opinions";
+import { ModerationBadge } from "./moderation-badge";
 import { RatingStars } from "./rating-stars";
 import { SessionStatusBadge } from "./session-status-badge";
 import { StanceBadge } from "./stance-badge";
@@ -24,15 +21,21 @@ interface SessionDetailProps {
   billId: string;
 }
 
-const scoreLabels: Record<string, string> = {
+const contentRichnessLabels: Record<string, string> = {
   total: "総合",
   clarity: "明確さ",
   specificity: "具体性",
-  impact: "影響度",
-  constructiveness: "建設性",
+  impact: "影響への言及",
+  constructiveness: "提案の広がり",
 };
 
-function ScoreBar({ label, value }: { label: string; value: number }) {
+function ContentRichnessBar({
+  label,
+  value,
+}: {
+  label: string;
+  value: number;
+}) {
   return (
     <div className="flex items-center gap-3">
       <div className="w-20 text-sm text-gray-500 shrink-0">{label}</div>
@@ -54,7 +57,10 @@ export function SessionDetail({ session, billId }: SessionDetailProps) {
   const messages = session.interview_messages;
   const reactionCounts = session.reaction_counts;
 
-  const scores = report?.scores as Record<string, unknown> | null;
+  const contentRichness = report?.content_richness as Record<
+    string,
+    unknown
+  > | null;
 
   return (
     <div className="space-y-6">
@@ -111,6 +117,30 @@ export function SessionDetail({ session, billId }: SessionDetailProps) {
                 )}
               </div>
             </div>
+            {session.feedback_tags.length > 0 && (
+              <div>
+                <div className="text-sm text-gray-500">フィードバック</div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {session.feedback_tags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      {(FEEDBACK_TAG_LABELS as Record<string, string>)[tag] ??
+                        tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {reactionCounts && (
+              <div>
+                <div className="text-sm text-gray-500">参考になる</div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Lightbulb className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-semibold">
+                    {reactionCounts.helpful}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -132,7 +162,7 @@ export function SessionDetail({ session, billId }: SessionDetailProps) {
         <CardContent>
           {report ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <div className="text-sm text-gray-500">スタンス</div>
                   <div className="mt-1">
@@ -150,6 +180,24 @@ export function SessionDetail({ session, billId }: SessionDetailProps) {
                   <div className="text-sm text-gray-500">役割の説明</div>
                   <div className="text-sm">
                     {report.role_description || "-"}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">モデレーション</div>
+                  <div className="mt-1">
+                    <ModerationBadge
+                      status={report.moderation_status}
+                      score={report.moderation_score}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">情報充実度</div>
+                  <div className="text-sm">
+                    {contentRichness &&
+                    typeof contentRichness.total === "number"
+                      ? `${contentRichness.total} / 100`
+                      : "-"}
                   </div>
                 </div>
               </div>
@@ -193,75 +241,109 @@ export function SessionDetail({ session, billId }: SessionDetailProps) {
         </CardContent>
       </Card>
 
-      {/* スコア・リアクション */}
-      {report && (scores || reactionCounts) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">評価・リアクション</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* スコア */}
-              {scores && (
-                <div>
-                  <div className="text-sm text-gray-500 mb-3">
-                    レポートスコア
+      {/* モデレーション・情報充実度 */}
+      {report && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* モデレーションスコア */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">モデレーション</CardTitle>
+              <RegenerateModerationButton
+                reportId={report.id}
+                sessionId={session.id}
+                billId={billId}
+              />
+            </CardHeader>
+            <CardContent>
+              {report.moderation_score != null ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm text-gray-500 w-16 shrink-0">
+                      スコア
+                    </div>
+                    <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${
+                          report.moderation_status === "ok"
+                            ? "bg-green-500"
+                            : report.moderation_status === "warning"
+                              ? "bg-orange-500"
+                              : "bg-red-500"
+                        }`}
+                        style={{
+                          width: `${report.moderation_score}%`,
+                        }}
+                      />
+                    </div>
+                    <div className="w-12 text-sm font-medium text-right">
+                      {report.moderation_score} / 100
+                    </div>
                   </div>
-                  <div className="space-y-2.5">
-                    {Object.entries(scoreLabels).map(([key, label]) => {
-                      const value = scores[key];
-                      if (typeof value !== "number") return null;
-                      return <ScoreBar key={key} label={label} value={value} />;
-                    })}
+                  <div className="text-xs text-gray-400">
+                    0-29: OK / 30-69: Warning / 70-100: NG
                   </div>
-                  {typeof scores.reasoning === "string" && (
+                  {report.moderation_reasoning && (
                     <div className="mt-3">
-                      <div className="text-sm text-gray-500 mb-1">
-                        スコア根拠
-                      </div>
+                      <div className="text-sm text-gray-500 mb-1">根拠</div>
                       <div className="text-sm bg-gray-50 p-3 rounded-lg">
-                        {scores.reasoning}
+                        {report.moderation_reasoning}
                       </div>
                     </div>
                   )}
                 </div>
-              )}
-
-              {/* リアクション */}
-              {reactionCounts && (
-                <div>
-                  <div className="text-sm text-gray-500 mb-3">
-                    ユーザーリアクション
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-                        <Lightbulb className="h-5 w-5 text-blue-500" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">参考になる</div>
-                        <div className="text-lg font-semibold">
-                          {reactionCounts.helpful}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center">
-                        <Frown className="h-5 w-5 text-orange-500" />
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-500">うーん...</div>
-                        <div className="text-lg font-semibold">
-                          {reactionCounts.hmm}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+              ) : (
+                <div className="text-gray-500 text-sm">
+                  モデレーション評価はまだ実行されていません
                 </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          {/* 情報充実度 */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">情報充実度</CardTitle>
+              <RegenerateContentRichnessButton
+                reportId={report.id}
+                sessionId={session.id}
+                billId={billId}
+              />
+            </CardHeader>
+            <CardContent>
+              {contentRichness ? (
+                <>
+                  <div className="space-y-2.5">
+                    {Object.entries(contentRichnessLabels).map(
+                      ([key, label]) => {
+                        const value = contentRichness[key];
+                        if (typeof value !== "number") return null;
+                        return (
+                          <ContentRichnessBar
+                            key={key}
+                            label={label}
+                            value={value}
+                          />
+                        );
+                      }
+                    )}
+                  </div>
+                  {typeof contentRichness.reasoning === "string" && (
+                    <div className="mt-3">
+                      <div className="text-sm text-gray-500 mb-1">評価根拠</div>
+                      <div className="text-sm bg-gray-50 p-3 rounded-lg">
+                        {contentRichness.reasoning}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-gray-500 text-sm">
+                  情報充実度評価はまだ実行されていません
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* チャット履歴 */}

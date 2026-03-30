@@ -4,6 +4,7 @@ import type {
   BillWithContent,
   ComingSoonBill,
 } from "@/features/bills/shared/types";
+import { siteConfig } from "@/config/site.config";
 import type { CouncilSession } from "../../shared/types";
 import { BillListWithStatusFilter } from "./bill-list-with-status-filter";
 
@@ -63,7 +64,7 @@ export function CouncilSessionBillList({
         />
       )}
 
-      {/* 市議会リンク */}
+      {/* 議会リンク */}
       {session.council_url && (
         <div className="flex items-center gap-1 text-[13px] font-medium text-mirai-text">
           {startDate.getFullYear()}年{session.name}に上程された全ての議案は
@@ -73,7 +74,7 @@ export function CouncilSessionBillList({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1"
           >
-            川崎市議会情報へ
+            {siteConfig.councilName}情報へ
             <ExternalLink className="h-3 w-3" />
           </a>
         </div>

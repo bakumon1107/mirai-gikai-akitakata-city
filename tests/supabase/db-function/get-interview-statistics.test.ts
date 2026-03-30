@@ -54,7 +54,7 @@ async function createTestReport(
       | "work_related"
       | "daily_life_affected"
       | "general_citizen";
-    scores: { total: number };
+    content_richness: { total: number };
     is_public_by_user: boolean;
   }> = {}
 ) {
@@ -160,16 +160,16 @@ describe("get_interview_statistics() 関数", () => {
     const config = await createTestInterviewConfig(bill.id);
 
     const s1 = await createTestSession(config.id, testUser.id);
-    await createTestReport(s1.id, { scores: { total: 80 } });
+    await createTestReport(s1.id, { content_richness: { total: 80 } });
     const s2 = await createTestSession(config.id, testUser.id);
-    await createTestReport(s2.id, { scores: { total: 60 } });
+    await createTestReport(s2.id, { content_richness: { total: 60 } });
 
     const { data, error } = await adminClient.rpc("get_interview_statistics", {
       p_config_id: config.id,
     });
 
     expect(error).toBeNull();
-    expect(Number(data?.[0].avg_total_score)).toBeCloseTo(70.0, 0);
+    expect(Number(data?.[0].avg_total_content_richness)).toBeCloseTo(70.0, 0);
   });
 
   it("役割分布を正しく集計する", async () => {
@@ -253,6 +253,64 @@ describe("get_interview_statistics() 関数", () => {
 
     expect(error).toBeNull();
     expect(data?.[0].total_sessions).toBe(1);
+  });
+
+  it("フィードバックタグ集計を正しく行う", async () => {
+    const bill = await createTestBill();
+    billIds.push(bill.id);
+    const config = await createTestInterviewConfig(bill.id);
+
+    const s1 = await createTestSession(config.id, testUser.id, { rating: 2 });
+    const s2 = await createTestSession(config.id, testUser.id, { rating: 1 });
+    const s3 = await createTestSession(config.id, testUser.id, { rating: 3 });
+
+    // s1: irrelevant_questions, not_aligned
+    await adminClient.from("interview_rating_feedbacks").insert([
+      { interview_session_id: s1.id, tag: "irrelevant_questions" as const },
+      { interview_session_id: s1.id, tag: "not_aligned" as const },
+    ]);
+    // s2: irrelevant_questions, misunderstood, other
+    await adminClient.from("interview_rating_feedbacks").insert([
+      { interview_session_id: s2.id, tag: "irrelevant_questions" as const },
+      { interview_session_id: s2.id, tag: "misunderstood" as const },
+      { interview_session_id: s2.id, tag: "other" as const },
+    ]);
+    // s3: too_many_questions
+    await adminClient
+      .from("interview_rating_feedbacks")
+      .insert([
+        { interview_session_id: s3.id, tag: "too_many_questions" as const },
+      ]);
+
+    const { data, error } = await adminClient.rpc("get_interview_statistics", {
+      p_config_id: config.id,
+    });
+
+    expect(error).toBeNull();
+    expect(data?.[0].feedback_irrelevant_questions).toBe(2);
+    expect(data?.[0].feedback_not_aligned).toBe(1);
+    expect(data?.[0].feedback_misunderstood).toBe(1);
+    expect(data?.[0].feedback_too_many_questions).toBe(1);
+    expect(data?.[0].feedback_other).toBe(1);
+  });
+
+  it("フィードバックがない場合はゼロを返す", async () => {
+    const bill = await createTestBill();
+    billIds.push(bill.id);
+    const config = await createTestInterviewConfig(bill.id);
+
+    await createTestSession(config.id, testUser.id, { rating: 5 });
+
+    const { data, error } = await adminClient.rpc("get_interview_statistics", {
+      p_config_id: config.id,
+    });
+
+    expect(error).toBeNull();
+    expect(data?.[0].feedback_irrelevant_questions).toBe(0);
+    expect(data?.[0].feedback_not_aligned).toBe(0);
+    expect(data?.[0].feedback_misunderstood).toBe(0);
+    expect(data?.[0].feedback_too_many_questions).toBe(0);
+    expect(data?.[0].feedback_other).toBe(0);
   });
 
   it("存在しないconfig_idではすべてゼロ/NULLの行を返す", async () => {

@@ -1,7 +1,8 @@
 import "server-only";
 
-import { Bot, UserRound } from "lucide-react";
+import { Bot, ChevronLeft, UserRound } from "lucide-react";
 import type { Route } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -19,6 +20,7 @@ import { IntervieweeInfo } from "../../shared/components/interviewee-info";
 import { OpinionsList } from "../../shared/components/opinions-list";
 import { ReportBreadcrumb } from "../../shared/components/report-breadcrumb";
 import { ReportMetaInfo } from "../../shared/components/report-meta-info";
+import { ReportProblemButton } from "../../shared/components/report-problem-button";
 import { parseOpinions } from "../../shared/utils/format-utils";
 import { countCharacters } from "../../shared/utils/report-utils";
 import { getReportWithMessages } from "../loaders/get-report-with-messages";
@@ -53,13 +55,24 @@ export async function ReportChatLogPage({
       : getPublicReportLink(reportId);
 
   return (
-    <div className="min-h-dvh bg-mirai-surface">
+    <div className="min-h-dvh bg-mirai-surface pt-20 md:pt-4">
+      {/* Back to Report Link */}
+      <div className="px-4 pt-4">
+        <Link
+          href={reportHref as Route}
+          className="inline-flex items-center gap-1 text-sm font-medium text-mirai-text-secondary"
+        >
+          <ChevronLeft size={20} />
+          レポートに戻る
+        </Link>
+      </div>
+
       {/* Header Section */}
-      <div className="px-4 pt-24 pb-8">
+      <div className="px-4 pt-8 pb-8">
         <div className="flex flex-col items-center">
           {/* Title */}
           <h1 className="text-2xl font-bold text-center text-gray-800">
-            インタビューレポート
+            実際のインタビュー
           </h1>
 
           {/* Bill Name */}
@@ -73,12 +86,13 @@ export async function ReportChatLogPage({
           {/* Stance and Meta Info */}
           <div className="mt-8">
             <ReportMetaInfo
+              reportId={report.id}
               stance={report.stance}
               role={report.role}
               roleTitle={report.role_title}
               sessionStartedAt={report.session_started_at}
               characterCount={characterCount}
-              variant="chat-log"
+              disableLink
             />
           </div>
         </div>
@@ -87,9 +101,6 @@ export async function ReportChatLogPage({
       {/* Content Sections */}
       <div className="px-4 py-8">
         <div className="flex flex-col gap-9">
-          {/* Interviewee Info */}
-          <IntervieweeInfo roleDescription={report.role_description} />
-
           {/* Chat Log Section */}
           <div className="flex flex-col gap-4">
             <h2 className="text-xl font-bold text-gray-800">
@@ -110,7 +121,7 @@ export async function ReportChatLogPage({
           {/* Back to Report / Bill Buttons */}
           <div className="flex flex-col gap-3">
             <BackToReportButton href={reportHref} />
-            <BackToBillButton billId={report.bill_id} />
+            <ReportProblemButton />
           </div>
 
           {/* Breadcrumb Navigation */}
@@ -128,9 +139,10 @@ export async function ReportChatLogPage({
         initialData={reactionData}
         billName={billName}
         shareUrl={shareUrl}
-        thumbnailUrl={bill.thumbnail_url}
+        ogImageUrl={`${origin}/api/og/report?id=${reportId}`}
         shareMessage={report.summary}
         showShare={report.is_public_by_user && report.is_public_by_admin}
+        showReaction={from !== "complete"} // 完了ページからはリアクション非表示
       />
     </div>
   );
@@ -168,7 +180,10 @@ function ChatMessage({ message }: ChatMessageProps) {
     const displayText = getMessageDisplayText(message.content);
     // AI message: icon on top left with gray background, then plain text below
     return (
-      <div className="flex flex-col items-start gap-2">
+      <div
+        id={`message-${message.id}`}
+        className="flex flex-col items-start gap-2 scroll-mt-24"
+      >
         <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center">
           <Bot size={24} className="text-gray-600" />
         </div>
@@ -181,7 +196,10 @@ function ChatMessage({ message }: ChatMessageProps) {
 
   // User message: icon on top right, then bubble below
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div
+      id={`message-${message.id}`}
+      className="flex flex-col items-end gap-2 scroll-mt-24"
+    >
       <div className="w-9 h-9 rounded-full bg-mirai-light-gradient flex items-center justify-center">
         <UserRound size={20} className="text-gray-600" />
       </div>

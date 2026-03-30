@@ -18,6 +18,7 @@ export const routes = {
   committees: () => "/committees" as const,
   factions: () => "/factions" as const,
   aiCollection: () => "/ai-collection" as const,
+  experts: () => "/experts" as const,
 
   // ── 議案配下 ──────────────────────────────────────
   billEdit: (billId: string) => `/bills/${billId}/edit` as const,

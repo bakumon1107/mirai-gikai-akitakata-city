@@ -126,6 +126,7 @@ export const bills: BillInsert[] = [
     published_at: "2025-11-25T09:00:00+09:00",
     publish_status: "published",
     is_featured: true,
+    thumbnail_url: "https://placehold.co/600x400",
   },
   {
     name: "川崎市地域包括ケアシステム推進条例",
@@ -134,6 +135,7 @@ export const bills: BillInsert[] = [
     published_at: "2025-09-15T10:00:00+09:00",
     publish_status: "published",
     is_featured: true,
+    thumbnail_url: "https://placehold.co/600x400",
   },
   {
     name: "川崎市公園条例の一部改正",
@@ -142,6 +144,7 @@ export const bills: BillInsert[] = [
     published_at: "2025-10-01T09:00:00+09:00",
     publish_status: "published",
     is_featured: false,
+    thumbnail_url: "https://placehold.co/600x400",
   },
   {
     name: "川崎市学校給食費の無償化に関する条例",
@@ -150,6 +153,7 @@ export const bills: BillInsert[] = [
     published_at: "2025-09-10T09:00:00+09:00",
     publish_status: "published",
     is_featured: false,
+    thumbnail_url: "https://placehold.co/600x400",
   },
   {
     name: "川崎市防災対策基本条例の一部改正",
@@ -158,6 +162,7 @@ export const bills: BillInsert[] = [
     published_at: "2025-09-20T10:00:00+09:00",
     publish_status: "published",
     is_featured: false,
+    thumbnail_url: "https://placehold.co/600x400",
   },
 ];
 
@@ -494,6 +499,7 @@ export function createInterviewReports(
       summary:
         "この議案に賛成。市民のためになると考えている。",
       role: "general_citizen" as const,
+      role_title: "一般市民",
       role_description: "議案の内容に賛同する市民",
       opinions: [
         { title: "賛成理由", content: "市民のためになる" },
@@ -501,8 +507,10 @@ export function createInterviewReports(
     },
     {
       stance: "against" as const,
-      summary: "財源の不明確さを理由に反対。",
+      summary:
+        "財源の確保が不透明であり、将来世代への負担増大が懸念されるため反対の立場をとる。歳出削減や他の財源確保策を十分に検討した上で、持続可能な制度設計を行うべきだと考える。",
       role: "work_related" as const,
+      role_title: "会社員",
       role_description: "財政面を懸念する市民",
       opinions: [
         { title: "反対理由", content: "財源が不明確" },
@@ -513,6 +521,7 @@ export function createInterviewReports(
       summary:
         "判断するにはより多くの情報が必要と考えている。",
       role: "subject_expert" as const,
+      role_title: "専門家",
       role_description: "慎重な判断を求める市民",
       opinions: [
         { title: "態度保留理由", content: "情報不足" },
@@ -534,6 +543,7 @@ export function createInterviewReports(
         interview_session_id: sessionId,
         ...reportTemplates[patternIndex],
         is_public_by_user: loopIndex < 5, // 最初の5件は公開
+        is_public_by_admin: loopIndex < 3, // 最初の3ループ分は管理者承認済み
       });
     }
   });
@@ -620,8 +630,10 @@ export function createDemoReport(): InterviewReportInsert {
     id: DEMO_REPORT_ID,
     interview_session_id: DEMO_SESSION_ID,
     stance: "neutral",
-    summary: "期待と懸念両方がある",
+    summary:
+      "デジタル化推進による省庁の業務効率化や官僚の働き方改革には期待するが、システム移行時の混乱や中小フォワーダーへの対応コスト増大について懸念も大きい。慎重な段階的導入を求める。",
     role: "subject_expert",
+    role_title: "フォワーダー",
     role_description:
       "川崎市在住の会社員\n行政手続きの煩雑さを日常的に感じている",
     opinions: [
@@ -633,6 +645,7 @@ export function createDemoReport(): InterviewReportInsert {
       },
     ],
     is_public_by_user: true,
+    is_public_by_admin: true,
   };
 }
 
@@ -778,6 +791,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
       summary:
         "子育て世帯として医療費負担軽減のため賛成",
       role: "work_related",
+      role_title: "運送会社経営者",
       role_description:
         "川崎市在住の共働き世帯\n子ども2人\n医療費の負担を日常的に感じている",
       opinions: [
@@ -788,6 +802,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
         },
       ],
       is_public_by_user: true,
+      is_public_by_admin: true,
     },
     {
       id: DEMO_REPORT_ID_DAILY,
@@ -796,6 +811,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
       summary:
         "子育て中の保護者として医療費負担軽減を期待",
       role: "daily_life_affected",
+      role_title: "主婦",
       role_description:
         "川崎市在住の主婦\n小さい子ども2人の子育て中\n医療費の自己負担を日常的に感じている",
       opinions: [
@@ -806,6 +822,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
         },
       ],
       is_public_by_user: true,
+      is_public_by_admin: true,
     },
     {
       id: DEMO_REPORT_ID_CITIZEN,
@@ -814,6 +831,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
       summary:
         "財源と子育て支援のバランスを考慮して判断",
       role: "general_citizen",
+      role_title: "会社員",
       role_description:
         "川崎市在住の会社員\n子育て支援に関心あり\n市の財政にも関心がある",
       opinions: [
@@ -824,6 +842,7 @@ export function createAdditionalDemoReports(): InterviewReportInsert[] {
         },
       ],
       is_public_by_user: true,
+      is_public_by_admin: true,
     },
   ];
 }

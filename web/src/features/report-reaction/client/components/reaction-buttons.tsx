@@ -3,11 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { useAnonymousSupabaseUser } from "@/features/chat/client/hooks/use-anonymous-supabase-user";
 import { Lightbulb, Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useOptimistic, useState, useTransition } from "react";
-import { toggleReaction } from "../../server/actions/toggle-reaction";
-import type { ReactionType, ReportReactionData } from "../../shared/types";
-import { computeOptimisticState } from "../../shared/utils/compute-optimistic-state";
+import { useState } from "react";
+import type { ReportReactionData } from "../../shared/types";
+import { useReactionToggle } from "../hooks/use-reaction-toggle";
 import { ReportShareModal } from "./report-share-modal";
 
 interface ReactionButtonsProps {
@@ -15,11 +13,14 @@ interface ReactionButtonsProps {
   initialData: ReportReactionData;
   billName: string;
   shareUrl: string;
-  thumbnailUrl?: string | null;
+  /** OGP画像のURL */
+  ogImageUrl: string;
   /** シェア時のメッセージ（レポートのsummary等） */
   shareMessage?: string | null;
   /** 共有ボタンを表示するかどうか（非公開レポートでは非表示） */
   showShare?: boolean;
+  /** 参考になるボタンを表示するかどうか */
+  showReaction?: boolean;
 }
 
 export function ReactionButtons({
@@ -27,34 +28,20 @@ export function ReactionButtons({
   initialData,
   billName,
   shareUrl,
-  thumbnailUrl,
+  ogImageUrl,
   shareMessage,
   showShare = true,
+  showReaction = true,
 }: ReactionButtonsProps) {
   useAnonymousSupabaseUser();
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const { data, isPending, toggle } = useReactionToggle(reportId, initialData);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [optimistic, setOptimistic] = useOptimistic(
-    initialData,
-    computeOptimisticState
-  );
 
-  const handleClick = (reactionType: ReactionType) => {
-    startTransition(async () => {
-      setOptimistic(reactionType);
-      try {
-        const result = await toggleReaction(reportId, reactionType);
-        if (!result.success) {
-          router.refresh();
-        }
-      } catch {
-        router.refresh();
-      }
-    });
-  };
+  const isActive = data.userReaction === "helpful";
 
-  const isActive = optimistic.userReaction === "helpful";
+  if (!showReaction && !showShare) {
+    return null;
+  }
 
   return (
     <>
@@ -63,34 +50,46 @@ export function ReactionButtons({
           <div className="border-t border-gray-400" />
           <div className="flex items-stretch">
             {/* 参考になる */}
-            <Button
-              variant="ghost"
-              onClick={() => handleClick("helpful")}
-              disabled={isPending}
-              className="flex-1 flex items-center justify-center gap-2 h-auto py-5 rounded-none hover:bg-transparent active:bg-gray-50"
-            >
-              <Lightbulb
-                size={20}
-                className={`transition-colors ${
-                  isActive
-                    ? "text-mirai-reaction-active fill-mirai-reaction-active"
-                    : "text-gray-800"
-                }`}
-              />
-              <span className="text-[15px] font-bold text-gray-800">
-                参考になる
-              </span>
-              {optimistic.counts.helpful > 0 && (
-                <span className="text-[15px] font-bold text-gray-800">
-                  {optimistic.counts.helpful}
+            {showReaction && (
+              <Button
+                variant="ghost"
+                onClick={() => toggle("helpful")}
+                disabled={isPending}
+                className="flex-1 flex items-center justify-center gap-2 h-auto py-5 rounded-none hover:bg-transparent active:bg-gray-50"
+              >
+                <Lightbulb
+                  size={20}
+                  className={`transition-colors ${
+                    isActive
+                      ? "text-mirai-reaction-active fill-mirai-reaction-active"
+                      : "text-gray-800"
+                  }`}
+                />
+                <span
+                  className={`text-[15px] font-bold transition-colors ${
+                    isActive ? "text-mirai-reaction-active" : "text-gray-800"
+                  }`}
+                >
+                  参考になる
                 </span>
-              )}
-            </Button>
+                {data.counts.helpful > 0 && (
+                  <span
+                    className={`text-[15px] font-bold transition-colors ${
+                      isActive ? "text-mirai-reaction-active" : "text-gray-800"
+                    }`}
+                  >
+                    {data.counts.helpful}
+                  </span>
+                )}
+              </Button>
+            )}
 
             {showShare && (
               <>
                 {/* セパレーター */}
-                <div className="w-px self-center h-6 bg-gray-400 shrink-0" />
+                {showReaction && (
+                  <div className="w-px self-center h-6 bg-gray-400 shrink-0" />
+                )}
 
                 {/* 共有する */}
                 <Button
@@ -114,7 +113,7 @@ export function ReactionButtons({
         onClose={() => setIsShareModalOpen(false)}
         billName={billName}
         shareUrl={shareUrl}
-        thumbnailUrl={thumbnailUrl}
+        ogImageUrl={ogImageUrl}
         shareMessage={shareMessage}
       />
     </>

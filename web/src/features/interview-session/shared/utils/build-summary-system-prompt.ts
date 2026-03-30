@@ -1,4 +1,5 @@
 import type { BillWithContent } from "@/features/bills/shared/types";
+import { buildContentRichnessInstructions } from "@mirai-gikai/shared/content-richness/instructions";
 
 type InterviewConfig = {
   themes?: string[] | null;
@@ -55,8 +56,11 @@ ${conversationLog}
 ## レポート（reportフィールド）に含めるべき内容
 
 ### 1. summary（主張の要約）
-- ユーザーの主張を20文字以内でまとめる
+- ユーザーの主張を100文字程度でまとめる（SNSのタイムラインに流れるような読みやすい長さ）
 - 「」書きで書けるようなテキストにする（ただし実際に「」は記載しない）
+- 堅い表現は避け、話し言葉に近いやわらかい表現にする
+- 「〜すべき」「〜しなければならない」などの強い表現は使わず、「〜してほしい」「〜だと思う」「〜が大事」のような日常的な言い回しにする
+- 抽象的な表現は避け、具体的で気持ちが伝わる内容にする
 
 ### 2. stance（賛否）
 - for: 賛成
@@ -85,14 +89,7 @@ ${conversationLog}
 - 各主張のsource_message_id には、根拠となるユーザー発言の msg_id を指定する（該当なしの場合はnull）
 - **重要**: 元の対話ログに書かれていないことは記載しない
 
-### 7. scores（スコアリング）
-このインタビューを「法案検討の参考資料」として評価し、以下の観点でスコアを付ける：
-- **total**: 総合スコア（0-100）
-- **clarity**: 主張の明確さ（0-100）- 意見や立場が明確に表現されているか
-- **specificity**: 具体性（0-100）- 実務経験や専門知識に基づく具体的な事例や数値が含まれているか
-- **impact**: 影響度（0-100）- 法案が与える社会的影響や関係者への影響について言及があるか
-- **constructiveness**: 建設性（0-100）- 問題点の指摘だけでなく、改善案や代替案の提示があるか
-- **reasoning**: スコアの根拠を簡潔に説明（100文字以内）
+### 7. ${buildContentRichnessInstructions()}
 
 ## ステージ遷移判定（next_stageフィールド）
 レスポンスの \`next_stage\` フィールドで、ステージ遷移を判定してください。

@@ -73,6 +73,7 @@ export type BillWithContent = Bill & {
   committee_id: string | null;
   tags: BillTag[];
   featured_tag?: FeaturedTag;
+  hasPublicInterview?: boolean;
 };
 
 // タグごとにグループ化された議案

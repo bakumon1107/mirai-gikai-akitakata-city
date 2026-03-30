@@ -42,7 +42,7 @@ export function InterviewPublicConsentModal({
 }: InterviewPublicConsentModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md py-9">
+      <DialogContent className="py-9">
         <DialogHeader>
           <p className="text-center text-primary-accent font-bold">
             あと少しです！
@@ -63,10 +63,10 @@ export function InterviewPublicConsentModal({
           <div className="space-y-4">
             <CheckListItem>
               公開を許可した場合、今後{siteConfig.siteName}
-              にあなたのご意見が匿名で掲載されることがあります。
+              にあなたのご意見の要約とインタビュー原文が匿名で掲載されることがあります。
             </CheckListItem>
             <CheckListItem>
-              さまざまな当事者の意見が公開されることで、より深い議案議論が実現できます。
+              さまざまな意見が公開されることで、より深い議案議論が実現できます。
             </CheckListItem>
           </div>
 

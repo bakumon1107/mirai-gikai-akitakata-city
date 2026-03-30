@@ -4,18 +4,15 @@ import type { Route } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/config/site.config";
-import { formatEstimatedDuration } from "@/features/interview-config/shared/utils/format-estimated-duration";
 import { routes } from "@/lib/routes";
 
 interface InterviewLandingSectionProps {
   billId: string;
-  estimatedDuration: number | null;
 }
 
-function getCheckPoints(estimatedDuration: number | null): string[] {
-  const durationText = formatEstimatedDuration(estimatedDuration);
+function getCheckPoints(): string[] {
   return [
-    durationText ? `所要時間は${durationText}` : null,
+    "所要時間は約5分〜",
     "AIがあなたのご意見を深掘り",
     siteConfig.managingParty
       ? `${siteConfig.managingParty}の政策検討に活用`
@@ -44,12 +41,8 @@ function _CheckPoint({ text }: { text: string }) {
   );
 }
 
-function _CheckPointsList({
-  estimatedDuration,
-}: {
-  estimatedDuration: number | null;
-}) {
-  const checkPoints = getCheckPoints(estimatedDuration);
+function _CheckPointsList() {
+  const checkPoints = getCheckPoints();
   return (
     <div className="flex flex-col gap-2">
       {checkPoints.map((text) => (
@@ -72,7 +65,7 @@ function _InterviewCTAButton({ billId }: { billId: string }) {
 
 function _InterviewIllustration() {
   return (
-    <div className="absolute right-6 bottom-[-32px] w-[113.6px] h-[177px] pointer-events-none">
+    <div className="absolute right-[-16px] sm:right-6 bottom-[-32px] w-[113.6px] h-[177px] pointer-events-none">
       <Image
         src="/illustrations/interview-illustration.png"
         alt=""
@@ -86,7 +79,6 @@ function _InterviewIllustration() {
 
 export function InterviewLandingSection({
   billId,
-  estimatedDuration,
 }: InterviewLandingSectionProps) {
   return (
     <div className="relative overflow-hidden rounded-xl bg-white p-6 mx-auto">
@@ -102,7 +94,7 @@ export function InterviewLandingSection({
             お聞かせください
           </h2>
 
-          <_CheckPointsList estimatedDuration={estimatedDuration} />
+          <_CheckPointsList />
 
           <div className="pt-2">
             <_InterviewCTAButton billId={billId} />

@@ -1,20 +1,20 @@
 import "server-only";
 
+import type { Route } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBillById } from "@/features/bills/server/loaders/get-bill-by-id";
+import { getBillDetailLink } from "@/features/interview-config/shared/utils/interview-links";
 import { PublicStatusSection } from "@/features/interview-report/client/components/public-status-section";
 import { getInterviewReportById } from "@/features/interview-report/server/loaders/get-interview-report-by-id";
-import { getAuthenticatedUser } from "@/features/interview-session/server/utils/verify-session-ownership";
 import { getInterviewMessages } from "@/features/interview-session/server/loaders/get-interview-messages";
+import { getAuthenticatedUser } from "@/features/interview-session/server/utils/verify-session-ownership";
 import { ExpertRegistrationSection } from "../../client/components/expert-registration-section";
 import { ReportContent } from "../../shared/components/report-content";
 import { isExpertRegistrationTargetRole } from "../../shared/utils/expert-registration-validation";
 import { parseOpinions } from "../../shared/utils/format-utils";
-import {
-  calculateDuration,
-  countCharacters,
-} from "../../shared/utils/report-utils";
+import { countCharacters } from "../../shared/utils/report-utils";
 import { getExpertRegistrationStatus } from "../loaders/get-expert-registration-status";
 
 interface ReportCompletePageProps {
@@ -50,28 +50,13 @@ export async function ReportCompletePage({
   }
 
   const opinions = parseOpinions(report.opinions);
-  const duration = calculateDuration(
-    report.session_started_at,
-    report.session_completed_at
-  );
   const characterCount = countCharacters(messages);
+  const billName = bill.bill_content?.title || bill.name;
 
   return (
     <div className="min-h-dvh bg-mirai-surface">
-      {/* 議案サムネイル画像 */}
-      {bill.thumbnail_url && (
-        <div className="relative w-full h-[320px]">
-          <Image
-            src={bill.thumbnail_url}
-            alt={bill.bill_content?.title || bill.name}
-            fill
-            className="object-cover"
-          />
-        </div>
-      )}
-
       {/* ヘッダーセクション */}
-      <div className="bg-white rounded-b-[32px] px-4 py-8">
+      <div className="bg-white rounded-b-[32px] px-4 pt-30 md:pt-16 pb-8">
         <div className="flex flex-col items-center gap-4">
           {/* 完了イラスト */}
           <Image
@@ -88,13 +73,6 @@ export async function ReportCompletePage({
             ご協力ありがとうございました
           </h1>
 
-          {/* 議案名 */}
-          <div className="bg-mirai-surface-grouped rounded-xl px-4 py-2">
-            <p className="text-sm text-gray-800">
-              {bill.bill_content?.title || bill.name}
-            </p>
-          </div>
-
           {/* 活用メッセージ */}
           <p className="text-sm text-gray-800">
             いただいた声は政策検討に最大限活用します
@@ -110,6 +88,12 @@ export async function ReportCompletePage({
             <h2 className="text-2xl font-bold text-black">
               インタビューレポート
             </h2>
+            <Link
+              href={getBillDetailLink(billId) as Route}
+              className="text-sm text-black underline"
+            >
+              {billName}
+            </Link>
             <PublicStatusSection
               sessionId={report.interview_session_id}
               initialIsPublic={report.is_public_by_user}
@@ -126,7 +110,6 @@ export async function ReportCompletePage({
             role={report.role}
             roleTitle={report.role_title}
             sessionStartedAt={report.session_started_at}
-            duration={duration}
             characterCount={characterCount}
             roleDescription={report.role_description}
             opinions={opinions}

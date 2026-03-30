@@ -38,6 +38,7 @@ import {
 } from "../../shared/types";
 import { generatePageNumbers } from "../../shared/utils/pagination-utils";
 import { SESSIONS_PER_PAGE } from "../loaders/get-interview-sessions";
+import { ModerationBadge } from "./moderation-badge";
 import { RatingStars } from "./rating-stars";
 import { SessionStatusBadge } from "./session-status-badge";
 import { StanceBadge } from "./stance-badge";
@@ -85,6 +86,9 @@ function buildPageUrl(
   if (filters.role !== DEFAULT_SESSION_FILTER.role) {
     params.set("role", filters.role);
   }
+  if (filters.moderation !== DEFAULT_SESSION_FILTER.moderation) {
+    params.set("moderation", filters.moderation);
+  }
   return `${routes.billReports(billId)}?${params.toString()}` as Route;
 }
 
@@ -131,12 +135,20 @@ export function SessionList({
                   <TableHead className="w-28">スタンス</TableHead>
                   <TableHead className="w-40">役割名</TableHead>
                   <SortableTableHead
-                    field="total_score"
+                    field="total_content_richness"
                     currentField={sort.field}
                     currentOrder={sort.order}
                     className="w-20 text-right"
                   >
-                    スコア
+                    充実度
+                  </SortableTableHead>
+                  <SortableTableHead
+                    field="moderation_score"
+                    currentField={sort.field}
+                    currentOrder={sort.order}
+                    className="w-32"
+                  >
+                    モデレーション
                   </SortableTableHead>
                   <TableHead className="w-24 text-center">満足度</TableHead>
                   <SortableTableHead
@@ -231,9 +243,20 @@ export function SessionList({
                         {session.interview_report?.role_title || "-"}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        {session.interview_report?.total_score != null
-                          ? session.interview_report.total_score
+                        {session.interview_report?.total_content_richness !=
+                        null
+                          ? session.interview_report.total_content_richness
                           : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <ModerationBadge
+                          status={
+                            session.interview_report?.moderation_status ?? null
+                          }
+                          score={
+                            session.interview_report?.moderation_score ?? null
+                          }
+                        />
                       </TableCell>
                       <TableCell className="text-center">
                         {session.rating != null ? (

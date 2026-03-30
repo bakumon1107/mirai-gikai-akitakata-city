@@ -33,7 +33,7 @@ export async function getBillByIdAdmin(
 
   const billTags = tagsResult;
 
-  // 川崎版は会派見解なし（mirai_stancesは議会全体のスタンス）
+  // 現在は会派見解なし（mirai_stancesは議会全体のスタンス）
   const factionStances: FactionStance[] = [];
 
   // タグデータを整形

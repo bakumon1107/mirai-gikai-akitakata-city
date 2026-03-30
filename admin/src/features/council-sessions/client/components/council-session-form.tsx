@@ -112,7 +112,7 @@ export function CouncilSessionForm() {
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor={councilUrlId}>市議会URL</Label>
+        <Label htmlFor={councilUrlId}>議会URL</Label>
         <Input
           id={councilUrlId}
           type="url"

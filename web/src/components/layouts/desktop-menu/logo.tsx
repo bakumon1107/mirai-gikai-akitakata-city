@@ -42,7 +42,7 @@ export function DesktopMenuLogo() {
             lineHeight: "2em",
           }}
         >
-          市議会の議論をわかりやすく
+          議会の議論をわかりやすく
         </p>
       </div>
     </Link>

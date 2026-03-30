@@ -14,6 +14,7 @@ import { rehypeEmbedYouTube } from "./rehype-embed-youtube";
 import { rehypeExternalLinks } from "./rehype-external-links";
 import { rehypeInjectElement } from "./rehype-inject-element";
 import { rehypeWrapSections } from "./rehype-wrap-sections";
+import { remarkFallbackBold } from "./remark-fallback-bold";
 
 // rehypeSanitizeのスキーマをカスタマイズ
 const sanitizeSchema = {
@@ -48,7 +49,8 @@ export async function parseMarkdown(markdown: string): Promise<ReactElement> {
   const remarkProcessor = unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkBreaks);
+    .use(remarkBreaks)
+    .use(remarkFallbackBold);
   const parsed = remarkProcessor.parse(markdown);
   const mdast = (await remarkProcessor.run(parsed)) as typeof parsed;
 

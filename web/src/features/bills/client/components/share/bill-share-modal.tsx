@@ -103,7 +103,7 @@ export function BillShareModal({
         {/* シェアセクション */}
         <div className="flex flex-col items-center gap-4 w-full">
           <p className="text-base font-bold text-gray-800 text-center">
-            シェアして市議会の議論をオープンに
+            シェアして議会の議論をオープンに
           </p>
 
           {/* SNSアイコン */}

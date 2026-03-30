@@ -41,7 +41,7 @@ export function TeamMirai() {
             <p className="text-[15px] leading-[28px] text-black">
               テクノロジーで政治の課題を解決することを目指す政党です。
               {siteConfig.siteName}は、{siteConfig.councilName}
-              の議論を市民に届けるために運営しています。
+              の議論を届けるために運営しています。
             </p>
           </div>
 

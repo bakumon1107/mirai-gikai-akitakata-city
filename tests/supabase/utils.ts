@@ -253,7 +253,7 @@ export async function createTestBillTag(billId: string, tagId: string) {
 }
 
 /** テスト用 mirai_stances を作成
- * 川崎市議会DBにはmirai_stancesテーブルが存在しないためモックを返す
+ * 現在のDBにはmirai_stancesテーブルが存在しないためモックを返す
  */
 export async function createTestMiraiStance(
   billId: string,

@@ -26,13 +26,13 @@ export function About() {
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             <h3 className="text-2xl font-bold leading-[43.2px]">
-              市議会での議論を
+              議会での議論を
               <br />
               できる限りわかりやすく
             </h3>
             <p className="text-[15px] leading-[28px] text-black">
               {siteConfig.siteName}は、{siteConfig.siteDescription}
-              。市民の意見を政治に届けることを目指して、継続的にアップデートしていきます。
+              。皆さまの意見を政治に届けることを目指して、継続的にアップデートしていきます。
             </p>
           </div>
 

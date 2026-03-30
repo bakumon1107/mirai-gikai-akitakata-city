@@ -22,7 +22,7 @@ interface ProgressStepProps {
   isPreparing: boolean;
 }
 
-// 基本ステップ定義（川崎市議会: 一院制）
+// 基本ステップ定義（地方議会: 一院制）
 const BASE_STEPS = [
   { label: "議案\n上程" },
   { label: "委員会\n審査" },

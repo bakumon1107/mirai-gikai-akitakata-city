@@ -15,7 +15,7 @@ export type BillContentUpdate =
 export type BillStatusEnum = Database["public"]["Enums"]["bill_status_enum"];
 export type StanceTypeEnum = Database["public"]["Enums"]["stance_type_enum"];
 
-// mirai_stances テーブルは川崎DB上には存在しないが、
+// mirai_stances テーブルは現在のDB上には存在しないが、
 // stance-styles.ts と関連テストが参照するためローカル型として定義する
 export type MiraiStance = {
   id: string;

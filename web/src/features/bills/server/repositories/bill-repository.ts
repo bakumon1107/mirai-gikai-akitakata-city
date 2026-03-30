@@ -81,7 +81,7 @@ export async function findBillById(id: string) {
 
 /**
  * 議案のmirai_stanceを取得
- * 川崎市議会DBにはmirai_stancesテーブルが存在しないため常にnullを返す
+ * 現在のDBにはmirai_stancesテーブルが存在しないため常にnullを返す
  */
 export async function findMiraiStanceByBillId(
   _billId: string

@@ -20,6 +20,18 @@ function resolveClaudePath(): string {
   return "claude";
 }
 
+/** Windows の stderr/stdout をデコードする。cp932 (Shift-JIS) で試み、失敗時は UTF-8 */
+function decodeBuffer(buf: Buffer): string {
+  if (process.platform === "win32") {
+    try {
+      return new TextDecoder("shift-jis").decode(buf);
+    } catch {
+      // TextDecoder が対応していない環境では UTF-8 にフォールバック
+    }
+  }
+  return buf.toString("utf8");
+}
+
 const CLAUDE_PATH = resolveClaudePath();
 
 /** Claude の使用制限に達したことを示すエラー */
@@ -131,11 +143,11 @@ export function executeClaudeToFile(
     }, CLAUDE_TIMEOUT_MS);
 
     proc.stdout.on("data", (chunk: Buffer) => {
-      stdout += chunk.toString();
+      stdout += chunk.toString("utf8");
     });
 
     proc.stderr.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString();
+      stderr += decodeBuffer(chunk);
     });
 
     proc.on("error", (err) => {

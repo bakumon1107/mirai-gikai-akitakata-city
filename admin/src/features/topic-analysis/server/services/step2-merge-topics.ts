@@ -1,7 +1,6 @@
 import "server-only";
 
 import { generateObject } from "ai";
-import { TOPIC_ANALYSIS_MODEL } from "../../shared/constants";
 import { topicMergeSchema } from "../../shared/schemas";
 
 /**
@@ -12,12 +11,13 @@ import { topicMergeSchema } from "../../shared/schemas";
  */
 export async function mergeTopics(
   rawTopics: string[],
-  billTitle: string
+  billTitle: string,
+  model: string
 ): Promise<string[]> {
   const topicsList = rawTopics.map((t, i) => `${i + 1}. ${t}`).join("\n");
 
   const { object } = await generateObject({
-    model: TOPIC_ANALYSIS_MODEL,
+    model,
     schema: topicMergeSchema,
     prompt: `あなたは日本の法案に関する市民意見のトピック整理を行います。
 

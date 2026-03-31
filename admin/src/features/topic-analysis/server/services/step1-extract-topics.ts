@@ -4,7 +4,6 @@ import { generateObject } from "ai";
 import {
   TOPIC_ANALYSIS_BATCH_SIZE,
   TOPIC_ANALYSIS_MAX_CONCURRENCY,
-  TOPIC_ANALYSIS_MODEL,
 } from "../../shared/constants";
 import { topicExtractionSchema } from "../../shared/schemas";
 import type { FlatOpinion } from "../../shared/types";
@@ -24,7 +23,8 @@ function chunk<T>(array: T[], size: number): T[][] {
 export async function extractTopics(
   opinions: FlatOpinion[],
   billTitle: string,
-  billSummary: string
+  billSummary: string,
+  model: string
 ): Promise<string[]> {
   const batches = chunk(opinions, TOPIC_ANALYSIS_BATCH_SIZE);
   const allTopics: string[] = [];
@@ -34,7 +34,13 @@ export async function extractTopics(
     const concurrent = batches.slice(i, i + TOPIC_ANALYSIS_MAX_CONCURRENCY);
     const results = await Promise.all(
       concurrent.map((batch, batchIndex) =>
-        extractTopicsFromBatch(batch, billTitle, billSummary, i + batchIndex)
+        extractTopicsFromBatch(
+          batch,
+          billTitle,
+          billSummary,
+          i + batchIndex,
+          model
+        )
       )
     );
     for (const result of results) {
@@ -49,14 +55,15 @@ async function extractTopicsFromBatch(
   opinions: FlatOpinion[],
   billTitle: string,
   billSummary: string,
-  batchIndex: number
+  batchIndex: number,
+  model: string
 ): Promise<string[]> {
   const opinionsText = opinions
     .map((o, i) => `[${i + 1}] ${o.title}\n${o.content}`)
     .join("\n\n");
 
   const { object } = await generateObject({
-    model: TOPIC_ANALYSIS_MODEL,
+    model,
     schema: topicExtractionSchema,
     prompt: `あなたは議案に対する市民の意見を分析する専門家です。
 

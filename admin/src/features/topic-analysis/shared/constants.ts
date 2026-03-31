@@ -9,8 +9,11 @@ export const TOPIC_ANALYSIS_MAX_CONCURRENCY = 10;
 /** トピックあたりの代表意見数上限 */
 export const TOPIC_ANALYSIS_MAX_REPRESENTATIVES = 5;
 
-/** トピック解析で使用するモデル */
+/** トピック解析で使用するモデル（フォールバック値） */
 export const TOPIC_ANALYSIS_MODEL = AI_MODELS.gemini3_flash_preview;
+
+/** トピック解析で使用するモデルの機能ID */
+export const TOPIC_ANALYSIS_FEATURE_ID = "topic-analysis";
 
 /** 解析パイプラインの全ステップ数 */
 export const ANALYSIS_TOTAL_STEPS = 7;

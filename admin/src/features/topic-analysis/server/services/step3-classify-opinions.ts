@@ -5,7 +5,6 @@ import { z } from "zod";
 import {
   TOPIC_ANALYSIS_BATCH_SIZE,
   TOPIC_ANALYSIS_MAX_CONCURRENCY,
-  TOPIC_ANALYSIS_MODEL,
 } from "../../shared/constants";
 import type { FlatOpinion } from "../../shared/types";
 
@@ -39,7 +38,8 @@ type ClassificationResult = {
 export async function classifyOpinions(
   opinions: FlatOpinion[],
   topicNames: string[],
-  billTitle: string
+  billTitle: string,
+  model: string
 ): Promise<ClassificationResult[]> {
   const batches = chunk(opinions, TOPIC_ANALYSIS_BATCH_SIZE);
   const allClassifications: ClassificationResult[] = [];
@@ -48,7 +48,7 @@ export async function classifyOpinions(
     const concurrent = batches.slice(i, i + TOPIC_ANALYSIS_MAX_CONCURRENCY);
     const results = await Promise.all(
       concurrent.map((batch, batchIndex) =>
-        classifyBatch(batch, topicNames, billTitle, i + batchIndex)
+        classifyBatch(batch, topicNames, billTitle, i + batchIndex, model)
       )
     );
     for (const result of results) {
@@ -63,7 +63,8 @@ async function classifyBatch(
   opinions: FlatOpinion[],
   topicNames: string[],
   billTitle: string,
-  batchIndex: number
+  batchIndex: number,
+  model: string
 ): Promise<ClassificationResult[]> {
   // 各意見に連番を振る（LLMにはUUIDを渡さない）
   const opinionsText = opinions
@@ -73,7 +74,7 @@ async function classifyBatch(
   const topicsText = topicNames.map((t, i) => `${i + 1}. ${t}`).join("\n");
 
   const { object } = await generateObject({
-    model: TOPIC_ANALYSIS_MODEL,
+    model,
     schema: classifyBatchSchema,
     prompt: `あなたは議案分析の専門家です。各意見を適切なトピックに分類してください。
 

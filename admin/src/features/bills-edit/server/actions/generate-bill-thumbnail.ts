@@ -4,6 +4,7 @@ import "server-only";
 
 import OpenAI from "openai";
 import { createAdminClient } from "@mirai-gikai/supabase";
+import { getAiModel } from "@/features/ai-settings/server/loaders/get-ai-model";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { findBillContentsByBillId } from "../repositories/bill-edit-repository";
 import { buildThumbnailPrompt } from "../../shared/utils/build-thumbnail-prompt";
@@ -17,34 +18,85 @@ export interface ImageGenerator {
   generate(prompt: string): Promise<{ url: string } | null>;
 }
 
-type DalleModel = "dall-e-2" | "dall-e-3";
+/** OpenAI画像生成モデルの種別 */
+type OpenAiImageModel = "dall-e-2" | "dall-e-3" | "gpt-image-1";
 
-/** モデルに応じた画像サイズを返す */
-function getImageSize(model: DalleModel): "1792x1024" | "1024x1024" {
-  // DALL-E 2 は 1792x1024 に対応していないため 1024x1024 を使用
-  return model === "dall-e-2" ? "1024x1024" : "1792x1024";
+/** モデルごとの設定 */
+type ImageModelConfig = {
+  size: string;
+  maxPromptLength: number;
+  quality?: string;
+  useSummaryForContext: boolean;
+};
+
+function getImageModelConfig(model: OpenAiImageModel): ImageModelConfig {
+  switch (model) {
+    case "dall-e-2":
+      return {
+        size: "1024x1024",
+        maxPromptLength: 1000,
+        useSummaryForContext: true,
+      };
+    case "dall-e-3":
+      return {
+        size: "1792x1024",
+        maxPromptLength: 4000,
+        quality: "standard",
+        useSummaryForContext: false,
+      };
+    case "gpt-image-1":
+      return {
+        size: "1536x1024",
+        maxPromptLength: 4000,
+        quality: "medium",
+        useSummaryForContext: false,
+      };
+  }
 }
 
-/** OpenAI DALL-E を使ったデフォルト実装 */
-function createDalleGenerator(
+/** OpenAI 画像生成の実装 */
+function createOpenAiImageGenerator(
   apiKey: string,
-  model: DalleModel
+  model: OpenAiImageModel
 ): ImageGenerator {
   const openai = new OpenAI({ apiKey });
+  const config = getImageModelConfig(model);
+
   return {
     async generate(prompt: string) {
       const response = await openai.images.generate({
         model,
         prompt,
         n: 1,
-        size: getImageSize(model),
-        // DALL-E 2 は quality パラメータに対応していない
-        ...(model === "dall-e-3" ? { quality: "standard" } : {}),
+        size: config.size as "1024x1024" | "1792x1024" | "1536x1024",
+        ...(config.quality
+          ? { quality: config.quality as "standard" | "medium" }
+          : {}),
       });
       const url = response.data?.[0]?.url;
-      return url ? { url } : null;
+      // gpt-image-1 は url ではなく b64_json を返す場合がある
+      if (url) return { url };
+
+      const b64 = response.data?.[0]?.b64_json;
+      if (b64) {
+        // base64 を data URL に変換（後続のfetchでバイナリ取得可能にする）
+        return { url: `data:image/png;base64,${b64}` };
+      }
+      return null;
     },
   };
+}
+
+/**
+ * ai_settings のモデルIDからOpenAI画像モデル名を抽出する
+ * 例: "openai/dall-e-3" → "dall-e-3"
+ */
+function parseOpenAiImageModel(modelId: string): OpenAiImageModel | null {
+  const modelName = modelId.replace("openai/", "");
+  const valid: OpenAiImageModel[] = ["dall-e-2", "dall-e-3", "gpt-image-1"];
+  return valid.includes(modelName as OpenAiImageModel)
+    ? (modelName as OpenAiImageModel)
+    : null;
 }
 
 const UUID_PATTERN =
@@ -63,6 +115,27 @@ export async function generateBillThumbnail(
       return { success: false, error: "無効な議案IDです" };
     }
 
+    // DB設定からモデルを取得（フォールバック: dall-e-3）
+    const modelId = await getAiModel("thumbnail-generation", "openai/dall-e-3");
+
+    const provider = modelId.split("/")[0];
+
+    if (provider === "google") {
+      // Google Imagen への対応は今後実装予定
+      return {
+        success: false,
+        error: `モデル「${modelId}」によるAI画像生成は未実装です。AI管理画面でOpenAIモデルに切り替えてください。`,
+      };
+    }
+
+    const openAiModel = parseOpenAiImageModel(modelId);
+    if (!openAiModel) {
+      return {
+        success: false,
+        error: `不明な画像生成モデルです: ${modelId}`,
+      };
+    }
+
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey && !deps?.imageGenerator) {
       return {
@@ -71,15 +144,12 @@ export async function generateBillThumbnail(
       };
     }
 
-    const dalleModel: DalleModel =
-      process.env.DALLE_MODEL === "dall-e-2" ? "dall-e-2" : "dall-e-3";
+    const config = getImageModelConfig(openAiModel);
     const generator =
       deps?.imageGenerator ??
-      createDalleGenerator(apiKey as string, dalleModel);
+      createOpenAiImageGenerator(apiKey as string, openAiModel);
 
     // 1. 議案コンテンツ（ふつう）を取得してプロンプトに含める
-    // DALL-E 2はプロンプト上限1000文字のため要約を使用、
-    // DALL-E 3は4000文字まで使えるので内容を使用
     let billContext: string | undefined;
     if (billId !== "new") {
       try {
@@ -88,10 +158,9 @@ export async function generateBillThumbnail(
           (c) => c.difficulty_level === "normal"
         );
         if (normalEntry) {
-          billContext =
-            dalleModel === "dall-e-2"
-              ? normalEntry.summary || undefined
-              : normalEntry.content || undefined;
+          billContext = config.useSummaryForContext
+            ? normalEntry.summary || undefined
+            : normalEntry.content || undefined;
         }
       } catch {
         // コンテンツ取得失敗時はタイトルのみで生成
@@ -99,8 +168,11 @@ export async function generateBillThumbnail(
     }
 
     // 2. 画像生成
-    const maxPromptLength = dalleModel === "dall-e-2" ? 1000 : 4000;
-    const prompt = buildThumbnailPrompt(billName, billContext, maxPromptLength);
+    const prompt = buildThumbnailPrompt(
+      billName,
+      billContext,
+      config.maxPromptLength
+    );
     const result = await generator.generate(prompt);
     if (!result) {
       return {
@@ -109,15 +181,22 @@ export async function generateBillThumbnail(
       };
     }
 
-    // 3. 生成画像をfetchしてバイナリ取得
-    const imageResponse = await fetch(result.url);
-    if (!imageResponse.ok) {
-      return {
-        success: false,
-        error: "生成された画像のダウンロードに失敗しました",
-      };
+    // 3. 生成画像をバイナリ取得
+    let imageBuffer: Buffer;
+    if (result.url.startsWith("data:")) {
+      // data URL (base64) の場合
+      const base64Data = result.url.split(",")[1];
+      imageBuffer = Buffer.from(base64Data, "base64");
+    } else {
+      const imageResponse = await fetch(result.url);
+      if (!imageResponse.ok) {
+        return {
+          success: false,
+          error: "生成された画像のダウンロードに失敗しました",
+        };
+      }
+      imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
     }
-    const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
 
     // 4. Supabase Storageにアップロード
     const supabase = createAdminClient();

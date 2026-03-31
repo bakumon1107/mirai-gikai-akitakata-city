@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -19,6 +20,7 @@ import { routes } from "@/lib/routes";
 interface ReportsPageProps {
   params: Promise<{
     id: string;
+    configId: string;
   }>;
   searchParams: Promise<{
     page?: string;
@@ -36,7 +38,7 @@ export default async function ReportsPage({
   params,
   searchParams,
 }: ReportsPageProps) {
-  const { id } = await params;
+  const { id, configId } = await params;
   const { page, sort, order, status, visibility, stance, role, moderation } =
     await searchParams;
   const currentPage = Math.max(1, Number(page) || 1);
@@ -51,9 +53,9 @@ export default async function ReportsPage({
 
   const [bill, sessions, totalCount, statistics] = await Promise.all([
     getBillById(id),
-    getInterviewSessions(id, currentPage, sortConfig, filterConfig),
-    getInterviewSessionsCount(id, filterConfig),
-    getInterviewStatistics(id),
+    getInterviewSessions(configId, currentPage, sortConfig, filterConfig),
+    getInterviewSessionsCount(configId, filterConfig),
+    getInterviewStatistics(configId),
   ]);
 
   if (!bill) {
@@ -64,11 +66,11 @@ export default async function ReportsPage({
     <div>
       <div className="mb-6">
         <Link
-          href={routes.bills()}
+          href={routes.billInterview(id) as Route}
           className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
-          議案一覧に戻る
+          インタビュー設定に戻る
         </Link>
       </div>
 
@@ -93,6 +95,7 @@ export default async function ReportsPage({
 
       <SessionList
         billId={id}
+        configId={configId}
         sessions={sessions}
         totalCount={totalCount}
         currentPage={currentPage}

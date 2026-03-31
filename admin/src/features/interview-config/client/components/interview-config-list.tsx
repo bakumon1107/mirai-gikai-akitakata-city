@@ -1,7 +1,7 @@
 "use client";
 
 import type { Route } from "next";
-import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
+import { BarChart3, Copy, Pencil, Plus, Sparkles, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -153,7 +153,9 @@ export function InterviewConfigList({
                   <TableHead>モード</TableHead>
                   <TableHead>テーマ</TableHead>
                   <TableHead>ステータス</TableHead>
+                  <TableHead>セッション数</TableHead>
                   <TableHead>作成日</TableHead>
+                  <TableHead>リンク</TableHead>
                   <TableHead className="w-[50px]" />
                 </TableRow>
               </TableHeader>
@@ -204,7 +206,32 @@ export function InterviewConfigList({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-gray-600">
+                      {sessionCounts ? (sessionCounts[config.id] ?? 0) : "-"}
+                    </TableCell>
+                    <TableCell className="text-gray-600">
                       {new Date(config.created_at).toLocaleDateString("ja-JP")}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <Link
+                          href={routes.billReports(billId, config.id) as Route}
+                        >
+                          <Button variant="ghost" size="sm" className="gap-1">
+                            <BarChart3 className="h-4 w-4" />
+                            レポート
+                          </Button>
+                        </Link>
+                        <Link
+                          href={
+                            routes.billTopicAnalysis(billId, config.id) as Route
+                          }
+                        >
+                          <Button variant="ghost" size="sm" className="gap-1">
+                            <Sparkles className="h-4 w-4" />
+                            トピック解析
+                          </Button>
+                        </Link>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">

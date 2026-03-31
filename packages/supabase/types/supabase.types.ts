@@ -34,6 +34,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_settings: {
+        Row: {
+          feature_id: string
+          model: string
+          updated_at: string
+        }
+        Insert: {
+          feature_id: string
+          model: string
+          updated_at?: string
+        }
+        Update: {
+          feature_id?: string
+          model?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bill_contents: {
         Row: {
           bill_id: string

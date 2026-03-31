@@ -11,8 +11,7 @@ export async function getAiModel(
   fallback: string
 ): Promise<string> {
   const supabase = createAdminClient();
-  // biome-ignore lint/suspicious/noExplicitAny: ai_settings 型未生成のため
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from("ai_settings")
     .select("model")
     .eq("feature_id", featureId)

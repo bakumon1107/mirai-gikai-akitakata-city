@@ -1,7 +1,12 @@
 import "server-only";
 
+import { getAiModel } from "@/features/ai-settings/server/loaders/get-ai-model";
 import { registerNodeTelemetry } from "@/lib/telemetry/register";
-import { ANALYSIS_STEPS } from "../../shared/constants";
+import {
+  ANALYSIS_STEPS,
+  TOPIC_ANALYSIS_FEATURE_ID,
+  TOPIC_ANALYSIS_MODEL,
+} from "../../shared/constants";
 import type {
   FlatOpinion,
   IntermediateResults,
@@ -34,7 +39,11 @@ export async function runTopicAnalysis(billId: string) {
   await registerNodeTelemetry();
 
   const version = await createVersion(billId);
-  await executeAnalysisPipeline(version.id, billId);
+  const model = await getAiModel(
+    TOPIC_ANALYSIS_FEATURE_ID,
+    TOPIC_ANALYSIS_MODEL
+  );
+  await executeAnalysisPipeline(version.id, billId, model);
   return { versionId: version.id };
 }
 
@@ -45,7 +54,8 @@ export async function runTopicAnalysis(billId: string) {
  */
 async function runPhase1Steps(
   versionId: string,
-  billId: string
+  billId: string,
+  model: string
 ): Promise<PhaseData> {
   // Step 1: データ取得
   await updateVersionStep(versionId, ANALYSIS_STEPS.FETCH_DATA.label);
@@ -85,7 +95,8 @@ async function runPhase1Steps(
   const rawTopics = await extractTopics(
     flatOpinions,
     billData.billTitle,
-    billData.billSummary
+    billData.billSummary,
+    model
   );
 
   // Step 3: トピック統合
@@ -93,7 +104,11 @@ async function runPhase1Steps(
   console.log(
     `[TopicAnalysis] Step 3: Merging ${rawTopics.length} raw topics...`
   );
-  const mergedTopicNames = await mergeTopics(rawTopics, billData.billTitle);
+  const mergedTopicNames = await mergeTopics(
+    rawTopics,
+    billData.billTitle,
+    model
+  );
 
   return {
     flat_opinions: flatOpinions,
@@ -112,7 +127,8 @@ async function runPhase1Steps(
  */
 async function runPhase2Steps(
   versionId: string,
-  phaseData: PhaseData
+  phaseData: PhaseData,
+  model: string
 ): Promise<PhaseData> {
   const flatOpinions = phaseData.flat_opinions!;
   const mergedTopicNames = phaseData.merged_topic_names!;
@@ -126,7 +142,8 @@ async function runPhase2Steps(
   const classifications = await classifyOpinions(
     flatOpinions,
     mergedTopicNames,
-    billTitle
+    billTitle,
+    model
   );
 
   return {
@@ -141,7 +158,8 @@ async function runPhase2Steps(
 async function runPhase3Steps(
   versionId: string,
   billId: string,
-  phaseData: PhaseData
+  phaseData: PhaseData,
+  model: string
 ): Promise<void> {
   const flatOpinions = phaseData.flat_opinions!;
   const mergedTopicNames = phaseData.merged_topic_names!;
@@ -187,7 +205,8 @@ async function runPhase3Steps(
     topicInputs,
     billTitle,
     validSessionIds,
-    billId
+    billId,
+    model
   );
 
   // Step 6: 全体サマリ生成
@@ -201,7 +220,8 @@ async function runPhase3Steps(
     })),
     billTitle,
     flatOpinions.length,
-    phaseData.sessions_count!
+    phaseData.sessions_count!,
+    model
   );
 
   // Step 7: 結果保存
@@ -286,7 +306,11 @@ export async function executePhase1(
 ): Promise<void> {
   try {
     await updateVersionStatus(versionId, "running");
-    const phaseData = await runPhase1Steps(versionId, billId);
+    const model = await getAiModel(
+      TOPIC_ANALYSIS_FEATURE_ID,
+      TOPIC_ANALYSIS_MODEL
+    );
+    const phaseData = await runPhase1Steps(versionId, billId, model);
     await savePhaseData(versionId, phaseData);
     console.log(`[TopicAnalysis] Phase 1 completed. Version: ${versionId}`);
   } catch (error) {
@@ -303,8 +327,12 @@ export async function executePhase1(
  */
 export async function executePhase2(versionId: string): Promise<void> {
   try {
+    const model = await getAiModel(
+      TOPIC_ANALYSIS_FEATURE_ID,
+      TOPIC_ANALYSIS_MODEL
+    );
     const phaseData = await loadPhaseData(versionId);
-    const updatedPhaseData = await runPhase2Steps(versionId, phaseData);
+    const updatedPhaseData = await runPhase2Steps(versionId, phaseData, model);
     await savePhaseData(versionId, updatedPhaseData);
     console.log(`[TopicAnalysis] Phase 2 completed. Version: ${versionId}`);
   } catch (error) {
@@ -324,8 +352,12 @@ export async function executePhase3(
   billId: string
 ): Promise<void> {
   try {
+    const model = await getAiModel(
+      TOPIC_ANALYSIS_FEATURE_ID,
+      TOPIC_ANALYSIS_MODEL
+    );
     const phaseData = await loadPhaseData(versionId);
-    await runPhase3Steps(versionId, billId, phaseData);
+    await runPhase3Steps(versionId, billId, phaseData, model);
     console.log(`[TopicAnalysis] Phase 3 completed. Version: ${versionId}`);
   } catch (error) {
     console.error("[TopicAnalysis] Phase 3 failed:", error);
@@ -341,14 +373,23 @@ export async function executePhase3(
  */
 export async function executeAnalysisPipeline(
   versionId: string,
-  billId: string
+  billId: string,
+  model?: string
 ) {
   try {
     await updateVersionStatus(versionId, "running");
 
-    const phase1Data = await runPhase1Steps(versionId, billId);
-    const phase2Data = await runPhase2Steps(versionId, phase1Data);
-    await runPhase3Steps(versionId, billId, phase2Data);
+    const resolvedModel =
+      model ??
+      (await getAiModel(TOPIC_ANALYSIS_FEATURE_ID, TOPIC_ANALYSIS_MODEL));
+
+    const phase1Data = await runPhase1Steps(versionId, billId, resolvedModel);
+    const phase2Data = await runPhase2Steps(
+      versionId,
+      phase1Data,
+      resolvedModel
+    );
+    await runPhase3Steps(versionId, billId, phase2Data, resolvedModel);
 
     console.log(
       `[TopicAnalysis] Completed successfully. Version: ${versionId}`

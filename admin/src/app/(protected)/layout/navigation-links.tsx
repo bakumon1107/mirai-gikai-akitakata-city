@@ -15,6 +15,7 @@ const navigationLinks = [
   { href: routes.aiCollection(), label: "AI情報収集" },
   { href: routes.experts(), label: "有識者" },
   { href: routes.admins(), label: "管理者" },
+  { href: routes.aiSettings(), label: "AI管理" },
 ];
 
 export function NavigationLinks() {

@@ -12,6 +12,8 @@ import {
   executeClaudeToFile,
   readCollectionOutput,
 } from "@/features/ai-collection/server/utils/execute-claude";
+import { getAiModel } from "@/features/ai-settings/server/loaders/get-ai-model";
+import { isClaudeCliModel } from "@/features/ai-settings/shared/ai-model-options";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 
 export type EnrichedContent = {
@@ -146,6 +148,16 @@ export async function enrichBillContents(
       }
     } catch {
       // 定例会情報が取得できなくても処理は続行
+    }
+
+    const modelId = await getAiModel("bill-enrichment", "anthropic/claude-cli");
+
+    if (!isClaudeCliModel(modelId)) {
+      // OpenAI API等への切替は今後実装予定
+      return {
+        success: false,
+        error: `モデル「${modelId}」による議案コンテンツ編集は未実装です。AI管理画面でClaude CLIに切り替えてください。`,
+      };
     }
 
     const prompt = buildPrompt(

@@ -8,6 +8,8 @@ import {
   getTempOutputPath,
   readCollectionOutput,
 } from "@/features/ai-collection/server/utils/execute-claude";
+import { getAiModel } from "@/features/ai-settings/server/loaders/get-ai-model";
+import { isClaudeCliModel } from "@/features/ai-settings/shared/ai-model-options";
 import {
   loadRun,
   saveRun,
@@ -50,6 +52,17 @@ export async function POST(request: Request) {
     };
 
     await saveRun(initialRun);
+
+    const modelId = await getAiModel("ai-collection", "anthropic/claude-cli");
+
+    if (!isClaudeCliModel(modelId)) {
+      return NextResponse.json(
+        {
+          error: `モデル「${modelId}」によるAI情報収集は未実装です。AI管理画面でClaude CLIに切り替えてください。`,
+        },
+        { status: 400 }
+      );
+    }
 
     // Fire-and-forget: run Claude in background
     const existingBillNumbers = await getExistingBillNumbers();

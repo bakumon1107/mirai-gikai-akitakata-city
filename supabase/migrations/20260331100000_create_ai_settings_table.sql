@@ -17,4 +17,7 @@ alter table ai_settings enable row level security;
 insert into ai_settings (feature_id, model) values
   ('interview-chat', 'openai/gpt-5.2'),
   ('config-generation', 'openai/gpt-5.2'),
-  ('topic-analysis', 'google/gemini-3-flash-preview');
+  ('topic-analysis', 'google/gemini-3-flash-preview'),
+  ('bill-enrichment', 'anthropic/claude-cli'),
+  ('ai-collection', 'anthropic/claude-cli'),
+  ('thumbnail-generation', 'openai/dall-e-3');

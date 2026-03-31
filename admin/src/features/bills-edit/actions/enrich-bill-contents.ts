@@ -15,6 +15,7 @@ import {
 import { getAiModel } from "@/features/ai-settings/server/loaders/get-ai-model";
 import { isClaudeCliModel } from "@/features/ai-settings/shared/ai-model-options";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
+import { enrichBillWithOpenAi } from "../server/services/enrich-bill-with-openai";
 
 export type EnrichedContent = {
   hard: {
@@ -152,12 +153,30 @@ export async function enrichBillContents(
 
     const modelId = await getAiModel("bill-enrichment", "anthropic/claude-cli");
 
+    // OpenAI API選択時は専用サービスで処理
     if (!isClaudeCliModel(modelId)) {
-      // OpenAI API等への切替は今後実装予定
-      return {
-        success: false,
-        error: `モデル「${modelId}」による議案コンテンツ編集は未実装です。AI管理画面でClaude CLIに切り替えてください。`,
-      };
+      try {
+        const result = await enrichBillWithOpenAi(
+          modelId,
+          billName,
+          existingHardTitle,
+          sessionInfo,
+          pdfUrl
+        );
+        if (!result.foundNewInfo) {
+          return { success: true, foundNewInfo: false };
+        }
+        return { success: true, foundNewInfo: true, content: result.content };
+      } catch (error) {
+        console.error("[enrich-bill-contents] OpenAI error:", error);
+        return {
+          success: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : "OpenAI APIでのコンテンツ生成に失敗しました",
+        };
+      }
     }
 
     const prompt = buildPrompt(

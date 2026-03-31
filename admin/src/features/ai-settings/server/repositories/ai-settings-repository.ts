@@ -8,21 +8,10 @@ export type AiSettingRow = {
   updated_at: string;
 };
 
-/**
- * ai_settings テーブルの型は supabase.types.ts に未反映。
- * マイグレーション適用後に `pnpm db:types:gen` で型を再生成すること。
- * それまでは型アサーションで回避する。
- */
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function fromAiSettings(supabase: ReturnType<typeof createAdminClient>) {
-  // biome-ignore lint/suspicious/noExplicitAny: ai_settings 型未生成のため
-  return (supabase as any).from("ai_settings");
-}
-
 export async function getAllAiSettings(): Promise<AiSettingRow[]> {
   const supabase = createAdminClient();
-  const { data, error } = await fromAiSettings(supabase)
+  const { data, error } = await supabase
+    .from("ai_settings")
     .select("feature_id, model, updated_at")
     .order("feature_id");
 
@@ -39,10 +28,9 @@ export async function updateAiSettingModel(
   model: string
 ): Promise<{ error: string | null }> {
   const supabase = createAdminClient();
-  const { error } = await fromAiSettings(supabase).upsert(
-    { feature_id: featureId, model },
-    { onConflict: "feature_id" }
-  );
+  const { error } = await supabase
+    .from("ai_settings")
+    .upsert({ feature_id: featureId, model }, { onConflict: "feature_id" });
 
   if (error) {
     console.error("Failed to update ai_setting:", error);

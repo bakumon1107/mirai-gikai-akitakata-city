@@ -3,6 +3,7 @@
 import "server-only";
 
 import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import { getAiModel } from "@/features/ai-settings/server/loaders/get-ai-model";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
@@ -99,6 +100,66 @@ function parseOpenAiImageModel(modelId: string): OpenAiImageModel | null {
     : null;
 }
 
+// ─── Google Imagen ───────────────────────────────────────
+
+/** Google Imagen モデルの種別 */
+type GoogleImagenModel =
+  | "imagen-4-fast"
+  | "imagen-4-standard"
+  | "imagen-4-ultra";
+
+/** ai_settings のモデルIDからGoogle Imagenモデル名を抽出する */
+function parseGoogleImagenModel(modelId: string): GoogleImagenModel | null {
+  const modelName = modelId.replace("google/", "");
+  const valid: GoogleImagenModel[] = [
+    "imagen-4-fast",
+    "imagen-4-standard",
+    "imagen-4-ultra",
+  ];
+  return valid.includes(modelName as GoogleImagenModel)
+    ? (modelName as GoogleImagenModel)
+    : null;
+}
+
+/** Google Imagen API のモデルID（API用フルネーム） */
+function getImagenApiModelId(model: GoogleImagenModel): string {
+  switch (model) {
+    case "imagen-4-fast":
+      return "imagen-4.0-fast-generate-001";
+    case "imagen-4-standard":
+      return "imagen-4.0-generate-001";
+    case "imagen-4-ultra":
+      return "imagen-4.0-ultra-generate-001";
+  }
+}
+
+/** Google Imagen 画像生成の実装 */
+function createGoogleImagenGenerator(
+  apiKey: string,
+  model: GoogleImagenModel
+): ImageGenerator {
+  const client = new GoogleGenAI({ apiKey });
+  const apiModelId = getImagenApiModelId(model);
+
+  return {
+    async generate(prompt: string) {
+      const response = await client.models.generateImages({
+        model: apiModelId,
+        prompt,
+        config: {
+          numberOfImages: 1,
+          aspectRatio: "16:9",
+        },
+      });
+
+      const imageBytes = response?.generatedImages?.[0]?.image?.imageBytes;
+      if (!imageBytes) return null;
+
+      return { url: `data:image/png;base64,${imageBytes}` };
+    },
+  };
+}
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -120,34 +181,57 @@ export async function generateBillThumbnail(
 
     const provider = modelId.split("/")[0];
 
-    if (provider === "google") {
-      // Google Imagen への対応は今後実装予定
-      return {
-        success: false,
-        error: `モデル「${modelId}」によるAI画像生成は未実装です。AI管理画面でOpenAIモデルに切り替えてください。`,
-      };
-    }
+    let generator: ImageGenerator;
+    let config: ImageModelConfig;
 
-    const openAiModel = parseOpenAiImageModel(modelId);
-    if (!openAiModel) {
-      return {
-        success: false,
-        error: `不明な画像生成モデルです: ${modelId}`,
-      };
-    }
+    if (deps?.imageGenerator) {
+      // テスト用のカスタムジェネレーター
+      generator = deps.imageGenerator;
+      config = getImageModelConfig("dall-e-3"); // テスト時のデフォルト
+    } else if (provider === "google") {
+      const imagenModel = parseGoogleImagenModel(modelId);
+      if (!imagenModel) {
+        return {
+          success: false,
+          error: `不明な画像生成モデルです: ${modelId}`,
+        };
+      }
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey && !deps?.imageGenerator) {
-      return {
-        success: false,
-        error: "OPENAI_API_KEY が設定されていません",
-      };
-    }
+      const googleApiKey = process.env.GOOGLE_AI_API_KEY;
+      if (!googleApiKey) {
+        return {
+          success: false,
+          error: "GOOGLE_AI_API_KEY が設定されていません",
+        };
+      }
 
-    const config = getImageModelConfig(openAiModel);
-    const generator =
-      deps?.imageGenerator ??
-      createOpenAiImageGenerator(apiKey as string, openAiModel);
+      generator = createGoogleImagenGenerator(googleApiKey, imagenModel);
+      // Google Imagen はプロンプト長の制限が緩いため dall-e-3 相当を使用
+      config = {
+        size: "16:9",
+        maxPromptLength: 4000,
+        useSummaryForContext: false,
+      };
+    } else {
+      const openAiModel = parseOpenAiImageModel(modelId);
+      if (!openAiModel) {
+        return {
+          success: false,
+          error: `不明な画像生成モデルです: ${modelId}`,
+        };
+      }
+
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        return {
+          success: false,
+          error: "OPENAI_API_KEY が設定されていません",
+        };
+      }
+
+      generator = createOpenAiImageGenerator(apiKey, openAiModel);
+      config = getImageModelConfig(openAiModel);
+    }
 
     // 1. 議案コンテンツ（ふつう）を取得してプロンプトに含める
     let billContext: string | undefined;

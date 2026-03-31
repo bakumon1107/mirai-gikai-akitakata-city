@@ -8,6 +8,7 @@ import {
   getTempOutputPath,
   readCollectionOutput,
 } from "@/features/ai-collection/server/utils/execute-claude";
+import { collectWithOpenAi } from "@/features/ai-collection/server/services/collect-with-openai";
 import { getAiModel } from "@/features/ai-settings/server/loaders/get-ai-model";
 import { isClaudeCliModel } from "@/features/ai-settings/shared/ai-model-options";
 import {
@@ -55,18 +56,21 @@ export async function POST(request: Request) {
 
     const modelId = await getAiModel("ai-collection", "anthropic/claude-cli");
 
-    if (!isClaudeCliModel(modelId)) {
-      return NextResponse.json(
-        {
-          error: `モデル「${modelId}」によるAI情報収集は未実装です。AI管理画面でClaude CLIに切り替えてください。`,
-        },
-        { status: 400 }
+    const existingBillNumbers = await getExistingBillNumbers();
+
+    if (isClaudeCliModel(modelId)) {
+      // Claude CLI で実行
+      runClaudeInBackground(runId, startDate, endDate, existingBillNumbers);
+    } else {
+      // OpenAI API で実行
+      runOpenAiInBackground(
+        runId,
+        modelId,
+        startDate,
+        endDate,
+        existingBillNumbers
       );
     }
-
-    // Fire-and-forget: run Claude in background
-    const existingBillNumbers = await getExistingBillNumbers();
-    runClaudeInBackground(runId, startDate, endDate, existingBillNumbers);
 
     return NextResponse.json({ runId });
   } catch (error) {
@@ -181,6 +185,71 @@ type RawCollectionResult = {
   }>;
   sources: string[];
 };
+
+async function runOpenAiInBackground(
+  runId: string,
+  modelId: string,
+  startDate: string,
+  endDate: string,
+  existingBillNumbers: string[]
+): Promise<void> {
+  try {
+    const parsed = await collectWithOpenAi(
+      modelId,
+      startDate,
+      endDate,
+      existingBillNumbers
+    );
+
+    const run = await loadRun(runId);
+    if (!run) return;
+
+    const bills: DraftBill[] = parsed.bills.map((b) => ({
+      id: crypto.randomUUID(),
+      billNumber: b.billNumber ?? null,
+      title: b.title,
+      summary: b.summary,
+      status: b.status as DraftBill["status"],
+      statusNote: b.statusNote ?? null,
+      submitter: b.submitter ?? null,
+      sourceUrls: b.sourceUrls ?? [],
+    }));
+
+    const factionStances: DraftFactionStance[] = parsed.factionStances.map(
+      (s) => ({
+        id: crypto.randomUUID(),
+        billTitle: s.billTitle,
+        factionName: s.factionName,
+        stanceType: s.stanceType as DraftFactionStance["stanceType"],
+        comment: s.comment ?? null,
+        sourceUrls: s.sourceUrls ?? [],
+      })
+    );
+
+    const updatedRun: CollectionRun = {
+      ...run,
+      status: "completed",
+      completedAt: new Date().toISOString(),
+      bills,
+      factionStances,
+      sources: parsed.sources,
+    };
+
+    await saveRun(updatedRun);
+  } catch (error) {
+    const run = await loadRun(runId);
+    if (!run) return;
+
+    const updatedRun: CollectionRun = {
+      ...run,
+      status: "failed",
+      completedAt: new Date().toISOString(),
+      error:
+        error instanceof Error ? error.message : "不明なエラーが発生しました",
+    };
+    await saveRun(updatedRun);
+  }
+}
 
 function parseCollectionJson(raw: string): RawCollectionResult {
   // マークダウンコードブロックや前後のテキストを除去してJSONを抽出

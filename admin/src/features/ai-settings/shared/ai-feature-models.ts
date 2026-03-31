@@ -69,7 +69,7 @@ export const aiFeatureConfigs: AiFeatureConfig[] = [
     provider: "Anthropic",
     model: "anthropic/claude-cli",
     modelCategory: "cli",
-    description: "議案一覧・会派態度をWebから自動収集。",
+    description: "議案一覧・会派見解をWebから自動収集。",
   },
   {
     id: "thumbnail-generation",

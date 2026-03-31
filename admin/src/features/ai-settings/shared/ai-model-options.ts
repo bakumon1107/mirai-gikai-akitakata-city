@@ -65,7 +65,7 @@ export const TEXT_MODEL_GROUPS: AiModelGroup[] = [
 // ─── CLI モデル（Web検索・PDF読み込み付き） ─────────────
 
 const ANTHROPIC_CLI_MODELS: AiModelOption[] = [
-  { value: "anthropic/claude-cli", label: "Claude CLI" },
+  { value: "anthropic/claude-cli", label: "Claude CLI(/modelで設定)" },
 ];
 
 const OPENAI_CLI_MODELS: AiModelOption[] = [

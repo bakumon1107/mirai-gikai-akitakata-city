@@ -10,6 +10,7 @@ export function prepareBillForDuplication(originalBill: Bill): BillInsert {
     created_at: __,
     updated_at: ___,
     status_order: ____,
+    publish_status_order: _____,
     ...billWithoutId
   } = originalBill;
 
@@ -17,6 +18,7 @@ export function prepareBillForDuplication(originalBill: Bill): BillInsert {
     ...billWithoutId,
     name: `${originalBill.name} (複製)`,
     publish_status: "draft",
+    bill_number: "",
   };
 }
 

@@ -163,6 +163,34 @@ export async function createBillContents(contents: BillContentInsert[]) {
   }
 }
 
+export async function findBillTagIdsByBillId(billId: string) {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("bills_tags")
+    .select("tag_id")
+    .eq("bill_id", billId);
+
+  if (error) {
+    throw new Error(`Failed to fetch bill tag ids: ${error.message}`);
+  }
+
+  return data?.map((item) => item.tag_id) ?? [];
+}
+
+export async function createBillsTags(billId: string, tagIds: string[]) {
+  const supabase = createAdminClient();
+  const billTags = tagIds.map((tagId) => ({
+    bill_id: billId,
+    tag_id: tagId,
+  }));
+
+  const { error } = await supabase.from("bills_tags").insert(billTags);
+
+  if (error) {
+    throw new Error(`Failed to create bill tags: ${error.message}`);
+  }
+}
+
 export async function findPreviewToken(billId: string) {
   const supabase = createAdminClient();
   const { data, error } = await supabase

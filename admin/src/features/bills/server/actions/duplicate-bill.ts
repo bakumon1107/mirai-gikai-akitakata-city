@@ -11,8 +11,10 @@ import {
 import {
   createBill,
   createBillContents,
+  createBillsTags,
   findBillById,
   findBillContentsByBillId,
+  findBillTagIdsByBillId,
 } from "../repositories/bill-repository";
 
 /**
@@ -38,6 +40,12 @@ export async function duplicateBill(billId: string) {
   const contentResult = await _duplicateContents(billId, newBill.data.id);
   if (!contentResult.success) {
     return contentResult;
+  }
+
+  // タグを複製
+  const tagResult = await _duplicateTags(billId, newBill.data.id);
+  if (!tagResult.success) {
+    return tagResult;
   }
 
   revalidatePath(routes.bills());
@@ -106,6 +114,30 @@ async function _duplicateContents(originalBillId: string, newBillId: string) {
     return {
       success: false as const,
       error: "コンテンツの複製に失敗しました",
+    };
+  }
+}
+
+/**
+ * 議案のタグを複製
+ */
+async function _duplicateTags(originalBillId: string, newBillId: string) {
+  try {
+    const tagIds = await findBillTagIdsByBillId(originalBillId);
+
+    // タグが存在しない場合は成功として扱う
+    if (tagIds.length === 0) {
+      return { success: true as const };
+    }
+
+    await createBillsTags(newBillId, tagIds);
+
+    return { success: true as const };
+  } catch (error) {
+    console.error("Error duplicating tags:", error);
+    return {
+      success: false as const,
+      error: "タグの複製に失敗しました",
     };
   }
 }

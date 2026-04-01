@@ -9,6 +9,7 @@ import { Form } from "@/components/ui/form";
 
 import type { Committee } from "@/features/committees/shared/types";
 import type { CouncilSession } from "@/features/council-sessions/shared/types";
+import { utcToJstDatetimeLocal } from "@/lib/utils/datetime-jst";
 import { updateBill } from "../../server/actions/update-bill";
 import {
   type Bill,
@@ -44,7 +45,7 @@ export function BillEditForm({
       status: bill.status,
       status_note: bill.status_note,
       published_at: bill.published_at
-        ? new Date(bill.published_at).toISOString().slice(0, 16)
+        ? utcToJstDatetimeLocal(bill.published_at)
         : "",
       thumbnail_url: bill.thumbnail_url,
       share_thumbnail_url: bill.share_thumbnail_url,

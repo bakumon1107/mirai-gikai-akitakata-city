@@ -7,6 +7,7 @@ import {
   invalidateWebCache,
   WEB_CACHE_TAGS,
 } from "@/lib/utils/cache-invalidation";
+import { jstDatetimeLocalToUtc } from "@/lib/utils/datetime-jst";
 import { getErrorMessage } from "@/lib/utils/get-error-message";
 import { type BillCreateInput, billCreateSchema } from "../../shared/types";
 import { createBillRecord } from "../repositories/bill-edit-repository";
@@ -22,7 +23,7 @@ export async function createBill(input: BillCreateInput) {
     const insertData = {
       ...validatedData,
       published_at: validatedData.published_at
-        ? new Date(validatedData.published_at).toISOString()
+        ? jstDatetimeLocalToUtc(validatedData.published_at)
         : null,
     };
 

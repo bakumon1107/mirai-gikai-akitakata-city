@@ -72,7 +72,9 @@ const SCALAR_FIELDS: ScalarField[] = [
     label: "公開日時",
     format: (b) =>
       b.published_at
-        ? new Date(b.published_at).toLocaleDateString("ja-JP")
+        ? new Date(b.published_at).toLocaleDateString("ja-JP", {
+            timeZone: "Asia/Tokyo",
+          })
         : "(未設定)",
   },
   {

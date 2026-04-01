@@ -27,11 +27,13 @@ const baseBill: Bill = {
 };
 
 describe("prepareBillForDuplication", () => {
-  it("id, created_at, updated_atを除去する", () => {
+  it("id, created_at, updated_at, status_order, publish_status_orderを除去する", () => {
     const result = prepareBillForDuplication(baseBill);
     expect(result).not.toHaveProperty("id");
     expect(result).not.toHaveProperty("created_at");
     expect(result).not.toHaveProperty("updated_at");
+    expect(result).not.toHaveProperty("status_order");
+    expect(result).not.toHaveProperty("publish_status_order");
   });
 
   it("名前に「(複製)」を付与する", () => {
@@ -42,6 +44,12 @@ describe("prepareBillForDuplication", () => {
   it("publish_statusをdraftに設定する", () => {
     const result = prepareBillForDuplication(baseBill);
     expect(result.publish_status).toBe("draft");
+  });
+
+  it("bill_numberを空文字にリセットする", () => {
+    const billWithNumber = { ...baseBill, bill_number: "第1号" };
+    const result = prepareBillForDuplication(billWithNumber);
+    expect(result.bill_number).toBe("");
   });
 
   it("その他のフィールドを保持する", () => {

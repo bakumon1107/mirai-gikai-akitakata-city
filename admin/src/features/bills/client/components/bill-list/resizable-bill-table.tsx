@@ -319,7 +319,9 @@ function BillRow({ bill }: { bill: BillWithCouncilSession }) {
       <td className="p-2 align-middle overflow-hidden">
         <span className="block truncate text-gray-600">
           {bill.published_at
-            ? new Date(bill.published_at).toLocaleDateString("ja-JP")
+            ? new Date(bill.published_at).toLocaleDateString("ja-JP", {
+                timeZone: "Asia/Tokyo",
+              })
             : "-"}
         </span>
       </td>

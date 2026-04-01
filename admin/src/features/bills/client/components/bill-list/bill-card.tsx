@@ -91,7 +91,9 @@ export function BillCard({ bill }: BillCardProps) {
               公開日:
               <span className="font-medium text-gray-900">
                 {bill.published_at
-                  ? new Date(bill.published_at).toLocaleDateString("ja-JP")
+                  ? new Date(bill.published_at).toLocaleDateString("ja-JP", {
+                      timeZone: "Asia/Tokyo",
+                    })
                   : "-"}
               </span>
             </span>

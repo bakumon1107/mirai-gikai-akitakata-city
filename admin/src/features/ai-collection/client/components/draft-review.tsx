@@ -324,7 +324,9 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       ).length;
 
     if (totalCount === 0) {
-      toast.error("適用する議案または変更を選択してください");
+      toast.error("適用する議案または変更を選択してください", {
+        duration: Infinity,
+      });
       return;
     }
 
@@ -337,7 +339,9 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       });
 
       if (!result.success) {
-        toast.error(result.error ?? "適用に失敗しました");
+        toast.error(result.error ?? "適用に失敗しました", {
+          duration: Infinity,
+        });
         return;
       }
 
@@ -349,7 +353,7 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       }
     } catch (err) {
       console.error("Apply drafts error:", err);
-      toast.error("適用に失敗しました");
+      toast.error("適用に失敗しました", { duration: Infinity });
     } finally {
       setIsApplying(false);
     }
@@ -357,7 +361,9 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
 
   const handleReapplyStances = async () => {
     if (selectedStanceIds.size === 0) {
-      toast.error("再取り込みする会派見解を選択してください");
+      toast.error("再取り込みする会派見解を選択してください", {
+        duration: Infinity,
+      });
       return;
     }
 
@@ -369,7 +375,9 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       });
 
       if (!result.success) {
-        toast.error(result.error ?? "再取り込みに失敗しました");
+        toast.error(result.error ?? "再取り込みに失敗しました", {
+          duration: Infinity,
+        });
         return;
       }
 
@@ -379,7 +387,7 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       }
     } catch (err) {
       console.error("Reapply stances error:", err);
-      toast.error("再取り込みに失敗しました");
+      toast.error("再取り込みに失敗しました", { duration: Infinity });
     } finally {
       setIsReapplying(false);
     }
@@ -392,7 +400,7 @@ export function DraftReview({ run, existingBillNumbers }: DraftReviewProps) {
       toast.success("マッチング状況を更新しました");
     } catch (err) {
       console.error("Refresh match status error:", err);
-      toast.error("マッチング状況の更新に失敗しました");
+      toast.error("マッチング状況の更新に失敗しました", { duration: Infinity });
     } finally {
       setIsRefreshingMatch(false);
     }

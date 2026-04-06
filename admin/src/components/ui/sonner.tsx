@@ -18,6 +18,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-border": "var(--border)",
         } as CSSProperties
       }
+      closeButton
       {...props}
     />
   );

@@ -28,14 +28,6 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
-      # リモートDBに適用済みだがローカル履歴と不整合なマイグレーションを修復
-      - name: Repair already-applied migrations
-        run: |
-          supabase migration repair --status applied 20260331100000
-          supabase migration repair --status applied 20260331110000
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-
       # マイグレーション適用（idempotent）
       - name: Supabase db push
         run: |

@@ -81,7 +81,11 @@ export function BillContentsEditForm({
     setIsEnriching(true);
     setError(null);
 
-    const existingHardTitle = form.getValues("hard.title") ?? "";
+    let existingHardTitle = form.getValues("hard.title") ?? "";
+    if (!existingHardTitle.trim()) {
+      existingHardTitle = bill.name;
+      form.setValue("hard.title", bill.name);
+    }
 
     try {
       const result = await enrichBillContents(
@@ -91,7 +95,7 @@ export function BillContentsEditForm({
       );
 
       if (!result.success) {
-        toast.error(result.error);
+        toast.error(result.error, { duration: Infinity });
         return;
       }
 
@@ -111,7 +115,7 @@ export function BillContentsEditForm({
       );
     } catch (err) {
       console.error("Enrich error:", err);
-      toast.error("補完中にエラーが発生しました");
+      toast.error("補完中にエラーが発生しました", { duration: Infinity });
     } finally {
       setIsEnriching(false);
     }
@@ -128,10 +132,10 @@ export function BillContentsEditForm({
         toast.success("議案コンテンツを更新しました");
       } else {
         setError(result.error);
-        toast.error("更新に失敗しました");
+        toast.error("更新に失敗しました", { duration: Infinity });
       }
     } catch {
-      toast.error("更新に失敗しました");
+      toast.error("更新に失敗しました", { duration: Infinity });
     } finally {
       setIsSubmitting(false);
     }

@@ -18,11 +18,13 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
 
   const validateDates = (): boolean => {
     if (!startDate || !endDate) {
-      toast.error("開始日と終了日を入力してください");
+      toast.error("開始日と終了日を入力してください", { duration: Infinity });
       return false;
     }
     if (new Date(endDate) < new Date(startDate)) {
-      toast.error("終了日は開始日以降の日付を指定してください");
+      toast.error("終了日は開始日以降の日付を指定してください", {
+        duration: Infinity,
+      });
       return false;
     }
     return true;
@@ -43,7 +45,9 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
       const data = (await res.json()) as { runId?: string; error?: string };
 
       if (!res.ok || !data.runId) {
-        toast.error(data.error ?? "収集の開始に失敗しました");
+        toast.error(data.error ?? "収集の開始に失敗しました", {
+          duration: Infinity,
+        });
         return;
       }
 
@@ -51,7 +55,7 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
       onRunStarted(data.runId);
     } catch (err) {
       console.error("Collection start error:", err);
-      toast.error("収集の開始に失敗しました");
+      toast.error("収集の開始に失敗しました", { duration: Infinity });
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +75,9 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
       const data = (await res.json()) as { runId?: string; error?: string };
 
       if (!res.ok || !data.runId) {
-        toast.error(data.error ?? "ステータスチェックの開始に失敗しました");
+        toast.error(data.error ?? "ステータスチェックの開始に失敗しました", {
+          duration: Infinity,
+        });
         return;
       }
 
@@ -79,7 +85,9 @@ export function CollectionForm({ onRunStarted }: CollectionFormProps) {
       onRunStarted(data.runId);
     } catch (err) {
       console.error("Status check start error:", err);
-      toast.error("ステータスチェックの開始に失敗しました");
+      toast.error("ステータスチェックの開始に失敗しました", {
+        duration: Infinity,
+      });
     } finally {
       setIsLoading(false);
     }

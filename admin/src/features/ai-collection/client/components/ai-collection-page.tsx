@@ -132,13 +132,15 @@ export function AiCollectionPage({
         });
         const data = (await res.json()) as { runId?: string; error?: string };
         if (!res.ok) {
-          toast.error(data.error ?? "収集の再開に失敗しました");
+          toast.error(data.error ?? "収集の再開に失敗しました", {
+            duration: Infinity,
+          });
           return;
         }
         toast.success("情報収集を再開しました");
         startPolling(runId);
       } catch {
-        toast.error("収集の再開に失敗しました");
+        toast.error("収集の再開に失敗しました", { duration: Infinity });
       } finally {
         setIsResuming(false);
       }

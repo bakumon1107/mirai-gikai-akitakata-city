@@ -37,9 +37,9 @@ describe("buildThumbnailPrompt", () => {
   });
 
   it("maxPromptLengthを超えない", () => {
-    const longContent = "あ".repeat(2000);
-    const prompt = buildThumbnailPrompt("テスト議案", longContent, 1000);
-    expect(prompt.length).toBeLessThanOrEqual(1000);
+    const longContent = "あ".repeat(5000);
+    const prompt = buildThumbnailPrompt("テスト議案", longContent, 4000);
+    expect(prompt.length).toBeLessThanOrEqual(4000);
   });
 });
 

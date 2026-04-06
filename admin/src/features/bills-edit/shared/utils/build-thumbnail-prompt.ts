@@ -1,8 +1,8 @@
 const REQUIREMENTS = `Requirements:
-- Focus on objects, places, or symbols that directly represent the bill's topic — the viewer should immediately understand what the bill is about
-- No text or letters in the image
+- First, identify the core subject from the bill title (e.g. "警察職員" → policing, "保育士" → childcare). Then depict that subject through its characteristic tools, equipment, spaces, or environments — the viewer should immediately recognize what field the bill is about
+- DO NOT depict people or human figures. Instead, convey the subject through objects and settings alone (e.g. a nursery classroom with small colorful chairs, picture books, and wooden toys on a table; a police station desk with a cap, badge, and radio; a fire station with helmets and hoses)
+- No text, letters, numbers, or written characters in the image
 - Photorealistic style resembling a stock photo — avoid flat illustration, isometric, or 3D-render looks
-- Avoid showing faces up close — use objects, hands, buildings, or wide environmental shots instead
 - Natural lighting with soft shadows — no HDR or overly dramatic effects
 - Muted, professional color palette — no oversaturation
 - Calm, professional tone suitable for a civic/government context
@@ -20,7 +20,7 @@ export function buildThumbnailPrompt(
   billContext?: string,
   maxPromptLength = 4000
 ): string {
-  const header = `Create a photorealistic image that visually represents the key topic of this Japanese municipal government bill: "${billName}". Choose objects, places, or scenes that best symbolize what this bill is about.`;
+  const header = `Create a photorealistic image for this Japanese government bill: "${billName}". First, extract the core subject from the title — ignore procedural words like "条例の一部を改正する" and focus on the key profession, field, or entity (e.g. 警察職員=policing, 保育士=childcare, 消防=firefighting). Then create an image that conveys that subject through its characteristic objects, tools, equipment, and environments — without showing any people.`;
 
   // ヘッダー + 改行 + Requirements の固定部分の長さを算出
   const fixedLength = header.length + 2 + REQUIREMENTS.length;

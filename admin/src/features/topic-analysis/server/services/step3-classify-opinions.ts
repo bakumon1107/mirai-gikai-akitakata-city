@@ -7,6 +7,7 @@ import {
   TOPIC_ANALYSIS_MAX_CONCURRENCY,
 } from "../../shared/constants";
 import type { FlatOpinion } from "../../shared/types";
+import { retryTopicAnalysisRequest } from "../utils/retry-topic-analysis-request";
 
 function chunk<T>(array: T[], size: number): T[][] {
   const chunks: T[][] = [];
@@ -73,10 +74,12 @@ async function classifyBatch(
 
   const topicsText = topicNames.map((t, i) => `${i + 1}. ${t}`).join("\n");
 
-  const { object } = await generateObject({
-    model,
-    schema: classifyBatchSchema,
-    prompt: `あなたは議案分析の専門家です。各意見を適切なトピックに分類してください。
+  const { object } = await retryTopicAnalysisRequest(
+    () =>
+      generateObject({
+        model,
+        schema: classifyBatchSchema,
+        prompt: `あなたは議案分析の専門家です。各意見を適切なトピックに分類してください。
 
 ## 法案
 ${billTitle}
@@ -93,14 +96,18 @@ ${opinionsText}
 - topic_namesには分類先のトピック名を配列で指定してください
 - 1つの意見が複数のトピックに該当する場合は複数指定してください
 - どのトピックにも該当しない意見は空配列にしてください`,
-    experimental_telemetry: {
-      isEnabled: true,
-      functionId: "topic-analysis-step3-classify",
-      metadata: {
-        batchIndex: String(batchIndex),
-      },
-    },
-  });
+        experimental_telemetry: {
+          isEnabled: true,
+          functionId: "topic-analysis-step3-classify",
+          metadata: {
+            batchIndex: String(batchIndex),
+          },
+        },
+      }),
+    {
+      label: `step3-classify batch=${batchIndex}`,
+    }
+  );
 
   // LLMが返した連番IDを元のinterview_report_id + opinion_indexにマッピング
   return object.classifications

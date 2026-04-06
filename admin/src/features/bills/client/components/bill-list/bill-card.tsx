@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  BarChart3,
-  Calendar,
-  Edit,
-  FileText,
-  MessageCircle,
-  Users,
-} from "lucide-react";
+import { Calendar, Edit, FileText, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -126,12 +119,6 @@ export function BillCard({ bill }: BillCardProps) {
               <Button variant="outline" size="sm">
                 <MessageCircle className="h-4 w-4 mr-1" />
                 インタビュー設定
-              </Button>
-            </Link>
-            <Link href={routes.billReports(bill.id)}>
-              <Button variant="outline" size="sm">
-                <BarChart3 className="h-4 w-4 mr-1" />
-                レポート一覧
               </Button>
             </Link>
           </div>

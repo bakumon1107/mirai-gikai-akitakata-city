@@ -57,7 +57,7 @@ export function InterviewPublicConsentModal({
           <h3 className="text-lg font-bold text-primary-accent text-center leading-relaxed">
             インタビュー内容の公開を
             <br />
-            許可しますか
+            許可しますか？
           </h3>
 
           <div className="space-y-4">

@@ -1008,6 +1008,13 @@ export type Database = {
           reaction_type: string
         }[]
       }
+      count_sessions_by_config_ids: {
+        Args: { p_config_ids: string[] }
+        Returns: {
+          interview_config_id: string
+          session_count: number
+        }[]
+      }
       find_public_reports_by_bill_id_ordered_by_reactions: {
         Args: {
           p_bill_id: string
@@ -1105,6 +1112,7 @@ export type Database = {
       get_interview_statistics: {
         Args: { p_config_id: string }
         Returns: {
+          avg_cost_usd: number
           avg_message_count: number
           avg_rating: number
           avg_total_content_richness: number
@@ -1123,6 +1131,7 @@ export type Database = {
           stance_against_count: number
           stance_for_count: number
           stance_neutral_count: number
+          total_cost_usd: number
           total_sessions: number
         }[]
       }

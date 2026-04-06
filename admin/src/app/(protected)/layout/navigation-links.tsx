@@ -12,6 +12,7 @@ const navigationLinks = [
   { href: routes.tags(), label: "タグ管理" },
   { href: routes.factions(), label: "会派管理" },
   { href: routes.committees(), label: "委員会管理" },
+  { href: routes.interviews(), label: "インタビュー" },
   { href: routes.aiCollection(), label: "AI情報収集" },
   { href: routes.experts(), label: "有識者" },
   { href: routes.admins(), label: "管理者" },

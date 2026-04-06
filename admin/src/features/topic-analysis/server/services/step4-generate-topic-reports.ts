@@ -28,6 +28,7 @@ export async function generateTopicReports(
   billTitle: string,
   validSessionIds: Set<string>,
   billId: string,
+  sessionConfigMap: Record<string, string>,
   model: string
 ): Promise<TopicReportOutput[]> {
   const results = await runWithConcurrency(
@@ -39,6 +40,7 @@ export async function generateTopicReports(
         billTitle,
         validSessionIds,
         billId,
+        sessionConfigMap,
         model
       )
   );
@@ -51,6 +53,7 @@ async function generateSingleTopicReport(
   billTitle: string,
   validSessionIds: Set<string>,
   billId: string,
+  sessionConfigMap: Record<string, string>,
   model: string
 ): Promise<TopicReportOutput> {
   const opinionsText = input.opinions
@@ -105,7 +108,8 @@ ${opinionsText}`,
     report.description,
     report.references,
     validSessionIds,
-    billId
+    billId,
+    sessionConfigMap
   );
 
   // LLMが返した意見番号から元データを直接参照して代表意見を構築

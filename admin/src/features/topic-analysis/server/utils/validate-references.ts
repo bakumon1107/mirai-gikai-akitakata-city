@@ -12,14 +12,16 @@ export function validateAndReplaceReferences(
   descriptionMd: string,
   references: Array<{ ref_id: number; session_id: string }>,
   validSessionIds: Set<string>,
-  billId: string
+  billId: string,
+  sessionConfigMap: Record<string, string>
 ): {
   cleanedMd: string;
   validReferences: Array<{ ref_id: number; session_id: string }>;
 } {
-  // 1. Filter references to only valid session IDs
-  const validRefs = references.filter((ref) =>
-    validSessionIds.has(ref.session_id)
+  // 1. Filter references to only valid session IDs with resolvable configId
+  const validRefs = references.filter(
+    (ref) =>
+      validSessionIds.has(ref.session_id) && sessionConfigMap[ref.session_id]
   );
 
   // 2. Replace ref markers in markdown
@@ -36,7 +38,8 @@ export function validateAndReplaceReferences(
           if (!ref) {
             return null;
           }
-          return `[[${refId}]](/bills/${billId}/reports/${ref.session_id})`;
+          const configId = sessionConfigMap[ref.session_id];
+          return `[[${refId}]](/bills/${billId}/interview/${configId}/reports/${ref.session_id})`;
         })
         .filter(Boolean);
       if (replaced.length === 0) {

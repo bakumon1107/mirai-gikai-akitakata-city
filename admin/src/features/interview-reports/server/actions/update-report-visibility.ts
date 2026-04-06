@@ -2,7 +2,6 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
-import { routes } from "@/lib/routes";
 import {
   findInterviewReportBySessionId,
   updateReportVisibility,
@@ -48,9 +47,8 @@ export async function updateReportVisibilityAction(
 
     await updateReportVisibility(reportId, isPublic);
 
-    // Revalidate the detail page and list page
-    revalidatePath(routes.billReportDetail(billId, sessionId));
-    revalidatePath(routes.billReports(billId));
+    // Revalidate bill interview pages (reports are under interview config)
+    revalidatePath(`/bills/${billId}`, "layout");
     revalidateTag("public-interview-reports");
 
     return { success: true };

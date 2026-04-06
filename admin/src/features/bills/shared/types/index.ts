@@ -33,6 +33,9 @@ export const BILL_SORT_FIELDS: readonly BillSortField[] = [
   "published_at",
   "status_order",
   "publish_status_order",
+  "bill_number",
+  "name",
+  "council_session",
 ] as const;
 
 export type BillSortConfig = SortConfig<BillSortField>;

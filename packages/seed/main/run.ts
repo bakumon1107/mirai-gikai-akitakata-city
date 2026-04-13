@@ -4,7 +4,6 @@ import {
   councilSessions,
   factions,
   committees,
-  createFactionStances,
   createBillsTags,
   createInterviewConfig,
   createInterviewQuestions,
@@ -184,34 +183,9 @@ async function seedDatabase() {
 
     console.log(`✅ Inserted ${insertedContents.length} bill contents`);
 
-    // Insert faction_stances (みらい会派の見解)
-    console.log("🎯 Inserting faction stances...");
-    const miraiFaction = insertedFactions.find((f) => f.name === "mirai");
-    let insertedStancesCount = 0;
-
-    if (miraiFaction) {
-      const factionStances = createFactionStances(
-        insertedBills,
-        miraiFaction.id
-      );
-
-      const { data: insertedStances, error: stancesError } = await supabase
-        .from("faction_stances")
-        .insert(factionStances)
-        .select("id");
-
-      if (stancesError) {
-        throw new Error(
-          `Failed to insert faction stances: ${stancesError.message}`
-        );
-      }
-
-      if (insertedStances) {
-        insertedStancesCount = insertedStances.length;
-      }
-    }
-
-    console.log(`✅ Inserted ${insertedStancesCount} faction stances`);
+    // faction_stances は使用しない（安芸高田市議会は全員無所属・個人の賛否は公開されないため）
+    const insertedStancesCount = 0;
+    console.log(`⏭️  Skipped faction stances (全員無所属のため不使用)`);
 
     // Insert bills_tags (関連付け)
     console.log("🔗 Inserting bills-tags relations...");

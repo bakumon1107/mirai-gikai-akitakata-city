@@ -520,6 +520,50 @@ export type Database = {
         }
         Relationships: []
       }
+      general_questions: {
+        Row: {
+          council_session_id: string
+          created_at: string
+          id: string
+          pdf_url: string | null
+          questioner_name: string
+          questioner_number: number | null
+          session_day: number
+          topics: Json
+          updated_at: string
+        }
+        Insert: {
+          council_session_id: string
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          questioner_name: string
+          questioner_number?: number | null
+          session_day: number
+          topics?: Json
+          updated_at?: string
+        }
+        Update: {
+          council_session_id?: string
+          created_at?: string
+          id?: string
+          pdf_url?: string | null
+          questioner_name?: string
+          questioner_number?: number | null
+          session_day?: number
+          topics?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "general_questions_council_session_id_fkey"
+            columns: ["council_session_id"]
+            isOneToOne: false
+            referencedRelation: "council_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interview_configs: {
         Row: {
           bill_id: string

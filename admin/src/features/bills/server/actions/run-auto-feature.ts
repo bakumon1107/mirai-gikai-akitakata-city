@@ -175,6 +175,28 @@ export async function runAutoFeature(
         .in("id", featuredIds);
     }
 
+    // ---- 主要タグを1件に絞って bills_tags を更新 ----
+    const { data: allTags } = await supabase.from("tags").select("id, label");
+
+    if (allTags && allTags.length > 0) {
+      for (const result of allResults) {
+        if (!result.primary_tag) continue;
+        const bill = bills.find((b) => b.bill_number === result.bill_number);
+        if (!bill) continue;
+        const tag = allTags.find((t) => t.label === result.primary_tag);
+        if (!tag) {
+          warnings.push(
+            `タグが見つかりません: ${result.primary_tag} (${result.bill_number})`
+          );
+          continue;
+        }
+        await supabase.from("bills_tags").delete().eq("bill_id", bill.id);
+        await supabase
+          .from("bills_tags")
+          .insert({ bill_id: bill.id, tag_id: tag.id });
+      }
+    }
+
     return {
       success: true,
       featuredCount: featuredIds.length,

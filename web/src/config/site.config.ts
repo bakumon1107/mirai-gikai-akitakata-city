@@ -53,7 +53,7 @@ export const siteConfig = {
    */
   features: {
     /** AIチャット機能（議案への質問・テキスト選択からの質問）*/
-    aiChat: true,
+    aiChat: false,
     /** AIインタビュー機能（議案当事者へのヒアリング）*/
     aiInterview: false,
     /**

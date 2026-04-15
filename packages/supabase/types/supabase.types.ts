@@ -93,6 +93,65 @@ export type Database = {
           },
         ]
       }
+      bill_discussions: {
+        Row: {
+          answer_raw: string | null
+          answer_summary: string | null
+          answerer_name: string | null
+          answerer_role: string | null
+          bill_id: string
+          created_at: string
+          exchange_count: number
+          id: string
+          question_raw: string | null
+          question_summary: string | null
+          questioner_name: string
+          questioner_number: string | null
+          questioner_party: string | null
+          session_day: number
+        }
+        Insert: {
+          answer_raw?: string | null
+          answer_summary?: string | null
+          answerer_name?: string | null
+          answerer_role?: string | null
+          bill_id: string
+          created_at?: string
+          exchange_count?: number
+          id?: string
+          question_raw?: string | null
+          question_summary?: string | null
+          questioner_name: string
+          questioner_number?: string | null
+          questioner_party?: string | null
+          session_day: number
+        }
+        Update: {
+          answer_raw?: string | null
+          answer_summary?: string | null
+          answerer_name?: string | null
+          answerer_role?: string | null
+          bill_id?: string
+          created_at?: string
+          exchange_count?: number
+          id?: string
+          question_raw?: string | null
+          question_summary?: string | null
+          questioner_name?: string
+          questioner_number?: string | null
+          questioner_party?: string | null
+          session_day?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bill_discussions_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "bills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bills: {
         Row: {
           bill_number: string

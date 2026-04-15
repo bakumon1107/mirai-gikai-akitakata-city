@@ -1,25 +1,25 @@
 import { getBillsByFeaturedTags } from "@/features/bills/server/loaders/get-bills-by-featured-tags";
 import { getActiveCouncilSession } from "@/features/council-sessions/server/loaders/get-active-council-session";
+import { getAllPastSessions } from "@/features/council-sessions/server/loaders/get-all-past-sessions";
 import { getFeaturedBills } from "./get-featured-bills";
-import { getPreviousSessionBills } from "./get-previous-session-bills";
 
 /**
  * トップページ用のデータを並列取得する
  * BFF (Backend For Frontend) パターン
  */
 export async function loadHomeData() {
-  const [featuredBills, billsByTag, previousSessionData, activeSession] =
+  const [featuredBills, billsByTag, pastSessions, activeSession] =
     await Promise.all([
       getFeaturedBills(),
       getBillsByFeaturedTags(),
-      getPreviousSessionBills(),
+      getAllPastSessions(),
       getActiveCouncilSession(),
     ]);
 
   return {
     billsByTag,
     featuredBills,
-    previousSessionData,
+    pastSessions,
     activeSessionSlug: activeSession?.slug ?? null,
   };
 }

@@ -89,6 +89,7 @@ export function AutoFeatureButton({ councilSessionId, sessionName }: Props) {
                       <th className="pb-2 pr-2">議案番号</th>
                       <th className="pb-2 pr-2 text-right">スコア</th>
                       <th className="pb-2 pr-2 text-center">除外</th>
+                      <th className="pb-2 pr-2">タグ</th>
                       <th className="pb-2 pr-2">内訳</th>
                       <th className="pb-2">理由</th>
                     </tr>
@@ -110,6 +111,9 @@ export function AutoFeatureButton({ councilSessionId, sessionName }: Props) {
                           </td>
                           <td className="py-1.5 pr-2 text-center text-xs text-gray-500">
                             {r.excluded ? "除外" : ""}
+                          </td>
+                          <td className="py-1.5 pr-2 text-xs text-gray-600 whitespace-nowrap">
+                            {r.primary_tag ?? ""}
                           </td>
                           <td className="py-1.5 pr-2 text-xs text-gray-500 font-mono whitespace-nowrap">
                             {r.breakdown.influence_range}/

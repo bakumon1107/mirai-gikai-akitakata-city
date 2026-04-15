@@ -68,31 +68,49 @@ function callClaude(prompt: string): string {
 
 // ─── プロンプト ──────────────────────────────────────────────
 
-function buildTopicsPrompt(questionerName: string, sectionText: string): string {
+function buildEnrichedPrompt(questionerName: string, sectionText: string): string {
   return `あなたは安芸高田市議会の会議録を構造化するアシスタントです。
 
 以下は${questionerName}議員の一般質問（全文）です。
-質問のテーマ（大枠）ごとに分割し、各テーマの情報をJSON配列で返してください。
+以下のJSON形式で構造化してください。
 
 ## 会議録テキスト
-${sectionText.slice(0, 6000)}
+${sectionText.slice(0, 8000)}
 
-## 出力形式（JSONのみ。他のテキストは含めないこと）
-[
-  {
-    "index": 1,
-    "title": "テーマのタイトル（20字以内）",
-    "question_summary": "質問内容の要約（2〜3文、市民が読みやすい表現で）",
-    "answer_summary": "答弁内容の要約（2〜3文、市民が読みやすい表現で）"
-  },
-  ...
-]
+## 出力形式（JSONのみ。他のテキストは一切含めないこと）
+{
+  "overall_summary": "この議員の質問全体を通じた2〜3文の総括（何を問い、何が明らかになったか）",
+  "questioner_stance": "建設的提案型 | 批判追及型 | 情報確認型 | 課題提起型 のいずれか1つ",
+  "stance_analysis": "質問者の姿勢・スタンスに対する2〜3文の分析（行政に対してポジティブか批判的か、質問の目的・動機など）",
+  "topics": [
+    {
+      "index": 1,
+      "title": "テーマのタイトル（20字以内）",
+      "question_summary": "質問内容の概要（2〜3文、市民が読みやすい表現で）",
+      "answer_summary": "答弁内容の概要（2〜3文、市民が読みやすい表現で）",
+      "exchanges": [
+        {
+          "speaker": "questioner",
+          "name": "${questionerName}",
+          "text": "発言内容を1〜3文に要約（verbatimではなく要約）"
+        },
+        {
+          "speaker": "answerer",
+          "name": "藤本市長",
+          "role": "市長",
+          "text": "答弁内容を1〜3文に要約"
+        }
+      ]
+    }
+  ]
+}
 
 注意:
-- title は発言の冒頭にある大枠テーマ名をそのまま短縮してください
-- summary は事実のみを書き、意見・評価は含めないでください
-- 大枠が複数ある場合はすべて含めてください
-- 大枠が1つだけの場合も配列形式で返してください`;
+- topics の title は大枠テーマ名をそのまま短縮してください
+- exchanges は質問者と答弁者の発言を交互に、実際の会話の流れに沿って記録してください（1テーマあたり2〜8往復程度）
+- summary は事実のみ書き、意見・評価は含めないでください
+- questioner_stance は行政への姿勢全体から判断してください
+- stance_analysis はポジティブ/ネガティブ/中立の視点を含め、質問の背景・動機まで分析してください`;
 }
 
 // ─── テキスト分割 ────────────────────────────────────────────
@@ -229,27 +247,36 @@ async function main() {
       `\n処理中: ${section.questionerNumber}番 ${section.questionerName}`
     );
 
-    // AI でトピック構造化
+    // AI でトピック構造化（exchanges + 総括 + スタンス分析を含む）
     console.log("  🤖 AI構造化中...");
     let topics: Topic[] = [];
+    let overallSummary = "";
+    let questionerStance = "";
+    let stanceAnalysis = "";
 
     try {
       const raw = callClaude(
-        buildTopicsPrompt(section.questionerName, section.rawText)
+        buildEnrichedPrompt(section.questionerName, section.rawText)
       );
-      const jsonMatch = raw.match(/\[[\s\S]*\]/);
+      const jsonMatch = raw.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
-        topics = parsed.map((t: Omit<Topic, "exchanges">, i: number) => ({
-          index: t.index ?? i + 1,
-          title: t.title ?? "",
-          question_summary: t.question_summary ?? "",
-          answer_summary: t.answer_summary ?? "",
-          exchanges: [],
-        }));
+        overallSummary = parsed.overall_summary ?? "";
+        questionerStance = parsed.questioner_stance ?? "";
+        stanceAnalysis = parsed.stance_analysis ?? "";
+        topics = (parsed.topics ?? []).map(
+          (t: Omit<Topic, "exchanges"> & { exchanges?: Topic["exchanges"] }, i: number) => ({
+            index: t.index ?? i + 1,
+            title: t.title ?? "",
+            question_summary: t.question_summary ?? "",
+            answer_summary: t.answer_summary ?? "",
+            exchanges: t.exchanges ?? [],
+          })
+        );
         console.log(
           `  ✅ ${topics.length} トピック: ${topics.map((t) => t.title).join(" / ")}`
         );
+        console.log(`  📊 スタンス: ${questionerStance}`);
       } else {
         console.log("  ⚠️  JSONパース失敗, raw:", raw.slice(0, 120));
       }
@@ -263,6 +290,9 @@ async function main() {
       questioner_name: section.fullName || section.questionerName,
       questioner_number: section.questionerNumber,
       topics: topics,
+      overall_summary: overallSummary,
+      questioner_stance: questionerStance,
+      stance_analysis: stanceAnalysis,
       pdf_url: null,
     };
 

@@ -46,6 +46,11 @@ export async function BillDetailHeader({
       )}
 
       <div className="px-4 pt-8 mb-3">
+        {bill.bill_number && (
+          <p className="text-xs font-medium text-muted-foreground mb-1">
+            議案第{bill.bill_number}号
+          </p>
+        )}
         {displayTitle && (
           <h1 className="text-2xl font-bold mb-3">{displayTitle}</h1>
         )}

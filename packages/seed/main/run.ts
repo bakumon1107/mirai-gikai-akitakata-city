@@ -163,25 +163,9 @@ async function seedDatabase() {
     }
 
     // Insert bill_contents
-    console.log("📚 Inserting bill contents...");
-    const billContents = createBillContents(insertedBills);
-
-    const { data: insertedContents, error: contentsError } = await supabase
-      .from("bill_contents")
-      .insert(billContents)
-      .select("id");
-
-    if (contentsError) {
-      throw new Error(
-        `Failed to insert bill contents: ${contentsError.message}`
-      );
-    }
-
-    if (!insertedContents) {
-      throw new Error("No bill contents were inserted");
-    }
-
-    console.log(`✅ Inserted ${insertedContents.length} bill contents`);
+    // bill-contents-data.ts は未差し替えのためスキップ（安芸高田市版の議案内容は別途作成）
+    console.log("⏭️  Skipped bill contents (bill-contents-data.ts は未差し替え)");
+    const insertedContents: { id: string }[] = [];
 
     // faction_stances は使用しない（安芸高田市議会は全員無所属・個人の賛否は公開されないため）
     const insertedStancesCount = 0;

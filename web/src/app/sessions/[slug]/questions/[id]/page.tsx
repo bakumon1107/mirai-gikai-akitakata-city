@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layouts/container";
 import { siteConfig } from "@/config/site.config";
 import { getCouncilSessionBySlug } from "@/features/council-sessions/server/loaders/get-council-session-by-slug";
-import { QuestionDetail } from "@/features/general-questions/server/components/question-detail";
+import { QuestionDetailClient } from "@/features/general-questions/client/components/question-detail-client";
 import { getGeneralQuestionById } from "@/features/general-questions/server/loaders/get-general-questions";
 import { routes } from "@/lib/routes";
 
@@ -41,7 +41,7 @@ export default async function QuestionDetailPage({ params }: Props) {
         </Link>
         <p className="text-sm text-muted-foreground">{session.name}</p>
       </div>
-      <QuestionDetail question={question} />
+      <QuestionDetailClient question={question} />
     </Container>
   );
 }

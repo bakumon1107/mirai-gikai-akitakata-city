@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Header } from "@/components/header";
+import { AuthGate } from "@/components/layouts/auth-gate";
 import { Footer } from "@/components/layouts/footer/footer";
 import { MainLayout } from "@/components/layouts/main-layout";
-import { AuthGate } from "@/components/layouts/auth-gate";
 import { RubyfulInitializer } from "@/lib/rubyful";
 
 export default function SessionsLayout({

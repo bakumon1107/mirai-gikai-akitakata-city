@@ -525,10 +525,13 @@ export type Database = {
           council_session_id: string
           created_at: string
           id: string
+          overall_summary: string | null
           pdf_url: string | null
           questioner_name: string
           questioner_number: number | null
+          questioner_stance: string | null
           session_day: number
+          stance_analysis: string | null
           topics: Json
           updated_at: string
         }
@@ -536,10 +539,13 @@ export type Database = {
           council_session_id: string
           created_at?: string
           id?: string
+          overall_summary?: string | null
           pdf_url?: string | null
           questioner_name: string
           questioner_number?: number | null
+          questioner_stance?: string | null
           session_day: number
+          stance_analysis?: string | null
           topics?: Json
           updated_at?: string
         }
@@ -547,10 +553,13 @@ export type Database = {
           council_session_id?: string
           created_at?: string
           id?: string
+          overall_summary?: string | null
           pdf_url?: string | null
           questioner_name?: string
           questioner_number?: number | null
+          questioner_stance?: string | null
           session_day?: number
+          stance_analysis?: string | null
           topics?: Json
           updated_at?: string
         }

@@ -20,6 +20,9 @@ export type GeneralQuestion = {
   questioner_name: string;
   questioner_number: number | null;
   topics: QuestionTopic[];
+  overall_summary: string | null;
+  questioner_stance: string | null;
+  stance_analysis: string | null;
   pdf_url: string | null;
   created_at: string;
   updated_at: string;

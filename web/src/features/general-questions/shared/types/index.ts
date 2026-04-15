@@ -13,6 +13,14 @@ export type QuestionExchange = {
   text: string;
 };
 
+export type RadarScores = {
+  行財政改革: number;
+  "福祉・医療": number;
+  "産業・経済": number;
+  "教育・文化": number;
+  "環境・インフラ": number;
+};
+
 export type GeneralQuestion = {
   id: string;
   council_session_id: string;
@@ -23,6 +31,7 @@ export type GeneralQuestion = {
   overall_summary: string | null;
   questioner_stance: string | null;
   stance_analysis: string | null;
+  radar_scores: RadarScores | null;
   pdf_url: string | null;
   created_at: string;
   updated_at: string;

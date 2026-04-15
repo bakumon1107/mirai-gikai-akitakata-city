@@ -38,6 +38,14 @@ type Topic = {
   exchanges: Exchange[];
 };
 
+type RadarScores = {
+  行財政改革: number;
+  "福祉・医療": number;
+  "産業・経済": number;
+  "教育・文化": number;
+  "環境・インフラ": number;
+};
+
 type QuestionerSection = {
   questionerName: string;
   questionerNumber: number | null;
@@ -82,6 +90,13 @@ ${sectionText.slice(0, 8000)}
   "overall_summary": "この議員の質問全体を通じた2〜3文の総括（何を問い、何が明らかになったか）",
   "questioner_stance": "建設的提案型 | 批判追及型 | 情報確認型 | 課題提起型 のいずれか1つ",
   "stance_analysis": "質問者の姿勢・スタンスに対する2〜3文の分析（行政に対してポジティブか批判的か、質問の目的・動機など）",
+  "radar_scores": {
+    "行財政改革": 3,
+    "福祉・医療": 2,
+    "産業・経済": 4,
+    "教育・文化": 1,
+    "環境・インフラ": 5
+  },
   "topics": [
     {
       "index": 1,
@@ -110,7 +125,8 @@ ${sectionText.slice(0, 8000)}
 - exchanges は質問者と答弁者の発言を交互に、実際の会話の流れに沿って記録してください（1テーマあたり2〜8往復程度）
 - summary は事実のみ書き、意見・評価は含めないでください
 - questioner_stance は行政への姿勢全体から判断してください
-- stance_analysis はポジティブ/ネガティブ/中立の視点を含め、質問の背景・動機まで分析してください`;
+- stance_analysis はポジティブ/ネガティブ/中立の視点を含め、質問の背景・動機まで分析してください
+- radar_scores の各軸は 1〜5 の整数で採点してください（質問テーマから判断。言及なし=1、軽く触れた=2、1テーマ程度=3、複数テーマ=4、中心的議題=5）`;
 }
 
 // ─── テキスト分割 ────────────────────────────────────────────
@@ -253,6 +269,7 @@ async function main() {
     let overallSummary = "";
     let questionerStance = "";
     let stanceAnalysis = "";
+    let radarScores: RadarScores | null = null;
 
     try {
       const raw = callClaude(
@@ -264,6 +281,7 @@ async function main() {
         overallSummary = parsed.overall_summary ?? "";
         questionerStance = parsed.questioner_stance ?? "";
         stanceAnalysis = parsed.stance_analysis ?? "";
+        radarScores = parsed.radar_scores ?? null;
         topics = (parsed.topics ?? []).map(
           (t: Omit<Topic, "exchanges"> & { exchanges?: Topic["exchanges"] }, i: number) => ({
             index: t.index ?? i + 1,
@@ -277,6 +295,9 @@ async function main() {
           `  ✅ ${topics.length} トピック: ${topics.map((t) => t.title).join(" / ")}`
         );
         console.log(`  📊 スタンス: ${questionerStance}`);
+        if (radarScores) {
+          console.log(`  📡 レーダー: ${JSON.stringify(radarScores)}`);
+        }
       } else {
         console.log("  ⚠️  JSONパース失敗, raw:", raw.slice(0, 120));
       }
@@ -293,6 +314,7 @@ async function main() {
       overall_summary: overallSummary,
       questioner_stance: questionerStance,
       stance_analysis: stanceAnalysis,
+      radar_scores: radarScores,
       pdf_url: null,
     };
 

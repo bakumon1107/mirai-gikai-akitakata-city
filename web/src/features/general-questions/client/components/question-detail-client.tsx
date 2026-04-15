@@ -5,7 +5,9 @@ import type {
   GeneralQuestion,
   QuestionExchange,
   QuestionTopic,
+  RadarScores,
 } from "../../shared/types";
+import { QuestionRadarChart } from "./question-radar-chart";
 
 // ─── スタンスバッジ ───────────────────────────────────────────
 
@@ -42,17 +44,20 @@ function StanceBadge({ stance }: { stance: string }) {
   );
 }
 
-// ─── チャット形式の発言 ──────────────────────────────────────
+// ─── チャット形式の発言（LINE風） ────────────────────────────
+// 質問者（議員）= 右側・緑バブル（LINEの「自分」に相当）
+// 答弁者（市長等）= 左側・白バブル（LINEの「相手」に相当）
 
 function ChatBubble({ exchange }: { exchange: QuestionExchange }) {
   const isQuestioner = exchange.speaker === "questioner";
+
   return (
     <div
-      className={`flex gap-2 ${isQuestioner ? "flex-row" : "flex-row-reverse"}`}
+      className={`flex items-end gap-2 ${isQuestioner ? "flex-row-reverse" : "flex-row"}`}
     >
       {/* アバター */}
       <div
-        className={`size-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+        className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
           isQuestioner
             ? "bg-primary-accent text-white"
             : "bg-mirai-surface-warm border border-mirai-border-muted text-mirai-text"
@@ -62,19 +67,19 @@ function ChatBubble({ exchange }: { exchange: QuestionExchange }) {
       </div>
 
       <div
-        className={`flex flex-col gap-0.5 max-w-[80%] ${isQuestioner ? "items-start" : "items-end"}`}
+        className={`flex flex-col gap-1 max-w-[72%] ${isQuestioner ? "items-end" : "items-start"}`}
       >
         {/* 名前・役職 */}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground px-1">
           {exchange.name}
           {exchange.role && `（${exchange.role}）`}
         </p>
         {/* バブル */}
         <div
-          className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+          className={`relative px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
             isQuestioner
-              ? "bg-mirai-surface-warm rounded-tl-none"
-              : "bg-primary-accent/10 rounded-tr-none"
+              ? "bg-primary-accent text-white rounded-2xl rounded-br-sm"
+              : "bg-white border border-mirai-border-muted text-mirai-text rounded-2xl rounded-bl-sm"
           }`}
         >
           {exchange.text}
@@ -105,15 +110,17 @@ function TopicSection({
 
       <div className="p-5">
         {isDetail ? (
-          /* 詳細: チャット形式 */
-          <div className="flex flex-col gap-3">
+          /* 詳細: LINE風チャット形式 */
+          <div className="flex flex-col gap-4 bg-mirai-surface-warm/40 rounded-xl p-3">
             {topic.exchanges.length > 0 ? (
               topic.exchanges.map((ex, i) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: exchanges have no stable id
                 <ChatBubble key={i} exchange={ex} />
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">詳細データ準備中</p>
+              <p className="text-sm text-muted-foreground text-center py-4">
+                詳細データ準備中
+              </p>
             )}
           </div>
         ) : (
@@ -215,6 +222,11 @@ export function QuestionDetailClient({ question }: QuestionDetailClientProps) {
           <TopicSection key={topic.index} topic={topic} isDetail={isDetail} />
         ))}
       </div>
+
+      {/* レーダーチャート（質問内容分析） */}
+      {question.radar_scores && (
+        <QuestionRadarChart scores={question.radar_scores as RadarScores} />
+      )}
 
       {/* スタンス分析 */}
       {(question.questioner_stance || question.stance_analysis) && (

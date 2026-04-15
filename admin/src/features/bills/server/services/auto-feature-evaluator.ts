@@ -21,10 +21,23 @@ export type EvalResult = {
     life_impact: number;
     interest: number;
   };
+  primary_tag: string;
 };
 
 export const FEATURE_THRESHOLD = 75;
 export const EVAL_BATCH_SIZE = 5;
+
+export const AVAILABLE_TAGS = [
+  "福祉・医療🏥",
+  "教育📚",
+  "住宅・まちづくり🏠",
+  "移住・定住🏡",
+  "農林業・環境🌿",
+  "道路・インフラ🛣️",
+  "議員提出📣",
+  "予算・財政💰",
+  "組織・人事👥",
+] as const;
 
 // ---- プロンプトビルド（純粋関数） ----
 
@@ -69,6 +82,14 @@ export function buildEvalPrompt(bills: BillForEval[]): string {
 - 和解・契約締結・外部監査契約のみの議案
 - 法令改正に伴う形式的な規定整備のみ
 
+## 主要タグ選択
+以下のタグから議案の内容に最も合うものを**1つだけ**選んでください：
+${AVAILABLE_TAGS.map((t) => `- ${t}`).join("\n")}
+
+- 発議・意見書・議員提案は「議員提出📣」を優先
+- 予算・補正予算は「予算・財政💰」を優先（他の条件と重なる場合も）
+- 組織改編・人事・給与のみの議案は「組織・人事👥」
+
 ## 出力形式
 必ずJSON配列のみを出力してください。説明文は不要です。
 
@@ -83,7 +104,8 @@ export function buildEvalPrompt(bills: BillForEval[]): string {
     },
     "score": <合計点>,
     "excluded": <true|false>,
-    "reason": "<50文字以内で評価理由>"
+    "reason": "<50文字以内で評価理由>",
+    "primary_tag": "<上記タグから1つ>"
   }
 ]
 \`\`\`

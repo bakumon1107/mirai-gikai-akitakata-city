@@ -2,12 +2,12 @@ import { Container } from "@/components/layouts/container";
 import { About } from "@/components/top/about";
 
 import { Hero } from "@/components/top/hero";
+import { PastSessionsSection } from "@/components/top/past-sessions-section";
 import { TeamMirai } from "@/components/top/team-mirai";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import { BillDisclaimer } from "@/features/bills/client/components/bill-detail/bill-disclaimer";
 import { BillsByTagSection } from "@/features/bills/server/components/bills-by-tag-section";
 import { FeaturedBillSection } from "@/features/bills/server/components/featured-bill-section";
-import { PreviousSessionSection } from "@/features/bills/server/components/previous-session-section";
 import { loadHomeData } from "@/features/bills/server/loaders/load-home-data";
 import type { BillWithContent } from "@/features/bills/shared/types";
 import { HomeChatClient } from "@/features/chat/client/components/home-chat-client";
@@ -17,7 +17,7 @@ import { CurrentCouncilSession } from "@/features/council-sessions/client/compon
 import { getJapanTime } from "@/lib/utils/date";
 
 export default async function Home() {
-  const { billsByTag, featuredBills, previousSessionData, activeSessionSlug } =
+  const { billsByTag, featuredBills, pastSessions, activeSessionSlug } =
     await loadHomeData();
 
   // ゆくゆくタグ機能がマージされたらBFFに統合する
@@ -60,18 +60,13 @@ export default async function Home() {
           </main>
         </div>
       </Container>
-      {/* 前回の定例会セクション（Archive） */}
-      {previousSessionData && (
-        <div className="bg-mirai-surface-muted py-10">
-          <Container>
-            <PreviousSessionSection
-              session={previousSessionData.session}
-              bills={previousSessionData.bills}
-              totalBillCount={previousSessionData.totalBillCount}
-            />
-          </Container>
-        </div>
-      )}
+
+      {/* 過去の定例会セクション */}
+      <div className="bg-mirai-surface-muted py-10">
+        <Container>
+          <PastSessionsSection sessions={pastSessions} />
+        </Container>
+      </div>
 
       <Container>
         {/* みらい議会とは セクション */}

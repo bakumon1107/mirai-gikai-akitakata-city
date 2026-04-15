@@ -530,6 +530,7 @@ export type Database = {
           questioner_name: string
           questioner_number: number | null
           questioner_stance: string | null
+          radar_scores: Json | null
           session_day: number
           stance_analysis: string | null
           topics: Json
@@ -544,6 +545,7 @@ export type Database = {
           questioner_name: string
           questioner_number?: number | null
           questioner_stance?: string | null
+          radar_scores?: Json | null
           session_day: number
           stance_analysis?: string | null
           topics?: Json
@@ -558,6 +560,7 @@ export type Database = {
           questioner_name?: string
           questioner_number?: number | null
           questioner_stance?: string | null
+          radar_scores?: Json | null
           session_day?: number
           stance_analysis?: string | null
           topics?: Json

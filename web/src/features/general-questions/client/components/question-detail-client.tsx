@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type {
   GeneralQuestion,
   QuestionExchange,
@@ -45,8 +44,8 @@ function StanceBadge({ stance }: { stance: string }) {
 }
 
 // ─── チャット形式の発言（LINE風） ────────────────────────────
-// 質問者（議員）= 右側・緑バブル（LINEの「自分」に相当）
-// 答弁者（市長等）= 左側・白バブル（LINEの「相手」に相当）
+// 質問者（議員）= 右側・緑バブル
+// 答弁者（市長等）= 左側・白バブル
 
 function ChatBubble({ exchange }: { exchange: QuestionExchange }) {
   const isQuestioner = exchange.speaker === "questioner";
@@ -55,7 +54,6 @@ function ChatBubble({ exchange }: { exchange: QuestionExchange }) {
     <div
       className={`flex items-end gap-2 ${isQuestioner ? "flex-row-reverse" : "flex-row"}`}
     >
-      {/* アバター */}
       <div
         className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
           isQuestioner
@@ -69,14 +67,12 @@ function ChatBubble({ exchange }: { exchange: QuestionExchange }) {
       <div
         className={`flex flex-col gap-1 max-w-[72%] ${isQuestioner ? "items-end" : "items-start"}`}
       >
-        {/* 名前・役職 */}
         <p className="text-xs text-muted-foreground px-1">
           {exchange.name}
           {exchange.role && `（${exchange.role}）`}
         </p>
-        {/* バブル */}
         <div
-          className={`relative px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
+          className={`px-4 py-2.5 text-sm leading-relaxed shadow-sm ${
             isQuestioner
               ? "bg-primary-accent text-white rounded-2xl rounded-br-sm"
               : "bg-white border border-mirai-border-muted text-mirai-text rounded-2xl rounded-bl-sm"
@@ -91,62 +87,25 @@ function ChatBubble({ exchange }: { exchange: QuestionExchange }) {
 
 // ─── トピックセクション ─────────────────────────────────────
 
-function TopicSection({
-  topic,
-  isDetail,
-}: {
-  topic: QuestionTopic;
-  isDetail: boolean;
-}) {
+function TopicSection({ topic }: { topic: QuestionTopic }) {
   return (
     <section className="border border-mirai-border-muted rounded-2xl overflow-hidden">
-      {/* タイトル */}
       <div className="bg-mirai-surface-warm px-5 py-3">
-        <p className="text-xs text-muted-foreground mb-0.5">
-          大枠{topic.index}
-        </p>
         <h2 className="font-bold text-base leading-snug">{topic.title}</h2>
       </div>
 
-      <div className="p-5">
-        {isDetail ? (
-          /* 詳細: LINE風チャット形式 */
+      <div className="p-4">
+        {topic.exchanges.length > 0 ? (
           <div className="flex flex-col gap-4 bg-mirai-surface-warm/40 rounded-xl p-3">
-            {topic.exchanges.length > 0 ? (
-              topic.exchanges.map((ex, i) => (
-                // biome-ignore lint/suspicious/noArrayIndexKey: exchanges have no stable id
-                <ChatBubble key={i} exchange={ex} />
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                詳細データ準備中
-              </p>
-            )}
+            {topic.exchanges.map((ex, i) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: exchanges have no stable id
+              <ChatBubble key={i} exchange={ex} />
+            ))}
           </div>
         ) : (
-          /* 概要: サマリー表示 */
-          <div className="flex flex-col gap-4">
-            {topic.question_summary && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1.5">
-                  質問の概要
-                </p>
-                <p className="text-sm leading-relaxed">
-                  {topic.question_summary}
-                </p>
-              </div>
-            )}
-            {topic.answer_summary && (
-              <div>
-                <p className="text-xs font-medium text-muted-foreground mb-1.5">
-                  答弁の概要
-                </p>
-                <p className="text-sm leading-relaxed">
-                  {topic.answer_summary}
-                </p>
-              </div>
-            )}
-          </div>
+          <p className="text-sm text-muted-foreground text-center py-4">
+            詳細データ準備中
+          </p>
         )}
       </div>
     </section>
@@ -160,8 +119,6 @@ interface QuestionDetailClientProps {
 }
 
 export function QuestionDetailClient({ question }: QuestionDetailClientProps) {
-  const [isDetail, setIsDetail] = useState(false);
-
   return (
     <div className="flex flex-col gap-6">
       {/* ヘッダー */}
@@ -187,43 +144,14 @@ export function QuestionDetailClient({ question }: QuestionDetailClientProps) {
         </div>
       )}
 
-      {/* 概要 / 詳細 スイッチ */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground">表示:</span>
-        <div className="flex rounded-lg border border-mirai-border-muted overflow-hidden text-sm font-medium">
-          <button
-            type="button"
-            onClick={() => setIsDetail(false)}
-            className={`px-4 py-1.5 transition-colors ${
-              !isDetail
-                ? "bg-primary-accent text-white"
-                : "bg-white text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            概要
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsDetail(true)}
-            className={`px-4 py-1.5 transition-colors ${
-              isDetail
-                ? "bg-primary-accent text-white"
-                : "bg-white text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            詳細
-          </button>
-        </div>
-      </div>
-
-      {/* トピック一覧 */}
+      {/* トピック一覧（チャット形式のみ） */}
       <div className="flex flex-col gap-4">
         {question.topics.map((topic) => (
-          <TopicSection key={topic.index} topic={topic} isDetail={isDetail} />
+          <TopicSection key={topic.index} topic={topic} />
         ))}
       </div>
 
-      {/* レーダーチャート（質問内容分析） */}
+      {/* レーダーチャート（質問の質評価） */}
       {question.radar_scores && (
         <QuestionRadarChart scores={question.radar_scores as RadarScores} />
       )}

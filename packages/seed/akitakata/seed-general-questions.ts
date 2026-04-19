@@ -53,6 +53,28 @@ type QuestionerSection = {
   rawText: string;
 };
 
+// ─── curl upsert（execSync後にundiciのコネクションが壊れるため） ─────
+
+function upsertViaCurl(record: Record<string, unknown>): void {
+  const supabaseUrl = process.env.SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const tmpFile = path.join(os.tmpdir(), `seed-upsert-${Date.now()}.json`);
+  fs.writeFileSync(tmpFile, JSON.stringify(record), "utf-8");
+  try {
+    execSync(
+      `curl -sf -X POST "${supabaseUrl}/rest/v1/general_questions?on_conflict=council_session_id,session_day,questioner_name" \
+        -H "apikey: ${serviceKey}" \
+        -H "Authorization: Bearer ${serviceKey}" \
+        -H "Content-Type: application/json" \
+        -H "Prefer: resolution=merge-duplicates,return=minimal" \
+        --data-binary @${tmpFile}`,
+      { encoding: "utf-8", shell: "/bin/bash" }
+    );
+  } finally {
+    fs.unlinkSync(tmpFile);
+  }
+}
+
 // ─── Claude CLI ──────────────────────────────────────────────
 
 const CLAUDE_PATH = process.env.CLAUDE_CLI_PATH || "claude";
@@ -318,19 +340,13 @@ async function main() {
       pdf_url: null,
     };
 
-    const { error } = await supabase
-      .from("general_questions")
-      .upsert(record, {
-        onConflict: "council_session_id,session_day,questioner_name",
-        ignoreDuplicates: false,
-      });
-
-    if (error) {
-      console.error(`  ❌ upsertエラー:`, error.message);
-      errorCount++;
-    } else {
+    try {
+      upsertViaCurl(record);
       console.log(`  ✅ upsert完了`);
       insertCount++;
+    } catch (e) {
+      console.error(`  ❌ upsertエラー:`, e);
+      errorCount++;
     }
   }
 

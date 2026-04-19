@@ -10,11 +10,11 @@ import {
 import type { RadarScores } from "../../shared/types";
 
 const AXES = [
-  "行財政改革",
-  "福祉・医療",
-  "産業・経済",
-  "教育・文化",
-  "環境・インフラ",
+  "論点の具体性",
+  "深掘り力",
+  "提案力",
+  "市民代弁度",
+  "準備・調査力",
 ] as const;
 
 interface QuestionRadarChartProps {

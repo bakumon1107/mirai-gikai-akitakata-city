@@ -14,11 +14,11 @@ export type QuestionExchange = {
 };
 
 export type RadarScores = {
-  行財政改革: number;
-  "福祉・医療": number;
-  "産業・経済": number;
-  "教育・文化": number;
-  "環境・インフラ": number;
+  論点の具体性: number;
+  深掘り力: number;
+  提案力: number;
+  市民代弁度: number;
+  "準備・調査力": number;
 };
 
 export type GeneralQuestion = {

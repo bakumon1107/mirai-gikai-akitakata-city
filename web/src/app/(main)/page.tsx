@@ -1,9 +1,10 @@
 import { Container } from "@/components/layouts/container";
 import { About } from "@/components/top/about";
-
+import { GeneralQuestionsBanner } from "@/components/top/general-questions-banner";
 import { Hero } from "@/components/top/hero";
 import { PastSessionsSection } from "@/components/top/past-sessions-section";
 import { TeamMirai } from "@/components/top/team-mirai";
+import { siteConfig } from "@/config/site.config";
 import { getDifficultyLevel } from "@/features/bill-difficulty/server/loaders/get-difficulty-level";
 import { BillDisclaimer } from "@/features/bills/client/components/bill-detail/bill-disclaimer";
 import { BillsByTagSection } from "@/features/bills/server/components/bills-by-tag-section";
@@ -11,9 +12,8 @@ import { FeaturedBillSection } from "@/features/bills/server/components/featured
 import { loadHomeData } from "@/features/bills/server/loaders/load-home-data";
 import type { BillWithContent } from "@/features/bills/shared/types";
 import { HomeChatClient } from "@/features/chat/client/components/home-chat-client";
-import { siteConfig } from "@/config/site.config";
-import { getCurrentCouncilSession } from "@/features/council-sessions/server/loaders/get-current-council-session";
 import { CurrentCouncilSession } from "@/features/council-sessions/client/components/current-council-session";
+import { getCurrentCouncilSession } from "@/features/council-sessions/server/loaders/get-current-council-session";
 import { getJapanTime } from "@/lib/utils/date";
 
 export default async function Home() {
@@ -57,6 +57,11 @@ export default async function Home() {
               featuredBillIds={featuredBillIds}
               sessionSlug={activeSessionSlug}
             />
+
+            {/* 一般質問バナー */}
+            {activeSessionSlug && (
+              <GeneralQuestionsBanner sessionSlug={activeSessionSlug} />
+            )}
           </main>
         </div>
       </Container>

@@ -56,4 +56,9 @@ export const policyLinks: FooterPolicyLink[] = [
     label: "プライバシーポリシー",
     href: routes.privacy(),
   },
+  {
+    label: "ソースコード（GitHub）",
+    href: "https://github.com/bakumon1107/mirai-gikai-akitakata-city",
+    external: true,
+  },
 ];

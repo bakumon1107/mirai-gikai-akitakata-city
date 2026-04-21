@@ -4,7 +4,7 @@
  * @see docs/kawasaki/20260304_1000_別地域向けfork手順.md
  */
 export const siteConfig = {
-  siteName: "みらい議会ー安芸高田市版",
+  siteName: "みらい議会＠安芸高田市",
   siteDescription:
     "安芸高田市議会で今どんな議案が検討されているか、わかりやすく伝えるプラットフォームです",
   cityName: "安芸高田市",

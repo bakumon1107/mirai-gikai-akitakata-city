@@ -81,8 +81,8 @@
 
   /* Stance semantic colors */
   --color-stance-for-bg: #ecfcf1;
-  --color-stance-for-badge-start: #ede9fe;
-  --color-stance-for-badge-end: #f5f3ff;
+  --color-stance-for-badge-start: #f2f0fe;
+  --color-stance-for-badge-end: #f9f7ff;
   --color-stance-against: #c9272a;
   --color-stance-against-light: #d23c3f;
   --color-stance-against-bg: #fff1f1;
@@ -105,8 +105,8 @@
   --color-mirai-progress-fill: #a9e89d;
 
   /* Gradient endpoints */
-  --color-mirai-gradient-start: #c4b5f4;
-  --color-mirai-gradient-end: #ddd6fe;
+  --color-mirai-gradient-start: #dbd3f9;
+  --color-mirai-gradient-end: #ede9fd;
 }
 
 :root {
@@ -117,8 +117,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #8272c0;
-  --primary-accent: #6455a4;
+  --primary: #a495d6;
+  --primary-accent: #7a6cc0;
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -240,7 +240,7 @@
   }
 
   .bg-mirai-light-gradient {
-    background-image: linear-gradient(to bottom, #ede9fe, #f5f3ff);
+    background-image: linear-gradient(to bottom, #f2f0fe, #f9f7ff);
   }
 
   .bg-mirai-white-fade {

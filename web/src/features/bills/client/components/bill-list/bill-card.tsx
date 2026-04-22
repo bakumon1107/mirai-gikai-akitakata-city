@@ -45,6 +45,11 @@ export function BillCard({ bill }: BillCardProps) {
         <div className="flex-1">
           <CardHeader>
             <div className="flex flex-col gap-3">
+              {bill.bill_number && (
+                <p className="text-xs font-medium text-muted-foreground">
+                  議案第{bill.bill_number}号
+                </p>
+              )}
               <CardTitle className="text-2xl/8 tracking-normal">
                 {displayTitle}
               </CardTitle>
@@ -62,10 +67,10 @@ export function BillCard({ bill }: BillCardProps) {
                 lineClamp={4}
                 className="text-sm leading-relaxed"
               />
-              {/* タグ表示 */}
+              {/* タグ表示（最上位の1件のみ） */}
               {(bill.tags.length > 0 || bill.hasPublicInterview) && (
                 <div className="flex flex-wrap gap-3">
-                  {bill.tags.map((tag) => (
+                  {bill.tags.slice(0, 1).map((tag) => (
                     <BillTag key={tag.id} tag={tag} />
                   ))}
                   {bill.hasPublicInterview && (

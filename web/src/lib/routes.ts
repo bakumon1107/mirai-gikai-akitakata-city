@@ -38,7 +38,11 @@ export const routes = {
   reportChatLog: (reportId: string) => `/report/${reportId}/chat-log` as const,
 
   // ── 定例会セッション ────────────────────────────────
+  sessions: () => "/sessions" as const,
   sessionBills: (slug: string) => `/sessions/${slug}/bills` as const,
+  sessionQuestions: (slug: string) => `/sessions/${slug}/questions` as const,
+  sessionQuestionDetail: (slug: string, id: string) =>
+    `/sessions/${slug}/questions/${id}` as const,
 
   // ── その他 ────────────────────────────────────────
   faq: () => "/faq" as const,

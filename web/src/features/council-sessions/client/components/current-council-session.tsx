@@ -13,15 +13,22 @@ export function CurrentCouncilSession({ session }: CurrentCouncilSessionProps) {
           <h2 className="text-xl font-bold text-gray-800 leading-[0.9]">
             本日は
           </h2>
-          <div
-            className={`
-            inline-flex items-center justify-center px-5 py-1.5 rounded-[50px]  shrink-0
-            ${session == null ? "bg-mirai-border-muted" : "bg-mirai-gradient"}
-            `}
-          >
-            <span className="text-base font-bold leading-[1.48]">
-              {session == null ? "閉会中" : "開会中"}
-            </span>
+          <div className="flex flex-col gap-1">
+            <div
+              className={`
+              inline-flex items-center justify-center px-5 py-1.5 rounded-[50px]  shrink-0
+              ${session == null ? "bg-mirai-border-muted" : "bg-mirai-gradient"}
+              `}
+            >
+              <span className="text-base font-bold leading-[1.48]">
+                {session == null ? "閉会中" : "開会中"}
+              </span>
+            </div>
+            {session == null && (
+              <p className="text-xs text-muted-foreground">
+                採決結果は議事公開後に更新されます
+              </p>
+            )}
           </div>
         </div>
         {session != null && (

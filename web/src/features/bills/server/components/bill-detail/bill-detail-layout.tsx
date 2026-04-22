@@ -13,6 +13,8 @@ import type { BillWithContent } from "../../../shared/types";
 import { BillShareButtons } from "../share/bill-share-buttons";
 import { BillContent } from "./bill-content";
 import { BillDetailHeader } from "./bill-detail-header";
+import { BillDiscussionsSection } from "./bill-discussions-section";
+import { getBillDiscussions } from "../../loaders/get-bill-discussions";
 
 interface BillDetailLayoutProps {
   bill: BillWithContent;
@@ -27,10 +29,13 @@ export async function BillDetailLayout({
     bill.status === "preparing" ||
     (bill.faction_stances && bill.faction_stances.length > 0);
 
-  const [interviewConfig, publicReportsResult] = await Promise.all([
-    getInterviewConfig(bill.id),
-    getPublicReportsByBillId(bill.id),
-  ]);
+  const [interviewConfig, publicReportsResult, discussions] = await Promise.all(
+    [
+      getInterviewConfig(bill.id),
+      getPublicReportsByBillId(bill.id),
+      getBillDiscussions(bill.id),
+    ]
+  );
 
   return (
     <div className="container mx-auto pb-8 max-w-4xl">
@@ -86,6 +91,13 @@ export async function BillDetailLayout({
             />
           </div>
         )}
+        {/* 議会での審議 */}
+        {discussions.length > 0 && (
+          <div className="my-8">
+            <BillDiscussionsSection discussions={discussions} />
+          </div>
+        )}
+
         {/* シェアボタン */}
         <div className="my-8">
           <BillShareButtons bill={bill} />

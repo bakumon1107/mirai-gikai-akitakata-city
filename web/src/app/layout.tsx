@@ -18,7 +18,6 @@ const lexendGiga = Lexend_Giga({
   weight: ["400", "500", "700", "800", "900"],
 });
 
-const isDev = process.env.NODE_ENV === "development";
 const ogImage = {
   url: "/ogp.jpg",
   width: 1200,
@@ -32,10 +31,8 @@ export const metadata: Metadata = {
   description: siteConfig.siteDescription,
   keywords: [...siteConfig.keywords],
   icons: {
-    icon: isDev
-      ? "/icons/pwa/icon_dev_192_v3.png"
-      : "/icons/pwa/icon_android_192.png",
-    apple: "/icons/pwa/icon_ios.png",
+    icon: "/icons/pwa/icon_akitakata.svg",
+    apple: "/icons/pwa/icon_akitakata.svg",
   },
   manifest: "/manifest.json",
   openGraph: {

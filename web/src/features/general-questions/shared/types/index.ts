@@ -1,38 +1,25 @@
-export type QuestionTopic = {
-  index: number;
+export type GeneralQuestionTopic = {
   title: string;
   question_summary: string;
   answer_summary: string;
-  exchanges: QuestionExchange[];
-};
-
-export type QuestionExchange = {
-  speaker: "questioner" | "answerer";
-  name: string;
-  role?: string;
-  text: string;
-};
-
-export type RadarScores = {
-  論点の具体性: number;
-  深掘り力: number;
-  提案力: number;
-  市民代弁度: number;
-  "準備・調査力": number;
+  answerer_role: string;
+  answerer_name: string;
+  block_summary?: string | null;
 };
 
 export type GeneralQuestion = {
   id: string;
   council_session_id: string;
-  session_day: number;
   questioner_name: string;
+  questioner_party: string | null;
   questioner_number: number | null;
-  topics: QuestionTopic[];
-  overall_summary: string | null;
-  questioner_stance: string | null;
-  stance_analysis: string | null;
-  radar_scores: RadarScores | null;
-  pdf_url: string | null;
+  session_day: number;
+  question_order: number;
+  summary: string | null;
+  topics: GeneralQuestionTopic[];
+  raw_text: string | null;
+  source_url: string | null;
+  publish_status: string;
   created_at: string;
   updated_at: string;
 };

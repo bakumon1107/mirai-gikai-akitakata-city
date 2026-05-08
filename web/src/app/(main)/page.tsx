@@ -14,6 +14,7 @@ import type { BillWithContent } from "@/features/bills/shared/types";
 import { HomeChatClient } from "@/features/chat/client/components/home-chat-client";
 import { CurrentCouncilSession } from "@/features/council-sessions/client/components/current-council-session";
 import { getCurrentCouncilSession } from "@/features/council-sessions/server/loaders/get-current-council-session";
+import { getLatestSessionWithQuestions } from "@/features/general-questions/server/loaders/get-latest-session-with-questions";
 import { getJapanTime } from "@/lib/utils/date";
 
 export default async function Home() {
@@ -21,10 +22,12 @@ export default async function Home() {
     await loadHomeData();
 
   // ゆくゆくタグ機能がマージされたらBFFに統合する
-  const [currentSession, currentDifficulty] = await Promise.all([
-    getCurrentCouncilSession(getJapanTime()),
-    getDifficultyLevel(),
-  ]);
+  const [currentSession, currentDifficulty, latestQuestionsSlug] =
+    await Promise.all([
+      getCurrentCouncilSession(getJapanTime()),
+      getDifficultyLevel(),
+      getLatestSessionWithQuestions(),
+    ]);
 
   const featuredBillIds = new Set(featuredBills.map((b) => b.id));
 
@@ -44,6 +47,13 @@ export default async function Home() {
       {/* 本日の定例会セクション */}
       <CurrentCouncilSession session={currentSession} />
 
+      {/* 一般質問バナー */}
+      {latestQuestionsSlug && (
+        <Container className="pt-6">
+          <GeneralQuestionsBanner sessionSlug={latestQuestionsSlug} />
+        </Container>
+      )}
+
       {/* 議案一覧セクション */}
       <Container className="">
         <div className="py-10">
@@ -57,11 +67,6 @@ export default async function Home() {
               featuredBillIds={featuredBillIds}
               sessionSlug={activeSessionSlug}
             />
-
-            {/* 一般質問バナー */}
-            {activeSessionSlug && (
-              <GeneralQuestionsBanner sessionSlug={activeSessionSlug} />
-            )}
           </main>
         </div>
       </Container>

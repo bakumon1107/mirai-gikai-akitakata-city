@@ -16,8 +16,11 @@ export function Hero() {
       />
       <div className="absolute bottom-[30vh] left-0 right-0 py-4">
         <Container>
-          <p className="font-bold text-xl md:text-2xl leading-relaxed">
-            いま{siteConfig.councilName}で議論されていること <br />
+          <p className="font-bold text-lg md:text-2xl leading-relaxed">
+            <span className="whitespace-nowrap">
+              いま{siteConfig.councilName}で議論されていること
+            </span>
+            <br />
             やさしい言葉で説明します
           </p>
           <p className="mt-2 font-lexend text-xs">

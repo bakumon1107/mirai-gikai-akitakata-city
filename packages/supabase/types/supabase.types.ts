@@ -525,14 +525,15 @@ export type Database = {
           council_session_id: string
           created_at: string
           id: string
-          overall_summary: string | null
-          pdf_url: string | null
+          publish_status: string
+          question_order: number
           questioner_name: string
           questioner_number: number | null
-          questioner_stance: string | null
-          radar_scores: Json | null
+          questioner_party: string | null
+          raw_text: string | null
           session_day: number
-          stance_analysis: string | null
+          source_url: string | null
+          summary: string | null
           topics: Json
           updated_at: string
         }
@@ -540,14 +541,15 @@ export type Database = {
           council_session_id: string
           created_at?: string
           id?: string
-          overall_summary?: string | null
-          pdf_url?: string | null
+          publish_status?: string
+          question_order?: number
           questioner_name: string
           questioner_number?: number | null
-          questioner_stance?: string | null
-          radar_scores?: Json | null
+          questioner_party?: string | null
+          raw_text?: string | null
           session_day: number
-          stance_analysis?: string | null
+          source_url?: string | null
+          summary?: string | null
           topics?: Json
           updated_at?: string
         }
@@ -555,14 +557,15 @@ export type Database = {
           council_session_id?: string
           created_at?: string
           id?: string
-          overall_summary?: string | null
-          pdf_url?: string | null
+          publish_status?: string
+          question_order?: number
           questioner_name?: string
           questioner_number?: number | null
-          questioner_stance?: string | null
-          radar_scores?: Json | null
+          questioner_party?: string | null
+          raw_text?: string | null
           session_day?: number
-          stance_analysis?: string | null
+          source_url?: string | null
+          summary?: string | null
           topics?: Json
           updated_at?: string
         }

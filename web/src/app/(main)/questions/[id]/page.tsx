@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/layouts/container";
 import { siteConfig } from "@/config/site.config";
+import { routes } from "@/lib/routes";
 import { RawTranscriptView } from "@/features/general-questions/server/components/raw-transcript-view";
 import { QuestionChatView } from "@/features/general-questions/client/components/question-chat-view";
 import { QuestionViewToggle } from "@/features/general-questions/client/components/question-view-toggle";
@@ -48,9 +49,9 @@ export default async function GeneralQuestionDetailPage({ params }: Props) {
     notFound();
   }
 
-  const backHref = session
-    ? `/sessions/${session.slug}/questions`
-    : "/questions";
+  const backHref = session?.slug
+    ? routes.sessionQuestions(session.slug)
+    : routes.questions();
 
   const dayLabel =
     DAY_LABELS[question.session_day] ?? `第${question.session_day}日`;
@@ -97,7 +98,7 @@ export default async function GeneralQuestionDetailPage({ params }: Props) {
 
       {question.source_url && (
         <div className="mt-8 pt-6 border-t border-border">
-          <Link
+          <a
             href={question.source_url}
             target="_blank"
             rel="noopener noreferrer"
@@ -105,7 +106,7 @@ export default async function GeneralQuestionDetailPage({ params }: Props) {
           >
             <ExternalLink className="w-4 h-4" />
             公式会議録を見る
-          </Link>
+          </a>
         </div>
       )}
     </Container>

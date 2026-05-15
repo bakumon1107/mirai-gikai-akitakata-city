@@ -9,6 +9,8 @@ import {
   Building2,
   Trophy,
   Globe,
+  Landmark,
+  Wifi,
 } from "lucide-react";
 import Link from "next/link";
 import type { GeneralQuestion } from "../../shared/types";
@@ -27,6 +29,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Leaf,
   Trophy,
   Globe,
+  Landmark,
+  Wifi,
   Circle,
 };
 
@@ -81,6 +85,18 @@ const CATEGORY_STYLE: Record<
     header: "bg-white/60 border-amber-200",
     text: "text-amber-700",
     iconBg: "bg-amber-100",
+  },
+  "財政・行政運営": {
+    card: "bg-slate-50 border-slate-300",
+    header: "bg-white/60 border-slate-200",
+    text: "text-slate-700",
+    iconBg: "bg-slate-200",
+  },
+  "情報通信・DX": {
+    card: "bg-cyan-50 border-cyan-200",
+    header: "bg-white/60 border-cyan-200",
+    text: "text-cyan-700",
+    iconBg: "bg-cyan-100",
   },
 };
 

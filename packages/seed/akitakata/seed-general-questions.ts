@@ -23,33 +23,20 @@ import { parseMinutes } from "./parse-minutes";
 
 // ─── 型 ──────────────────────────────────────────────────────
 
-type Exchange = {
-  speaker: "questioner" | "answerer";
-  name: string;
-  role?: string;
-  text: string;
-};
-
-type Topic = {
-  index: number;
+type GeneratedTopic = {
   title: string;
   question_summary: string;
   answer_summary: string;
-  exchanges: Exchange[];
-};
-
-type RadarScores = {
-  "論点の具体性": number;
-  "深掘り力": number;
-  "提案力": number;
-  "市民代弁度": number;
-  "準備・調査力": number;
+  answerer_role: string;
+  answerer_name: string;
+  raw_question?: string | null;
+  raw_answer?: string | null;
 };
 
 type QuestionerSection = {
   questionerName: string;
   questionerNumber: number | null;
-  fullName: string; // 姓名（例: "新田和明"）
+  fullName: string;
   rawText: string;
 };
 
@@ -62,7 +49,7 @@ function upsertViaCurl(record: Record<string, unknown>): void {
   fs.writeFileSync(tmpFile, JSON.stringify(record), "utf-8");
   try {
     execSync(
-      `curl -sf -X POST "${supabaseUrl}/rest/v1/general_questions?on_conflict=council_session_id,session_day,questioner_name" \
+      `curl -sf -X POST "${supabaseUrl}/rest/v1/general_questions?on_conflict=council_session_id,session_day,question_order" \
         -H "apikey: ${serviceKey}" \
         -H "Authorization: Bearer ${serviceKey}" \
         -H "Content-Type: application/json" \
@@ -73,6 +60,26 @@ function upsertViaCurl(record: Record<string, unknown>): void {
   } finally {
     fs.unlinkSync(tmpFile);
   }
+}
+
+// ─── テキスト前処理 ──────────────────────────────────────────
+
+/**
+ * 会議録テキストから不要な要素を除去する
+ * - 【速報版】ページマーカー行（前後の空白行も含む）
+ * - 議長の進行発言（「答弁を求めます」「以上で答弁を終わります」「○○議員。」等）
+ */
+function cleanMinutesText(text: string): string {
+  return text
+    // 【速報版】を含む行（前のページ番号行も含めて）を除去
+    .replace(/^[ \t]*\d+[ \t]*\n[ \t]*【速報版】[ \t]*\n?/gm, "")
+    .replace(/【速報版】/g, "")
+    // 議長の発言ブロック（○〜議 長 で始まる行から次の○まで）を除去
+    .replace(/^○[^\n]*議\s*長[^\n]*\n(?:[^○\n][^\n]*\n)*/gm, "")
+    // ページ番号だけの行（空白＋数字1〜3桁）を除去
+    .replace(/^[ \t]*\d{1,3}[ \t]*$/gm, "")
+    // 連続する空行を1行に圧縮
+    .replace(/\n{3,}/g, "\n\n");
 }
 
 // ─── Claude CLI ──────────────────────────────────────────────
@@ -86,11 +93,15 @@ function callClaude(prompt: string): string {
     const env = { ...process.env };
     delete env.CLAUDECODE;
     delete env.CLAUDE_CODE;
-    const result = execSync(
+    return execSync(
       `"${CLAUDE_PATH}" --dangerously-skip-permissions -p "$(cat ${tmpFile})"`,
-      { encoding: "utf-8", maxBuffer: 10 * 1024 * 1024, env, shell: "/bin/bash" }
-    );
-    return result.trim();
+      {
+        encoding: "utf-8",
+        maxBuffer: 10 * 1024 * 1024,
+        env,
+        shell: "/bin/bash",
+      }
+    ).trim();
   } finally {
     fs.unlinkSync(tmpFile);
   }
@@ -98,73 +109,80 @@ function callClaude(prompt: string): string {
 
 // ─── プロンプト ──────────────────────────────────────────────
 
-function buildEnrichedPrompt(questionerName: string, sectionText: string): string {
-  return `あなたは安芸高田市議会の会議録を構造化するアシスタントです。
+function buildPrompt(questionerName: string, sectionText: string): string {
+  const cleanedText = cleanMinutesText(sectionText);
+  return `あなたは市議会の会議録を市民向けに整理する専門家です。
+以下の一般質問の会議録テキスト（${questionerName}議員）を市民がわかりやすい形に構造化してください。
 
-以下は${questionerName}議員の一般質問（全文）です。
-以下のJSON形式で構造化してください。
+**出力は必ず最初の文字から最後の文字まで JSON のみとすること。前置きや説明文は一切不要。**
 
 ## 会議録テキスト
-${sectionText.slice(0, 8000)}
+${cleanedText}
 
-## 出力形式（JSONのみ。他のテキストは一切含めないこと）
+## 出力形式（JSONのみ。説明文・前置き不要）
 {
-  "overall_summary": "この議員の質問全体を通じた2〜3文の総括（何を問い、何が明らかになったか）",
-  "questioner_stance": "建設的提案型 | 批判追及型 | 情報確認型 | 課題提起型 のいずれか1つ",
-  "stance_analysis": "質問者の姿勢・スタンスに対する2〜3文の分析（行政に対してポジティブか批判的か、質問の目的・動機など）",
-  "radar_scores": {
-    "論点の具体性": 3,
-    "深掘り力": 4,
-    "提案力": 2,
-    "市民代弁度": 5,
-    "準備・調査力": 3
-  },
+  "questioner_party": "会派名（テキストから読み取れない場合はnull）",
+  "summary": "質問全体の要約（80字以内、市民向け）",
   "topics": [
     {
-      "index": 1,
-      "title": "テーマのタイトル（20字以内）",
-      "question_summary": "質問内容の概要（2〜3文、市民が読みやすい表現で）",
-      "answer_summary": "答弁内容の概要（2〜3文、市民が読みやすい表現で）",
-      "exchanges": [
-        {
-          "speaker": "questioner",
-          "name": "${questionerName}",
-          "text": "発言内容を1〜3文に要約（verbatimではなく要約）"
-        },
-        {
-          "speaker": "answerer",
-          "name": "藤本市長",
-          "role": "市長",
-          "text": "答弁内容を1〜3文に要約"
-        }
-      ]
+      "title": "テーマタイトル（20字以内）",
+      "question_summary": "質問内容の要約（100字以内）",
+      "answer_summary": "答弁内容の要約（100字以内）",
+      "answerer_role": "答弁者の役職（複数いる場合は「○○局長・市長」のように連記）",
+      "answerer_name": "答弁者の氏名（複数の場合は「氏名A・氏名B」のように連記。不明の場合は空文字）",
+      "raw_question": "このテーマに対応する議員の質問発言を原文のまま抜粋（複数回の発言は改行で連結、600文字以内）",
+      "raw_answer": "このテーマに対応する答弁者の発言を原文のまま抜粋（複数回の発言は改行で連結、600文字以内）"
     }
   ]
 }
 
-注意:
-- topics の title は大枠テーマ名をそのまま短縮してください
-- exchanges は質問者と答弁者の発言を交互に、実際の会話の流れに沿って記録してください（1テーマあたり2〜8往復程度）
-- summary は事実のみ書き、意見・評価は含めないでください
-- questioner_stance は行政への姿勢全体から判断してください
-- stance_analysis はポジティブ/ネガティブ/中立の視点を含め、質問の背景・動機まで分析してください
-- radar_scores の各軸は 1〜5 の整数で採点してください（議事録の発言内容から判断）
-  - 論点の具体性: 数字・事例・固有名詞を用いた具体的な質問か（抽象的=1、非常に具体的=5）
-  - 深掘り力: 答弁に対して再質問・追及ができているか（一問一答で終わる=1、深く掘り下げる=5）
-  - 提案力: 問題指摘にとどまらず代替案・改善策を提示しているか（指摘のみ=1、具体的提案あり=5）
-  - 市民代弁度: 市民生活・住民目線を意識した質問か（行政視点のみ=1、市民目線が強い=5）
-  - 準備・調査力: 事前調査・他自治体事例・データを根拠に質問しているか（根拠なし=1、十分な調査あり=5）`;
+## 制約
+- 事実のみを要約し、政治的評価や推測は含めない
+- topicsは質問者が取り上げたテーマ単位で分割する
+- 原文（会議録）に登場する行政略語・専門用語はそのまま使うこと（誤った言い換えは事実誤認になる）
+- 中国語簡体字・繁体字を使わず、必ず日本語の漢字を使用すること
+- answerer_name は役職と氏名を別にする（answerer_role に役職、answerer_name に氏名を格納）
+- raw_question / raw_answer は要約せず、会議録テキストから該当発言を忠実に抜粋すること（各600文字以内）`;
+}
+
+// ─── 出席議員一覧からフルネームマップを構築 ────────────────────
+
+/**
+ * 「２．出席議員は次のとおりである」セクションから
+ * 議員番号→フルネームのマップを作成する
+ */
+function buildMemberNameMap(text: string): Map<number, string> {
+  const map = new Map<number, string>();
+  const startIdx = text.indexOf("出席議員は次のとおりである");
+  if (startIdx < 0) return map;
+  const sectionText = text.slice(startIdx, startIdx + 1000);
+
+  const toHalf = (s: string) =>
+    s.replace(/[０-９]/g, (c) => String(c.charCodeAt(0) - 0xff10));
+
+  // 「１番    氏 名」「１０番       氏   名」のパターン（全角数字+番+スペース+氏名）
+  // 氏名部分はスペース・全角スペース区切りの漢字/かな文字列
+  const ENTRY_RE = /([０-９]{1,2})番[ 　]{1,8}((?:[^\s０-９\d\n]+[ 　]*){1,4})/g;
+  let m: RegExpExecArray | null;
+  while ((m = ENTRY_RE.exec(sectionText)) !== null) {
+    const num = parseInt(toHalf(m[1]), 10);
+    const name = m[2].replace(/\s/g, "").trim();
+    if (!isNaN(num) && name.length >= 2 && name.length <= 8) {
+      map.set(num, name);
+    }
+  }
+  return map;
 }
 
 // ─── テキスト分割 ────────────────────────────────────────────
 
-/**
- * 会議録テキストを議員ごとのセクションに分割する
- */
-function splitByQuestioner(text: string): QuestionerSection[] {
-  // 「X番、XXX議員。」で各セクションを特定
+function splitByQuestioner(text: string, fullText = text): QuestionerSection[] {
+  // 出席議員一覧は文書冒頭にあるため、GQスライス前のフルテキストから構築する
+  const memberNameMap = buildMemberNameMap(fullText);
+
+  // 「8番、新田議員。」（カンマ）「10番 児玉議員。」（スペース）「9 番 山根議員。」（番の前後にスペース）の形式に対応
   const SECTION_START_RE =
-    /([0-9０-９]+)番[、，]([^\n。]{1,10}?)議員[。\n]/g;
+    /([0-9０-９]+)\s*番[、，\s]([^\n。]{1,10}?)議員[。\n]/g;
 
   const matches: Array<{ pos: number; num: string; name: string }> = [];
   let m: RegExpExecArray | null;
@@ -187,17 +205,27 @@ function splitByQuestioner(text: string): QuestionerSection[] {
     const end = i + 1 < unique.length ? unique[i + 1].pos : text.length;
     const rawText = text.slice(pos, end);
 
-    // 氏名を取得（「○XXX 議 員\nXX番、XXX和明でございます」から）
-    const fullNameMatch = rawText.match(
-      /[0-9０-９]+番[、，].{1,20}でございます|[0-9０-９]+番[、，].{1,20}です[。\n]/
+    // 形式1: 「8番、新田和明でございます」「6番 南沢克彦です。」（数字+番+名前）
+    // 「の」を含むものは質問番号（「2番、次の質問です。」）の誤マッチを防ぐため除外
+    const fullNameByNumber = rawText.match(
+      /[0-9０-９]+\s*番[、，\s][^\nの。]{2,15}でございます|[0-9０-９]+\s*番[、，\s][^\nの。]{2,15}です[。\n]/
     );
-    const fullName = fullNameMatch
-      ? fullNameMatch[0]
-          .replace(/^[0-9０-９]+番[、，]/, "")
+    // 形式2: 「熊高昌三です。」（数字なし、姓+名で計4〜5文字以内）
+    // ○ではじまる議員発言の最初のブロックから抽出
+    const firstSpeakerBlock = rawText.match(/○[^\n]+\n(?:[^\n]*\n){0,3}/)?.[0] ?? "";
+    const fullNameDirect = firstSpeakerBlock.match(/([^\s　。、\n（(]{2,6}(?:でございます|です)[。\n])/);
+    const fullName = fullNameByNumber
+      ? fullNameByNumber[0]
+          .replace(/^[0-9０-９]+\s*番[、，\s]/, "")
           .replace(/でございます.*/, "")
           .replace(/です[。\n].*/, "")
           .trim()
-      : name.replace(/\s/g, "");
+      : fullNameDirect
+        ? fullNameDirect[1]
+            .replace(/でございます.*/, "")
+            .replace(/です[。\n].*/, "")
+            .trim()
+        : memberNameMap.get(parseInt(num, 10)) ?? name.replace(/\s/g, "");
 
     sections.push({
       questionerName: name.replace(/\s/g, ""),
@@ -249,7 +277,7 @@ async function main() {
   console.log(`💬 発言ブロック: ${speeches.length} 件`);
 
   // 議員セクションに分割
-  const sections = splitByQuestioner(gqText);
+  const sections = splitByQuestioner(gqText, minutesText);
   console.log(`👥 質問者: ${sections.length} 名`);
   for (const s of sections) {
     console.log(
@@ -285,49 +313,49 @@ async function main() {
   let insertCount = 0;
   let errorCount = 0;
 
-  for (const section of sections) {
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i];
+    const questionOrder = i + 1;
+
     console.log(
-      `\n処理中: ${section.questionerNumber}番 ${section.questionerName}`
+      `\n処理中 [${questionOrder}/${sections.length}]: ${section.questionerNumber}番 ${section.questionerName}`
     );
 
-    // AI でトピック構造化（exchanges + 総括 + スタンス分析を含む）
-    console.log("  🤖 AI構造化中...");
-    let topics: Topic[] = [];
-    let overallSummary = "";
-    let questionerStance = "";
-    let stanceAnalysis = "";
-    let radarScores: RadarScores | null = null;
+    let topics: GeneratedTopic[] = [];
+    let questionerParty: string | null = null;
+    let summary = "";
 
+    console.log("  🤖 AI構造化中...");
     try {
-      const raw = callClaude(
-        buildEnrichedPrompt(section.questionerName, section.rawText)
-      );
-      const jsonMatch = raw.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        const parsed = JSON.parse(jsonMatch[0]);
-        overallSummary = parsed.overall_summary ?? "";
-        questionerStance = parsed.questioner_stance ?? "";
-        stanceAnalysis = parsed.stance_analysis ?? "";
-        radarScores = parsed.radar_scores ?? null;
-        topics = (parsed.topics ?? []).map(
-          (t: Omit<Topic, "exchanges"> & { exchanges?: Topic["exchanges"] }, i: number) => ({
-            index: t.index ?? i + 1,
-            title: t.title ?? "",
-            question_summary: t.question_summary ?? "",
-            answer_summary: t.answer_summary ?? "",
-            exchanges: t.exchanges ?? [],
-          })
-        );
-        console.log(
-          `  ✅ ${topics.length} トピック: ${topics.map((t) => t.title).join(" / ")}`
-        );
-        console.log(`  📊 スタンス: ${questionerStance}`);
-        if (radarScores) {
-          console.log(`  📡 レーダー: ${JSON.stringify(radarScores)}`);
-        }
-      } else {
-        console.log("  ⚠️  JSONパース失敗, raw:", raw.slice(0, 120));
+      const raw = callClaude(buildPrompt(section.questionerName, section.rawText));
+      let cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const jsonStart = cleaned.indexOf("{");
+      const jsonEnd = cleaned.lastIndexOf("}");
+      if (jsonStart >= 0 && jsonEnd > jsonStart) {
+        cleaned = cleaned.slice(jsonStart, jsonEnd + 1);
       }
+
+      const parsed = JSON.parse(cleaned) as {
+        questioner_party?: string | null;
+        summary?: string;
+        topics?: GeneratedTopic[];
+      };
+
+      questionerParty = parsed.questioner_party ?? null;
+      summary = parsed.summary ?? "";
+      topics = (parsed.topics ?? []).map((t) => ({
+        title: t.title ?? "",
+        question_summary: t.question_summary ?? "",
+        answer_summary: t.answer_summary ?? "",
+        answerer_role: t.answerer_role ?? "",
+        answerer_name: t.answerer_name ?? "",
+        raw_question: t.raw_question ?? null,
+        raw_answer: t.raw_answer ?? null,
+      }));
+
+      console.log(
+        `  ✅ ${topics.length} トピック: ${topics.map((t) => t.title).join(" / ")}`
+      );
     } catch (e) {
       console.error("  ❌ AI構造化エラー:", e);
     }
@@ -335,14 +363,15 @@ async function main() {
     const record = {
       council_session_id: councilSessionId,
       session_day: sessionDay,
+      question_order: questionOrder,
       questioner_name: section.fullName || section.questionerName,
       questioner_number: section.questionerNumber,
-      topics: topics,
-      overall_summary: overallSummary,
-      questioner_stance: questionerStance,
-      stance_analysis: stanceAnalysis,
-      radar_scores: radarScores,
-      pdf_url: null,
+      questioner_party: questionerParty,
+      summary,
+      topics,
+      raw_text: section.rawText,
+      source_url: null,
+      publish_status: "draft",
     };
 
     try {
@@ -358,6 +387,7 @@ async function main() {
   console.log("\n🎉 完了");
   console.log(`  挿入/更新: ${insertCount} 件`);
   console.log(`  エラー: ${errorCount} 件`);
+  console.log("  publish_status は 'draft' で登録されました。DBを直接更新して公開してください。");
 }
 
 main().catch(console.error);

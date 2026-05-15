@@ -41,8 +41,10 @@ export const routes = {
   sessions: () => "/sessions" as const,
   sessionBills: (slug: string) => `/sessions/${slug}/bills` as const,
   sessionQuestions: (slug: string) => `/sessions/${slug}/questions` as const,
-  sessionQuestionDetail: (slug: string, id: string) =>
-    `/sessions/${slug}/questions/${id}` as const,
+
+  // ── 一般質問 ──────────────────────────────────────
+  questions: () => "/questions" as const,
+  questionDetail: (id: string) => `/questions/${id}` as const,
 
   // ── その他 ────────────────────────────────────────
   faq: () => "/faq" as const,

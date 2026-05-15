@@ -13,3 +13,6 @@ node_modules
 
 # local claude permissions
 .claude/settings.local.json
+
+# meeting minutes text (do not commit)
+docs/akitakata/minutes/

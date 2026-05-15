@@ -110,7 +110,7 @@ const _getCachedBillsByFeaturedTags = unstable_cache(
       })),
     }));
   },
-  ["featured-bills-list"],
+  ["featured-bills-list-v2"],
   {
     revalidate: 600, // 10分（600秒）
     tags: [CACHE_TAGS.BILLS, CACHE_TAGS.INTERVIEW_CONFIGS],

@@ -76,7 +76,7 @@ export function DifficultySelector({
         {label != null ? (
           label
         ) : (
-          <span>
+          <span className="whitespace-nowrap">
             <span className="hidden md:inline-block">説明をもっと</span>詳しく
           </span>
         )}

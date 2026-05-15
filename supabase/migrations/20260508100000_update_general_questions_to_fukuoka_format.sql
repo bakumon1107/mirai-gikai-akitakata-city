@@ -30,9 +30,17 @@ do $$ begin
   end if;
 end $$;
 
--- 旧 unique 制約を削除して新しいものを追加
+-- 旧 unique 制約を削除
 alter table general_questions
   drop constraint if exists general_questions_council_session_id_session_day_questioner_nam;
+
+-- フォーマット移行: 旧データは旧フォーマット（exchanges[]）で新UIと非互換のため削除
+truncate table general_questions;
+
+-- 新しい unique 制約を追加（session内の質問順序で一意）
+alter table general_questions
+  add constraint general_questions_council_session_id_session_day_order_key
+  unique (council_session_id, session_day, question_order);
 
 -- publish_status インデックス追加
 create index if not exists general_questions_publish_status_idx

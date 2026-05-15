@@ -6,14 +6,10 @@ import { validatePreviewToken } from "@/features/bills/server/loaders/validate-p
 import { BillDetailLayout } from "@/features/bills/server/components/bill-detail/bill-detail-layout";
 import { env } from "@/lib/env";
 
-interface PreviewBillPageProps {
-  params: {
-    id: string;
-  };
-  searchParams: {
-    token?: string;
-  };
-}
+type PreviewBillPageProps = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ token?: string }>;
+};
 
 function PreviewBanner() {
   return (
@@ -44,17 +40,15 @@ export default async function PreviewBillPage({
   params,
   searchParams,
 }: PreviewBillPageProps) {
-  // トークン検証
-  const isValidToken = await validatePreviewToken(
-    params.id,
-    searchParams.token
-  );
+  const { id } = await params;
+  const { token } = await searchParams;
+
+  const isValidToken = await validatePreviewToken(id, token);
   if (!isValidToken) {
     notFound();
   }
 
-  // 管理者用API（非公開議案も取得可能）を使用
-  const bill = await getBillByIdAdmin(params.id);
+  const bill = await getBillByIdAdmin(id);
   const difficulty = await getDifficultyLevel();
 
   if (!bill) {

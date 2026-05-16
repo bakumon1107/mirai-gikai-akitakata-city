@@ -15,6 +15,8 @@ import { HomeChatClient } from "@/features/chat/client/components/home-chat-clie
 import { CurrentCouncilSession } from "@/features/council-sessions/client/components/current-council-session";
 import { getCurrentCouncilSession } from "@/features/council-sessions/server/loaders/get-current-council-session";
 import { getLatestSessionWithQuestions } from "@/features/general-questions/server/loaders/get-latest-session-with-questions";
+import { PressConferenceNoticeBanner } from "@/features/press-conferences/client/components/press-conference-notice-banner";
+import { getLatestPressConference } from "@/features/press-conferences/server/loaders/get-latest-press-conference";
 import { getJapanTime } from "@/lib/utils/date";
 
 export default async function Home() {
@@ -22,12 +24,17 @@ export default async function Home() {
     await loadHomeData();
 
   // ゆくゆくタグ機能がマージされたらBFFに統合する
-  const [currentSession, currentDifficulty, latestQuestionsSlug] =
-    await Promise.all([
-      getCurrentCouncilSession(getJapanTime()),
-      getDifficultyLevel(),
-      getLatestSessionWithQuestions(),
-    ]);
+  const [
+    currentSession,
+    currentDifficulty,
+    latestQuestionsSlug,
+    latestPressConference,
+  ] = await Promise.all([
+    getCurrentCouncilSession(getJapanTime()),
+    getDifficultyLevel(),
+    getLatestSessionWithQuestions(),
+    getLatestPressConference(),
+  ]);
 
   const featuredBillIds = new Set(featuredBills.map((b) => b.id));
 
@@ -51,6 +58,15 @@ export default async function Home() {
       {latestQuestionsSlug && (
         <Container className="pt-6">
           <GeneralQuestionsBanner sessionSlug={latestQuestionsSlug} />
+        </Container>
+      )}
+
+      {/* 市長記者会見バナー */}
+      {latestPressConference && (
+        <Container className="pt-4">
+          <PressConferenceNoticeBanner
+            pressConference={latestPressConference}
+          />
         </Container>
       )}
 

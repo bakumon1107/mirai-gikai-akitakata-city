@@ -46,6 +46,11 @@ export const routes = {
   questions: () => "/questions" as const,
   questionDetail: (id: string) => `/questions/${id}` as const,
 
+  // ── 市長記者会見 ──────────────────────────────────
+  pressConferences: () => "/press-conferences" as const,
+  pressConferenceDetail: (slug: string) =>
+    `/press-conferences/${slug}` as const,
+
   // ── その他 ────────────────────────────────────────
   faq: () => "/faq" as const,
 } as const;

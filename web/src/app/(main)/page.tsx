@@ -15,7 +15,9 @@ import { HomeChatClient } from "@/features/chat/client/components/home-chat-clie
 import { CurrentCouncilSession } from "@/features/council-sessions/client/components/current-council-session";
 import { getCurrentCouncilSession } from "@/features/council-sessions/server/loaders/get-current-council-session";
 import { getLatestSessionWithQuestions } from "@/features/general-questions/server/loaders/get-latest-session-with-questions";
+import { PressConferenceArchiveSection } from "@/features/press-conferences/client/components/press-conference-archive-section";
 import { PressConferenceNoticeBanner } from "@/features/press-conferences/client/components/press-conference-notice-banner";
+import { getPressConferences } from "@/features/press-conferences/server/loaders/get-press-conferences";
 import { getLatestPressConference } from "@/features/press-conferences/server/loaders/get-latest-press-conference";
 import { getJapanTime } from "@/lib/utils/date";
 
@@ -29,11 +31,13 @@ export default async function Home() {
     currentDifficulty,
     latestQuestionsSlug,
     latestPressConference,
+    pressConferences,
   ] = await Promise.all([
     getCurrentCouncilSession(getJapanTime()),
     getDifficultyLevel(),
     getLatestSessionWithQuestions(),
     getLatestPressConference(),
+    getPressConferences(),
   ]);
 
   const featuredBillIds = new Set(featuredBills.map((b) => b.id));
@@ -54,19 +58,19 @@ export default async function Home() {
       {/* 本日の定例会セクション */}
       <CurrentCouncilSession session={currentSession} />
 
-      {/* 一般質問バナー */}
-      {latestQuestionsSlug && (
-        <Container className="pt-6">
-          <GeneralQuestionsBanner sessionSlug={latestQuestionsSlug} />
-        </Container>
-      )}
-
       {/* 市長記者会見バナー */}
       {latestPressConference && (
-        <Container className="pt-4">
+        <Container className="pt-6">
           <PressConferenceNoticeBanner
             pressConference={latestPressConference}
           />
+        </Container>
+      )}
+
+      {/* 一般質問バナー */}
+      {latestQuestionsSlug && (
+        <Container className="pt-4">
+          <GeneralQuestionsBanner sessionSlug={latestQuestionsSlug} />
         </Container>
       )}
 
@@ -93,6 +97,17 @@ export default async function Home() {
           <PastSessionsSection sessions={pastSessions} />
         </Container>
       </div>
+
+      {/* 市長記者会見アーカイブセクション */}
+      {pressConferences.length > 0 && (
+        <div className="bg-mirai-surface-muted py-10 border-t border-mirai-border">
+          <Container>
+            <PressConferenceArchiveSection
+              pressConferences={pressConferences}
+            />
+          </Container>
+        </div>
+      )}
 
       <Container>
         {/* みらい議会とは セクション */}

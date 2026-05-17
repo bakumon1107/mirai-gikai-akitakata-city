@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { formatDateJST } from "@/lib/utils/date";
 import type { BillWithContent } from "../../../shared/types";
 import { BillStatusBadge } from "./bill-status-badge";
+import { BillTag } from "./bill-tag";
 
 interface CompactBillCardProps {
   bill: BillWithContent;
@@ -40,6 +41,13 @@ export function CompactBillCard({ bill, className }: CompactBillCardProps) {
               </span>
             )}
           </div>
+          {bill.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {bill.tags.slice(0, 1).map((tag) => (
+                <BillTag key={tag.id} tag={tag} />
+              ))}
+            </div>
+          )}
         </div>
 
         {/* サムネイル画像 */}

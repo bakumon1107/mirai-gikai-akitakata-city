@@ -1,11 +1,11 @@
-import { MessageSquare } from "lucide-react";
+import { FileText, MessageSquare } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getInterviewLPLink } from "@/features/interview-config/shared/utils/interview-links";
 import { routes } from "@/lib/routes";
-import { formatDateWithDots } from "@/lib/utils/date";
+import { formatDateJST } from "@/lib/utils/date";
 import { BillDetailShareButton } from "../../../client/components/bill-detail/bill-detail-share-button";
 import { BillStatusBadge } from "../../../client/components/bill-list/bill-status-badge";
 import { BillTag } from "../../../client/components/bill-list/bill-tag";
@@ -58,7 +58,7 @@ export async function BillDetailHeader({
           <BillStatusBadge status={bill.status} className="w-fit" />
           <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             {bill.published_at && (
-              <time>{formatDateWithDots(bill.published_at)} 提出</time>
+              <time>{formatDateJST(bill.published_at)} 提出</time>
             )}
           </div>
         </div>
@@ -93,7 +93,7 @@ export async function BillDetailHeader({
             </span>
           </Link>
         )}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {hasInterviewConfig && (
             <Button
               variant="default"
@@ -110,6 +110,19 @@ export async function BillDetailHeader({
                 />
                 AIインタビューに協力する
               </Link>
+            </Button>
+          )}
+          {bill.pdf_url && (
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="text-[13px] font-bold gap-1.5 py-1 px-3"
+            >
+              <a href={bill.pdf_url} target="_blank" rel="noopener noreferrer">
+                <FileText className="size-4" />
+                議案原文（PDF）
+              </a>
             </Button>
           )}
           <BillDetailShareButton

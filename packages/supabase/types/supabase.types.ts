@@ -7,30 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -370,6 +350,159 @@ export type Database = {
           name?: string
           sort_order?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      community_consultation_meetings: {
+        Row: {
+          ai_representative_quote: string | null
+          consultation_id: string | null
+          held_at: string | null
+          id: string
+          location_name: string
+          participant_count: number | null
+          theme: string | null
+        }
+        Insert: {
+          ai_representative_quote?: string | null
+          consultation_id?: string | null
+          held_at?: string | null
+          id?: string
+          location_name: string
+          participant_count?: number | null
+          theme?: string | null
+        }
+        Update: {
+          ai_representative_quote?: string | null
+          consultation_id?: string | null
+          held_at?: string | null
+          id?: string
+          location_name?: string
+          participant_count?: number | null
+          theme?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_consultation_meetings_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "community_consultations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_consultation_opinion_tags: {
+        Row: {
+          opinion_id: string
+          tag: string
+        }
+        Insert: {
+          opinion_id: string
+          tag: string
+        }
+        Update: {
+          opinion_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_consultation_opinion_tags_opinion_id_fkey"
+            columns: ["opinion_id"]
+            isOneToOne: false
+            referencedRelation: "community_consultation_opinions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_consultation_opinions: {
+        Row: {
+          ai_summary: string | null
+          consultation_id: string | null
+          created_at: string | null
+          department: string
+          id: string
+          is_cross_department: boolean | null
+          opinion_number: number | null
+          opinion_type: string | null
+          text: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          consultation_id?: string | null
+          created_at?: string | null
+          department: string
+          id?: string
+          is_cross_department?: boolean | null
+          opinion_number?: number | null
+          opinion_type?: string | null
+          text: string
+        }
+        Update: {
+          ai_summary?: string | null
+          consultation_id?: string | null
+          created_at?: string | null
+          department?: string
+          id?: string
+          is_cross_department?: boolean | null
+          opinion_number?: number | null
+          opinion_type?: string | null
+          text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_consultation_opinions_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "community_consultations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_consultations: {
+        Row: {
+          ai_issue_cards: Json | null
+          ai_year_summary: string | null
+          created_at: string | null
+          fiscal_year: string
+          fiscal_year_label: string
+          held_from: string | null
+          held_to: string | null
+          id: string
+          pdf_url: string | null
+          status: string | null
+          title: string
+          total_opinions: number | null
+          total_participants: number | null
+        }
+        Insert: {
+          ai_issue_cards?: Json | null
+          ai_year_summary?: string | null
+          created_at?: string | null
+          fiscal_year: string
+          fiscal_year_label: string
+          held_from?: string | null
+          held_to?: string | null
+          id?: string
+          pdf_url?: string | null
+          status?: string | null
+          title: string
+          total_opinions?: number | null
+          total_participants?: number | null
+        }
+        Update: {
+          ai_issue_cards?: Json | null
+          ai_year_summary?: string | null
+          created_at?: string | null
+          fiscal_year?: string
+          fiscal_year_label?: string
+          held_from?: string | null
+          held_to?: string | null
+          id?: string
+          pdf_url?: string | null
+          status?: string | null
+          title?: string
+          total_opinions?: number | null
+          total_participants?: number | null
         }
         Relationships: []
       }
@@ -1534,9 +1667,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       bill_publish_status: ["draft", "published", "coming_soon"],
@@ -1582,4 +1712,3 @@ export const Constants = {
     },
   },
 } as const
-

@@ -51,6 +51,11 @@ export const routes = {
   pressConferenceDetail: (slug: string) =>
     `/press-conferences/${slug}` as const,
 
+  // ── 地域懇談会 ────────────────────────────────────
+  communityConsultationDetail: (year: string) =>
+    `/community-consultations/${year}` as const,
+  communityConsultationLatest: () => "/community-consultations/latest" as const,
+
   // ── その他 ────────────────────────────────────────
   faq: () => "/faq" as const,
 } as const;

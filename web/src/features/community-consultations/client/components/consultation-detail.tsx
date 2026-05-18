@@ -71,7 +71,7 @@ export function ConsultationDetail({
   return (
     <div className="flex flex-col gap-10 pb-16">
       {/* ① ヒーロー */}
-      <div className="bg-white rounded-b-4xl px-4 pt-8 pb-8">
+      <div className="bg-white rounded-b-4xl px-4 pt-24 pb-8">
         <p className="text-xs font-medium text-mirai-text-muted mb-1">
           {consultation.fiscalYearLabel}
         </p>

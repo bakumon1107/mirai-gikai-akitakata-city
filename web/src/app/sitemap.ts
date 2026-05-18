@@ -4,8 +4,10 @@ import { env } from "@/lib/env";
 import { routes } from "@/lib/routes";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
+  // VERCEL_URL はデプロイ固有のURLのため使わない。
+  // VERCEL_PROJECT_PRODUCTION_URL は本番の安定したホスト名（https:// なし）。
+  const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : env.webUrl;
 
   const bills = await getBills();

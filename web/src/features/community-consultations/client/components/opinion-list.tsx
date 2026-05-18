@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ConsultationOpinion } from "../../shared/types";
 
 const OPINION_TYPE_LABELS: Record<string, string> = {
@@ -89,6 +89,14 @@ export function OpinionList({
   const [deptFilter, setDeptFilter] = useState(initialDepartmentFilter ?? ALL);
   const [typeFilter, setTypeFilter] = useState(ALL);
   const [tagFilter, setTagFilter] = useState(initialTagFilter ?? "");
+
+  useEffect(() => {
+    setDeptFilter(initialDepartmentFilter ?? ALL);
+  }, [initialDepartmentFilter]);
+
+  useEffect(() => {
+    setTagFilter(initialTagFilter ?? "");
+  }, [initialTagFilter]);
   const [keyword, setKeyword] = useState("");
 
   const departments = [

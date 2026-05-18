@@ -34,11 +34,21 @@ export function ConsultationDetail({
   opinions,
 }: ConsultationDetailProps) {
   const [tagFilter, setTagFilter] = useState("");
+  const [deptFilter, setDeptFilter] = useState("");
 
   const departmentStats = buildDepartmentStats(opinions);
 
   const handleFilterByTag = (tag: string) => {
     setTagFilter(tag);
+    setDeptFilter("");
+    document
+      .getElementById("opinions-section")
+      ?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleFilterByDept = (dept: string) => {
+    setDeptFilter(dept);
+    setTagFilter("");
     document
       .getElementById("opinions-section")
       ?.scrollIntoView({ behavior: "smooth" });
@@ -162,12 +172,7 @@ export function ConsultationDetail({
               </p>
               <DepartmentBar
                 stats={departmentStats}
-                onClickDepartment={() => {
-                  setTagFilter("");
-                  document
-                    .getElementById("opinions-section")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }}
+                onClickDepartment={handleFilterByDept}
               />
             </section>
           )}
@@ -177,7 +182,11 @@ export function ConsultationDetail({
             <h2 className="text-lg font-bold text-mirai-text mb-1">
               意見を読む
             </h2>
-            <OpinionList opinions={opinions} initialTagFilter={tagFilter} />
+            <OpinionList
+              opinions={opinions}
+              initialTagFilter={tagFilter}
+              initialDepartmentFilter={deptFilter || undefined}
+            />
           </section>
         </>
       )}

@@ -20,24 +20,26 @@ export function IssueCardComponent({ card, onClickTag }: IssueCardProps) {
       </p>
       <div className="flex flex-wrap gap-1.5">
         {card.tags.map((tag) => (
-          <button
+          <Button
             key={tag}
-            type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => onClickTag?.(tag)}
-            className="text-xs bg-mirai-surface px-2 py-0.5 rounded-full text-mirai-text-muted hover:bg-mirai-surface-muted transition-colors"
+            className="text-xs bg-mirai-surface px-2 py-0.5 rounded-full text-mirai-text-muted hover:bg-mirai-surface-muted h-auto"
           >
             {tag}
-          </button>
+          </Button>
         ))}
       </div>
-      <button
-        type="button"
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={() => onClickTag?.(card.tags[0])}
-        className="flex items-center gap-1 text-xs font-medium text-primary-accent hover:opacity-80 transition-opacity w-fit"
+        className="flex items-center gap-1 text-xs font-medium text-primary-accent hover:opacity-80 p-0 h-auto"
       >
         関連する意見 {card.opinionCount}件を読む
         <ArrowRight className="size-3" />
-      </button>
+      </Button>
     </div>
   );
 }

@@ -9,7 +9,7 @@ description: コードレビュー・テストガイドラインチェック・�
 
 ## 使い方
 
-引数なしで実行すると、develop ブランチとの差分をレビューする。
+引数なしで実行すると、akitakata/develop ブランチとの差分をレビューする。
 
 ```
 /review
@@ -24,7 +24,7 @@ description: コードレビュー・テストガイドラインチェック・�
 
 ```bash
 git branch --show-current
-git diff --stat develop...HEAD
+git diff --stat akitakata/develop...HEAD
 ```
 
 変更がない場合（かつ未コミット変更もない場合）はユーザーに通知して終了。
@@ -34,27 +34,18 @@ git diff --stat develop...HEAD
 
 以下の3つを **並列に** 起動する（同一メッセージ内で3つの Tool call を発行）:
 
-#### 2a. Codex Review（Bashで実行）
+#### 2a. コードレビュー（Agent ツールで実行）
 
-ユーザーから追加の指示（引数）があればそれを PROMPT として渡す。
-
-```bash
-# 引数なしの場合
-codex review --base develop
-
-# 引数ありの場合（例: "セキュリティ面を重点的にチェック"）
-codex review --base develop "{ユーザーの指示}"
-```
-
-コマンドのタイムアウトは5分（300000ms）に設定する。
+`.claude/agents/code-reviewer.md` の内容に従い、`subagent_type: "general-purpose"` の Agent を起動してコードレビューを行う。
+ユーザーから追加指示（引数）があれば、プロンプトに追記して渡す。
 
 #### 2b. テストガイドラインチェック（Agent ツールで実行）
 
-`.claude/agents/test-guidelines-checker.md` の内容に従い、`subagent_type: "general-purpose"` の Agent エージェントを起動してテストガイドラインの遵守状況をチェックする。
+`.claude/agents/test-guidelines-checker.md` の内容に従い、`subagent_type: "general-purpose"` の Agent を起動してテストガイドラインの遵守状況をチェックする。
 
 #### 2c. コード品質チェック（Agent ツールで実行）
 
-`.claude/agents/code-quality-checker.md` の内容に従い、`subagent_type: "general-purpose"` の Agent エージェントを起動して可読性・保守性・コード品質をチェックする。
+`.claude/agents/code-quality-checker.md` の内容に従い、`subagent_type: "general-purpose"` の Agent を起動して可読性・保守性・コード品質をチェックする。
 
 **重要**: 2a, 2b, 2c は必ず並列（同一メッセージ内で3つの Tool call）で実行すること。
 
@@ -62,13 +53,11 @@ codex review --base develop "{ユーザーの指示}"
 
 3つの結果をまとめてユーザーに表示する:
 
-1. **Codex Review 結果**: Codex の出力をそのまま表示
+1. **コードレビュー結果**: エージェントの出力をそのまま表示
 2. **テストガイドラインチェック結果**: エージェントの出力をそのまま表示
 3. **コード品質チェック結果**: エージェントの出力をそのまま表示
 
 ## 注意事項
 
-- `codex` CLI がインストール済みであること（`/opt/homebrew/bin/codex`）
-- レビュー対象はデフォルトで `develop` ブランチとの差分
-- `--base` オプションで比較対象を変更可能
-- エージェントファイルが存在しない場合は、該当チェックをスキップして残りを実行する
+- レビュー対象はデフォルトで `akitakata/develop` ブランチとの差分
+- 3つのエージェントファイルはすべて存在必須。見つからない場合はエラーとして報告し、スキップしない

@@ -34,15 +34,15 @@ PRの数に応じてエージェント数を決める（目安: 4-5が上限）�
 ```bash
 # {team} はチーム名の略称（例: test4, refactor2）
 # {x} はエージェント識別子（a, b, c, d...）
-git worktree add ../mirai-gikai-kawasaki-worktree/team-{team}-{x} -b {team}-{x}-base
-mkdir -p ../mirai-gikai-kawasaki-worktree/team-{team}-{x}/.claude
-cp .claude/settings.local.json ../mirai-gikai-kawasaki-worktree/team-{team}-{x}/.claude/
+git worktree add ../mirai-gikai-akitakata-worktree/team-{team}-{x} -b {team}-{x}-base
+mkdir -p ../mirai-gikai-akitakata-worktree/team-{team}-{x}/.claude
+cp .claude/settings.local.json ../mirai-gikai-akitakata-worktree/team-{team}-{x}/.claude/
 ```
 
 依存パッケージのインストール（全worktreeをバックグラウンドで並列実行）:
 
 ```bash
-cd ../mirai-gikai-kawasaki-worktree/team-{team}-{x} && pnpm install --frozen-lockfile
+cd ../mirai-gikai-akitakata-worktree/team-{team}-{x} && pnpm install --frozen-lockfile
 ```
 
 ### Phase 3: チーム組成＆エージェント起動
@@ -81,7 +81,7 @@ Task(
 - ...
 
 ## 作業手順
-1. `git checkout -b {branch} kawasaki/develop` でブランチ作成
+1. `git checkout -b {branch} akitakata/develop` でブランチ作成
 2. 対象ファイルを読んで理解
 3. 実装・修正
 4. push前のローカル検証（CIと同じコマンドを全て実行し、全て通過すること）:
@@ -92,8 +92,8 @@ Task(
 5. エラーがあれば修正して再度ステップ4を実行
 6. コミット（Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>）
 7. `git push -u origin {branch}`
-8. `gh pr create --base kawasaki/develop --title "{title}" --body "..."`
-9. 次のPRがあれば `git checkout -b {next-branch} kawasaki/develop` で次へ
+8. `gh pr create --base akitakata/develop --title "{title}" --body "..."`
+9. 次のPRがあれば `git checkout -b {next-branch} akitakata/develop` で次へ
 10. 全完了後、リーダーにメッセージで報告（PR番号・URL）
 ```
 
@@ -133,7 +133,7 @@ PRコメント対応:
 SendMessage(type: "shutdown_request", recipient: "agent-{x}")
 
 # worktree削除
-git worktree remove ../mirai-gikai-kawasaki-worktree/team-{team}-{x}
+git worktree remove ../mirai-gikai-akitakata-worktree/team-{team}-{x}
 git branch -D {team}-{x}-base
 
 # チーム削除
@@ -154,5 +154,5 @@ TeamDelete
 
 - エージェント数は4-5が実用的上限（APIレート制限、CI負荷）
 - CIのflaky testに注意 → 失敗時はログ確認してから再実行
-- worktreeパスは `../mirai-gikai-kawasaki-worktree/team-{name}` 形式
+- worktreeパスは `../mirai-gikai-akitakata-worktree/team-{name}` 形式
 - `settings.local.json` のコピーは必須（権限設定のため）

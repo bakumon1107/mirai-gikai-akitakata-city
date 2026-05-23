@@ -60,7 +60,7 @@ export function HeaderClient({ difficultyLevel, sessions }: HeaderClientProps) {
             <Link
               href={routes.search()}
               aria-label="検索"
-              className="p-2 text-mirai-text-muted hover:text-mirai-text transition-colors"
+              className="ml-3 p-2 text-mirai-text-muted hover:text-mirai-text transition-colors"
             >
               <Search className="size-5" />
             </Link>

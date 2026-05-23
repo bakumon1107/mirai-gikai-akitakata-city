@@ -42,7 +42,7 @@ export function HeaderClient({ difficultyLevel, sessions }: HeaderClientProps) {
                   height={36}
                 />
               )}
-              <div className="text-base sm:text-xl font-bold whitespace-nowrap">
+              <div className="text-sm sm:text-base font-bold whitespace-nowrap">
                 {siteConfig.siteName}
               </div>
             </Link>
@@ -60,7 +60,7 @@ export function HeaderClient({ difficultyLevel, sessions }: HeaderClientProps) {
             <Link
               href={routes.search()}
               aria-label="検索"
-              className="ml-3 p-2 text-mirai-text-muted hover:text-mirai-text transition-colors"
+              className="p-2 text-mirai-text-muted hover:text-mirai-text transition-colors"
             >
               <Search className="size-5" />
             </Link>

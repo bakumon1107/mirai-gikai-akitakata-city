@@ -56,6 +56,10 @@ export const routes = {
     `/community-consultations/${year}` as const,
   communityConsultationLatest: () => "/community-consultations/latest" as const,
 
+  // ── 検索 ──────────────────────────────────────────
+  search: (q?: string) =>
+    q ? `/search?q=${encodeURIComponent(q)}` : ("/search" as const),
+
   // ── その他 ────────────────────────────────────────
   faq: () => "/faq" as const,
 } as const;

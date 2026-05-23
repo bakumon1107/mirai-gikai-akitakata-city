@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { DifficultySelector } from "@/features/bill-difficulty/client/components/difficulty-selector";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
@@ -56,6 +57,13 @@ export function HeaderClient({ difficultyLevel, sessions }: HeaderClientProps) {
               <DifficultySelector currentLevel={difficultyLevel} />
             )}
             {showInterviewActions && <InterviewHeaderActions />}
+            <Link
+              href={routes.search()}
+              aria-label="キーワード検索"
+              className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-mirai-surface transition-colors text-mirai-text-muted hover:text-mirai-text"
+            >
+              <Search className="w-5 h-5" />
+            </Link>
             <HamburgerMenu sessions={sessions} />
           </nav>
         </div>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Search } from "lucide-react";
 import { DifficultySelector } from "@/features/bill-difficulty/client/components/difficulty-selector";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
 import type { CouncilSession } from "@/features/council-sessions/shared/types";
@@ -56,6 +57,13 @@ export function HeaderClient({ difficultyLevel, sessions }: HeaderClientProps) {
               <DifficultySelector currentLevel={difficultyLevel} />
             )}
             {showInterviewActions && <InterviewHeaderActions />}
+            <Link
+              href={routes.search()}
+              aria-label="検索"
+              className="p-2 text-mirai-text-muted hover:text-mirai-text transition-colors"
+            >
+              <Search className="size-5" />
+            </Link>
             <HamburgerMenu sessions={sessions} />
           </nav>
         </div>

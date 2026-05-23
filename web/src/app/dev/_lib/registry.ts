@@ -36,6 +36,16 @@ export const previewRegistry: PreviewGroup[] = [
     ],
   },
   {
+    name: "Search",
+    items: [
+      {
+        path: "/dev/features/search",
+        label: "検索UI",
+        description: "キーワード検索の結果画面プロトタイプ（モックデータ）",
+      },
+    ],
+  },
+  {
     name: "Interview",
     items: [
       {

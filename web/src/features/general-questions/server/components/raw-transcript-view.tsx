@@ -1,4 +1,5 @@
 import "server-only";
+import { MessageCircle, User } from "lucide-react";
 import type { GeneralQuestionTopic } from "../../shared/types";
 
 type SpeakerTurn = {
@@ -81,26 +82,35 @@ function findTopicBoundaries(
 }
 
 function TurnBubble({ turn }: { turn: SpeakerTurn }) {
-  const isQ = turn.isQuestioner;
+  if (turn.isQuestioner) {
+    return (
+      <div className="flex items-end justify-end gap-2">
+        <div className="max-w-[85%] bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-3">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+            {turn.text}
+          </p>
+        </div>
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <User className="h-4 w-4" />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={isQ ? "flex justify-end" : "flex"}>
-      <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-          isQ
-            ? "bg-primary text-primary-foreground rounded-br-sm"
-            : "bg-card border border-border text-mirai-text rounded-bl-sm"
-        }`}
-      >
-        <p
-          className={`mb-1 text-xs font-medium ${
-            isQ ? "text-primary-foreground/70" : "text-mirai-text-secondary"
-          }`}
-        >
+    <div className="flex items-end gap-2">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-mirai-surface-muted border border-border">
+        <MessageCircle className="h-4 w-4 text-mirai-text-secondary" />
+      </div>
+      <div className="max-w-[85%]">
+        <p className="mb-1 text-xs text-mirai-text-secondary">
           {turn.displayName}
         </p>
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
-          {turn.text}
-        </p>
+        <div className="rounded-2xl rounded-bl-sm bg-card border border-border px-4 py-3">
+          <p className="text-sm leading-relaxed whitespace-pre-wrap text-mirai-text">
+            {turn.text}
+          </p>
+        </div>
       </div>
     </div>
   );

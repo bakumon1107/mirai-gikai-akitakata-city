@@ -163,6 +163,7 @@ async function main() {
         questioner_party: parsed.questioner_party ?? null,
         summary: parsed.summary ?? "",
         topics,
+        publish_status: "published",
         ...(rawText !== null ? { raw_text: rawText } : {}),
       };
 

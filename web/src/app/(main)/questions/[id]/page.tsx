@@ -88,7 +88,7 @@ export default async function GeneralQuestionDetailPage({ params }: Props) {
       {question.raw_text && question.topics.length > 0 ? (
         <QuestionViewToggle
           topics={question.topics}
-          rawText={question.raw_text}
+          rawTranscriptSlot={<RawTranscriptView rawText={question.raw_text} />}
         />
       ) : question.raw_text ? (
         <RawTranscriptView rawText={question.raw_text} />

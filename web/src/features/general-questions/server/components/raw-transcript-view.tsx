@@ -44,7 +44,9 @@ function parseSpeakerTurns(rawText: string): SpeakerTurn[] {
   return turns;
 }
 
-// トピックの raw_question 先頭テキストでターン位置を特定する
+// トピックの raw_question 先頭テキストでターン位置を特定する。
+// AI生成の raw_question は議事録と微妙に異なる表現になる場合があるため、
+// キー長を 15→12→9→6 と段階的に短縮して最初にマッチしたターンを採用する。
 function findTopicBoundaries(
   turns: SpeakerTurn[],
   topics: GeneralQuestionTopic[]
@@ -54,17 +56,25 @@ function findTopicBoundaries(
 
   for (const topic of topics) {
     if (!topic.raw_question) continue;
-    const key = topic.raw_question.replace(/\s/g, "").slice(0, 15);
+    const q = topic.raw_question.replace(/\s/g, "");
 
-    for (let i = searchFrom; i < turns.length; i++) {
-      if (
-        turns[i].isQuestioner &&
-        turns[i].text.replace(/\s/g, "").includes(key)
-      ) {
-        boundaries.set(i, topic.title);
-        searchFrom = i + 1;
-        break;
+    for (const keyLen of [15, 12, 9, 6]) {
+      if (q.length < keyLen) continue;
+      const key = q.slice(0, keyLen);
+
+      let found = false;
+      for (let i = searchFrom; i < turns.length; i++) {
+        if (
+          turns[i].isQuestioner &&
+          turns[i].text.replace(/\s/g, "").includes(key)
+        ) {
+          boundaries.set(i, topic.title);
+          searchFrom = i + 1;
+          found = true;
+          break;
+        }
       }
+      if (found) break;
     }
   }
   return boundaries;

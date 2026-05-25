@@ -10,21 +10,27 @@ function parseSpeakerTurns(rawText: string): SpeakerTurn[] {
   const segments = rawText.split("◯").filter((s) => s.trim().length > 0);
 
   for (const seg of segments) {
-    const newlineIdx = seg.search(/[\s　]/);
-    if (newlineIdx === -1) {
-      turns.push({ speaker: seg.trim(), text: "" });
-      continue;
-    }
-    const speaker = seg.slice(0, newlineIdx).trim();
-    const text = seg.slice(newlineIdx).trim();
-    if (speaker.includes("議長")) continue;
+    // 話者名と発言は 2文字以上の空白で区切られる。
+    // 名前自体は "新 田 議 員" のようにCJK文字間に単一スペースを含む。
+    const match = seg.match(/^(.+?)\s{2,}([\s\S]*)$/);
+    if (!match) continue;
+
+    const speaker = match[1].trim();
+    const text = match[2]
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .join("\n");
+
+    if (!speaker || /議\s*長/.test(speaker)) continue;
     turns.push({ speaker, text });
   }
   return turns;
 }
 
 function isQuestioner(speaker: string): boolean {
-  return /^\d+番/.test(speaker);
+  // "新 田 議 員" のように "議員" を含む話者が質問者
+  return /議\s*員/.test(speaker);
 }
 
 export function RawTranscriptView({ rawText }: { rawText: string }) {

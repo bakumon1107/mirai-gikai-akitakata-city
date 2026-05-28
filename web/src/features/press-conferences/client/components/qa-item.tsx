@@ -32,7 +32,7 @@ export function QaItem({ item, defaultOpen = false }: Props) {
         <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary-accent text-xs font-bold flex items-center justify-center">
           Q
         </span>
-        <span className="flex-1 text-sm font-medium text-mirai-text">
+        <span className="flex-1 text-sm font-medium text-mirai-text whitespace-normal">
           {item.title}
         </span>
         <ChevronDown

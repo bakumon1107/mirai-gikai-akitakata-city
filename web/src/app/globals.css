@@ -327,7 +327,13 @@ button {
   cursor: pointer;
 }
 
-/* 文字サイズ拡大モード */
-html.large-text {
-  font-size: 118.75%; /* 16px → 19px */
+/* 文字サイズ拡大モード: <main> 内の本文テキストのみ対象（ヘッダー・ヒーロー等は除外） */
+html.large-text main .text-xs {
+  font-size: calc(0.75rem * 1.1875); /* 12px → ~14px */
+}
+html.large-text main .text-sm {
+  font-size: calc(0.875rem * 1.1875); /* 14px → ~17px */
+}
+html.large-text main .text-base {
+  font-size: calc(1rem * 1.1875); /* 16px → 19px */
 }

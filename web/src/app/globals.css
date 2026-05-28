@@ -326,3 +326,8 @@
 button {
   cursor: pointer;
 }
+
+/* 文字サイズ拡大モード */
+html.large-text {
+  font-size: 118.75%; /* 16px → 19px */
+}

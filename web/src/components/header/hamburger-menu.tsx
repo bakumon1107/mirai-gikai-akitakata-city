@@ -11,6 +11,7 @@ import {
 import type { CouncilSession } from "@/features/council-sessions/shared/types";
 import { routes } from "@/lib/routes";
 import { RubyToggle } from "@/lib/rubyful";
+import { TextSizeToggle } from "@/lib/text-size";
 
 const NAV_LINKS = [
   { label: "定例会一覧", href: routes.sessions() },
@@ -52,8 +53,9 @@ export function HamburgerMenu({ sessions: _ }: HamburgerMenuProps) {
               ))}
             </ul>
           </nav>
-          <div className="border-t border-mirai-border pt-3">
+          <div className="border-t border-mirai-border pt-3 flex flex-col gap-3">
             <RubyToggle />
+            <TextSizeToggle />
           </div>
         </div>
       </PopoverContent>

@@ -7,6 +7,7 @@ import { Footer } from "@/components/layouts/footer/footer";
 import { MainLayout } from "@/components/layouts/main-layout";
 import { env } from "@/lib/env";
 import { RubyfulInitializer } from "@/lib/rubyful";
+import { TextSizeInitializer } from "@/lib/text-size";
 
 export default function MainGroupLayout({
   children,
@@ -15,6 +16,7 @@ export default function MainGroupLayout({
 }>) {
   return (
     <>
+      <TextSizeInitializer />
       <SpeedInsights />
       <GoogleAnalytics gaId={env.analytics.gaTrackingId ?? ""} />
       <RubyfulInitializer />

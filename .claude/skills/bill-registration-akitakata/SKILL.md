@@ -19,6 +19,7 @@ description: 安芸高田市議会の新しい定例会の議案をDBに追加�
 ### セッションID
 | slug | id | 定例会名 |
 |---|---|---|
+| r8-2 | `83116aa6-1678-4f7e-8343-5c1c4fea1f08` | 令和8年第2回定例会 |
 | r8-1 | `7e80877e-961d-43db-9baa-8ef0a2bbd99d` | 令和8年第1回定例会 |
 | r7-4 | `fd76e4ec-cd1c-482b-8e92-58f7f28b26f6` | 令和7年第4回定例会 |
 
@@ -78,11 +79,29 @@ bash packages/seed/akitakata/download-pdfs-<session>.sh
 #### bill_number の命名規則
 - 通常議案: 議案番号そのまま（例: "64", "65"）
 - 発議: "h" + 番号（例: "h5"）
+- 承認案件（専決処分）: "sho" + 番号（例: "sho2", "sho3"）
+- 同意案件: "doi" + 番号（例: "doi3"）
 
 #### 委員会の割り当て目安
-- 給与・組織・火災予防・議員報酬 → 総務文教
-- 福祉・産業・財産区・施設・下水道・火入れ → 産業厚生
+- 給与・組織・火災予防・議員報酬・行政手続き・教育施設工事 → 総務文教
+- 福祉・産業・財産区・施設・下水道・火入れ・国保・体育施設 → 産業厚生
 - 補正予算・本予算 → 予算決算
+
+#### 新セッション登録時の is_active 管理（重要）
+新しいセッションを `is_active: true` で作成する前に、**必ず既存のアクティブセッションを `is_active: false` に更新してから**新セッションを INSERT すること。
+
+`findActiveCouncilSession` は `.maybeSingle()` を使用しており、`is_active: true` が複数存在すると **null を返す**（全セッションの議案が表示される）。
+
+```bash
+# 1. 旧セッションを先に非アクティブ化
+source .env.production && curl -s -X PATCH "$SUPABASE_URL/rest/v1/council_sessions?is_active=eq.true" \
+  -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"is_active": false}'
+
+# 2. 新セッションを is_active: true で INSERT
+```
 
 ### 5. 実行（必ずこのコマンドパターンを使う）
 

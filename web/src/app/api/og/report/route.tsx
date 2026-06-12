@@ -118,8 +118,7 @@ export async function GET(request: Request) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundImage:
-          "linear-gradient(177deg, rgb(226, 246, 243) 0%, rgb(238, 246, 226) 100%)",
+        backgroundImage: "linear-gradient(177deg, #f2f0fe 0%, #ede9fd 100%)",
       }}
     >
       {/* グラデーションborder用ラッパー */}
@@ -129,8 +128,7 @@ export async function GET(request: Request) {
           width: 1140,
           height: 560,
           borderRadius: 30,
-          backgroundImage:
-            "linear-gradient(-30deg, rgb(188, 236, 211) 1%, rgb(100, 216, 198) 99%)",
+          backgroundImage: "linear-gradient(-30deg, #dbd3f9 1%, #a495d6 99%)",
           padding: 6,
           position: "relative",
         }}
@@ -168,7 +166,7 @@ export async function GET(request: Request) {
               display: "flex",
               fontSize: 32,
               fontWeight: 800,
-              color: "#0f8472",
+              color: "#7a6cc0",
               lineHeight: 1.5,
             }}
           >
@@ -191,8 +189,7 @@ export async function GET(request: Request) {
             paddingBottom: 10,
             borderBottomLeftRadius: 30,
             borderTopRightRadius: 30,
-            backgroundImage:
-              "linear-gradient(-30deg, rgb(188, 236, 211) 1%, rgb(100, 216, 198) 99%)",
+            backgroundImage: "linear-gradient(-30deg, #dbd3f9 1%, #a495d6 99%)",
           }}
         >
           <span

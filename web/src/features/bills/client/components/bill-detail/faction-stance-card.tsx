@@ -10,18 +10,18 @@ function getStanceBadgeStyle(type: StanceTypeEnum) {
     case "for":
     case "conditional_for":
       return {
-        bg: "bg-[#ECFCF1]",
-        textColor: "text-[#0F8472]",
+        bg: "bg-stance-for-badge-start",
+        textColor: "text-primary-accent",
       };
     case "against":
     case "conditional_against":
       return {
-        bg: "bg-[#FFF1F1]",
-        textColor: "text-[#C9272A]",
+        bg: "bg-stance-against-bg",
+        textColor: "text-stance-against",
       };
     default:
       return {
-        bg: "bg-[#E5E5EA]",
+        bg: "bg-mirai-surface-muted",
         textColor: "text-black",
       };
   }

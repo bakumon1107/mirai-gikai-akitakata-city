@@ -58,7 +58,7 @@ function StatusBadge({ message }: StatusBadgeProps) {
         style={{
           borderLeft: "7.5px solid transparent",
           borderRight: "7.5px solid transparent",
-          borderTop: "7.5px solid var(--color-mirai-progress-fill)",
+          borderTop: "7.5px solid var(--color-mirai-gradient-end)",
         }}
       />
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { ExternalLink, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -54,6 +54,17 @@ export function HamburgerMenu({ sessions: _ }: HamburgerMenuProps) {
           </nav>
           <div className="border-t border-mirai-border pt-3">
             <RubyToggle />
+          </div>
+          <div className="border-t border-mirai-border pt-3">
+            <a
+              href="https://inshatancountry-jpn-tax-map.com/local-tax/?pref=34&entity=342149"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-1 py-1 text-sm text-mirai-text-secondary hover:text-primary-accent transition-colors"
+            >
+              <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+              税金の使い道マップ（外部サイト）
+            </a>
           </div>
         </div>
       </PopoverContent>

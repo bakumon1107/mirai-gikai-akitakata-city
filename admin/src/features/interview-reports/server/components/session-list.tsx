@@ -1,3 +1,5 @@
+import "server-only";
+
 import { CheckCircle2, Clock, Lightbulb, XCircle } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";

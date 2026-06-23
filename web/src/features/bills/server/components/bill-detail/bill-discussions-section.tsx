@@ -1,5 +1,6 @@
 import { MessageSquare } from "lucide-react";
 import type { DifficultyLevelEnum } from "@/features/bill-difficulty/shared/types";
+import { splitTurns } from "../../utils/split-discussion-turns";
 import type { BillDiscussion } from "../../loaders/get-bill-discussions";
 
 interface BillDiscussionsSectionProps {
@@ -34,15 +35,6 @@ export function BillDiscussionsSection({
   );
 }
 
-// （追加）区切りでテキストを複数ターンに分割する
-function splitTurns(text: string | null): string[] {
-  if (!text) return [];
-  return text
-    .split(/（追加）/)
-    .map((t) => t.trim())
-    .filter(Boolean);
-}
-
 function DiscussionThread({
   discussion,
   difficulty,
@@ -62,10 +54,12 @@ function DiscussionThread({
     .filter(Boolean)
     .join("・");
 
-  const isRaw = difficulty === "hard";
-
-  // 原文モード: （追加）で分割して交互に表示
-  if (isRaw) {
+  // 原文モード: raw が両方ある場合は（追加）分割して交互表示
+  // raw が欠損している場合はサマリーにフォールバック
+  if (
+    difficulty === "hard" &&
+    (discussion.question_raw || discussion.answer_raw)
+  ) {
     const qTurns = splitTurns(discussion.question_raw);
     const aTurns = splitTurns(discussion.answer_raw);
     const maxTurns = Math.max(qTurns.length, aTurns.length);
@@ -95,7 +89,7 @@ function DiscussionThread({
     );
   }
 
-  // サマリーモード: 要約を1Q・1Aで表示
+  // サマリーモード（またはraw欠損時のフォールバック）
   return (
     <div className="space-y-2">
       {discussion.question_summary && (

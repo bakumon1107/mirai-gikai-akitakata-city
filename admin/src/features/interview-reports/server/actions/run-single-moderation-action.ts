@@ -1,5 +1,7 @@
 "use server";
 
+import "server-only";
+
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { runSingleModerationScoring } from "../services/batch-moderation-scoring";

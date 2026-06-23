@@ -84,13 +84,12 @@ export function RunAnalysisButton({
       if (data.status === "completed") {
         stopPolling();
         setIsRunning(false);
-        router.push(
-          routes.billTopicAnalysisDetail(
-            billId,
-            configId,
-            versionIdRef.current!
-          ) as Route
-        );
+        const versionId = versionIdRef.current;
+        if (versionId) {
+          router.push(
+            routes.billTopicAnalysisDetail(billId, configId, versionId) as Route
+          );
+        }
         router.refresh();
       } else if (data.status === "failed") {
         stopPolling();

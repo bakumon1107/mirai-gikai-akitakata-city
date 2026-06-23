@@ -182,7 +182,6 @@ export function ResizableBillTable({
             <tr className="border-b hover:bg-transparent">
               {COLUMNS.map((col, i) => (
                 <ResizableHead
-                  // biome-ignore lint/suspicious/noArrayIndexKey: column order is stable
                   key={col.key}
                   colIndex={i}
                   resizable={col.resizable}

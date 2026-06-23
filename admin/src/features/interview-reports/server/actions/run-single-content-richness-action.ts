@@ -1,5 +1,7 @@
 "use server";
 
+import "server-only";
+
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/features/auth/server/lib/auth-server";
 import { runSingleContentRichnessScoring } from "../services/content-richness-scoring";
@@ -13,7 +15,7 @@ interface SingleContentRichnessResult {
 export async function runSingleContentRichnessAction(
   reportId: string,
   billId: string,
-  sessionId: string
+  _sessionId: string
 ): Promise<SingleContentRichnessResult> {
   await requireAdmin();
 

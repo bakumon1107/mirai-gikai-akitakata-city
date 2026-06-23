@@ -94,7 +94,10 @@ export async function BillDetailLayout({
         {/* 議会での審議 */}
         {discussions.length > 0 && (
           <div className="my-8">
-            <BillDiscussionsSection discussions={discussions} />
+            <BillDiscussionsSection
+              discussions={discussions}
+              difficulty={currentDifficulty}
+            />
           </div>
         )}
 

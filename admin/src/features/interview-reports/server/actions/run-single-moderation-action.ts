@@ -13,7 +13,7 @@ interface SingleModerationResult {
 export async function runSingleModerationAction(
   reportId: string,
   billId: string,
-  sessionId: string
+  _sessionId: string
 ): Promise<SingleModerationResult> {
   await requireAdmin();
 

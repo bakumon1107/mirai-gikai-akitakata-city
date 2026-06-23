@@ -137,9 +137,16 @@ async function runPhase2Steps(
   phaseData: PhaseData,
   model: string
 ): Promise<PhaseData> {
-  const flatOpinions = phaseData.flat_opinions!;
-  const mergedTopicNames = phaseData.merged_topic_names!;
-  const billTitle = phaseData.bill_title!;
+  const {
+    flat_opinions: flatOpinions,
+    merged_topic_names: mergedTopicNames,
+    bill_title: billTitle,
+  } = phaseData;
+  if (!flatOpinions || !mergedTopicNames || !billTitle) {
+    throw new Error(
+      "Phase 2: required phase data (flat_opinions, merged_topic_names, bill_title) is missing"
+    );
+  }
 
   // Step 4: 意見分類
   await updateVersionStep(versionId, ANALYSIS_STEPS.CLASSIFY_OPINIONS.label);
@@ -168,12 +175,24 @@ async function runPhase3Steps(
   phaseData: PhaseData,
   model: string
 ): Promise<void> {
-  const flatOpinions = phaseData.flat_opinions!;
-  const mergedTopicNames = phaseData.merged_topic_names!;
-  const billTitle = phaseData.bill_title!;
-  const validSessionIds = new Set(phaseData.valid_session_ids!);
+  const {
+    flat_opinions: flatOpinions,
+    merged_topic_names: mergedTopicNames,
+    bill_title: billTitle,
+    valid_session_ids: rawValidSessionIds,
+    classifications,
+  } = phaseData;
+  if (
+    !flatOpinions ||
+    !mergedTopicNames ||
+    !billTitle ||
+    !rawValidSessionIds ||
+    !classifications
+  ) {
+    throw new Error("Phase 3: required phase data is missing");
+  }
+  const validSessionIds = new Set(rawValidSessionIds);
   const sessionConfigMap = phaseData.session_config_map ?? {};
-  const classifications = phaseData.classifications!;
 
   // トピックごとの意見をグループ化
   const topicOpinionsMap = new Map<string, FlatOpinion[]>();
@@ -229,7 +248,7 @@ async function runPhase3Steps(
     })),
     billTitle,
     flatOpinions.length,
-    phaseData.sessions_count!,
+    phaseData.sessions_count ?? 0,
     model
   );
 
@@ -292,11 +311,11 @@ async function runPhase3Steps(
   }
 
   const intermediateResults: IntermediateResults = {
-    step1_raw_topics: phaseData.raw_topics!,
+    step1_raw_topics: phaseData.raw_topics ?? [],
     step2_merged_topics: mergedTopicNames,
     step3_classifications: classifications,
     opinions_count: flatOpinions.length,
-    sessions_count: phaseData.sessions_count!,
+    sessions_count: phaseData.sessions_count ?? 0,
   };
 
   await updateVersionResult(versionId, summaryMd, intermediateResults);

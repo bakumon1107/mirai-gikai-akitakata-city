@@ -522,3 +522,24 @@ export async function findBillIdsWithPublicInterview(
 
   return new Set(data.map((row) => row.bill_id));
 }
+
+export async function findBillIdsWithDiscussion(
+  billIds: string[]
+): Promise<Set<string>> {
+  if (billIds.length === 0) {
+    return new Set();
+  }
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("bill_discussions")
+    .select("bill_id")
+    .in("bill_id", billIds);
+
+  if (error) {
+    console.error("Failed to fetch bill discussions:", error);
+    return new Set();
+  }
+
+  return new Set(data.map((row) => row.bill_id));
+}

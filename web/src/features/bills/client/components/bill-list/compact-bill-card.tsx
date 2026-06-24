@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MessageSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatDateJST } from "@/lib/utils/date";
 import type { BillWithContent } from "../../../shared/types";
@@ -41,11 +42,17 @@ export function CompactBillCard({ bill, className }: CompactBillCardProps) {
               </span>
             )}
           </div>
-          {bill.tags.length > 0 && (
+          {(bill.tags.length > 0 || bill.hasDiscussion) && (
             <div className="flex flex-wrap gap-2">
               {bill.tags.slice(0, 1).map((tag) => (
                 <BillTag key={tag.id} tag={tag} />
               ))}
+              {bill.hasDiscussion && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium text-mirai-text-muted border border-mirai-border rounded-full">
+                  <MessageSquare className="w-3 h-3" />
+                  質疑あり
+                </span>
+              )}
             </div>
           )}
         </div>

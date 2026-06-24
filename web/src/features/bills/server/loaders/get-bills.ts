@@ -7,6 +7,7 @@ import {
   findPublishedBillsWithContents,
   findTagsByBillIds,
   findBillIdsWithPublicInterview,
+  findBillIdsWithDiscussion,
 } from "../repositories/bill-repository";
 
 export async function getBills(): Promise<BillWithContent[]> {
@@ -19,12 +20,14 @@ const _getCachedBills = unstable_cache(
   async (difficultyLevel: DifficultyLevelEnum): Promise<BillWithContent[]> => {
     const data = await findPublishedBillsWithContents(difficultyLevel);
 
-    // タグ情報とインタビュー状態を一括取得
+    // タグ情報とインタビュー状態・質疑状態を一括取得
     const billIds = data.map((item) => item.id);
-    const [tagsByBillId, interviewBillIds] = await Promise.all([
-      findTagsByBillIds(billIds),
-      findBillIdsWithPublicInterview(billIds),
-    ]);
+    const [tagsByBillId, interviewBillIds, discussionBillIds] =
+      await Promise.all([
+        findTagsByBillIds(billIds),
+        findBillIdsWithPublicInterview(billIds),
+        findBillIdsWithDiscussion(billIds),
+      ]);
 
     const billsWithContent: BillWithContent[] = data.map((item) => {
       const { bill_contents, ...bill } = item;
@@ -35,6 +38,7 @@ const _getCachedBills = unstable_cache(
           : undefined,
         tags: tagsByBillId.get(item.id) ?? [],
         hasPublicInterview: interviewBillIds.has(item.id),
+        hasDiscussion: discussionBillIds.has(item.id),
       };
     });
 
@@ -43,6 +47,10 @@ const _getCachedBills = unstable_cache(
   ["bills-list"],
   {
     revalidate: 600, // 10分（600秒）
-    tags: [CACHE_TAGS.BILLS, CACHE_TAGS.INTERVIEW_CONFIGS],
+    tags: [
+      CACHE_TAGS.BILLS,
+      CACHE_TAGS.INTERVIEW_CONFIGS,
+      CACHE_TAGS.BILL_DISCUSSIONS,
+    ],
   }
 );

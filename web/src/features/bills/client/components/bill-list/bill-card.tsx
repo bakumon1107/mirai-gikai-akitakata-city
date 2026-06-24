@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MessageSquare } from "lucide-react";
 import { RubySafeLineClamp } from "@/components/ruby-safe-line-clamp";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateJST } from "@/lib/utils/date";
@@ -68,7 +69,9 @@ export function BillCard({ bill }: BillCardProps) {
                 className="text-sm leading-relaxed"
               />
               {/* タグ表示（最上位の1件のみ） */}
-              {(bill.tags.length > 0 || bill.hasPublicInterview) && (
+              {(bill.tags.length > 0 ||
+                bill.hasPublicInterview ||
+                bill.hasDiscussion) && (
                 <div className="flex flex-wrap gap-3">
                   {bill.tags.slice(0, 1).map((tag) => (
                     <BillTag key={tag.id} tag={tag} />
@@ -76,6 +79,12 @@ export function BillCard({ bill }: BillCardProps) {
                   {bill.hasPublicInterview && (
                     <span className="inline-flex items-center justify-center px-3 py-1 text-xs font-medium text-black bg-mirai-light-gradient rounded-full">
                       AIインタビュー受付中
+                    </span>
+                  )}
+                  {bill.hasDiscussion && (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-mirai-text-muted border border-mirai-border rounded-full">
+                      <MessageSquare className="w-3 h-3" />
+                      質疑あり
                     </span>
                   )}
                 </div>

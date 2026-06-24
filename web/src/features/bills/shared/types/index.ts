@@ -74,6 +74,7 @@ export type BillWithContent = Bill & {
   tags: BillTag[];
   featured_tag?: FeaturedTag;
   hasPublicInterview?: boolean;
+  hasDiscussion?: boolean;
 };
 
 // タグごとにグループ化された議案

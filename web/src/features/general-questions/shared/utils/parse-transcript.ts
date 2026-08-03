@@ -3,12 +3,14 @@ import {
   unwrapTranscriptLines,
 } from "@mirai-gikai/shared/transcript/unwrap";
 import type { GeneralQuestionTopic } from "../types";
+import { isSubstantiveChairRemark } from "./chair-remarks";
 
 export type SpeakerTurn = {
   speaker: string;
   displayName: string;
   paragraphs: string[];
   isQuestioner: boolean;
+  isChair: boolean;
 };
 
 // 議長が次の発言者を指名する行（"小松議員。" "8番、新田議員。" など）。
@@ -47,18 +49,23 @@ export function parseSpeakerTurns(rawText: string): SpeakerTurn[] {
 
     const speaker = match[1].trim();
     const text = match[2].trim();
-    if (!speaker || /議\s*長/.test(speaker)) continue;
+    if (!speaker) continue;
 
     current = {
       speaker,
       displayName: normalizeDisplayName(speaker),
       paragraphs: text.length > 0 ? [text] : [],
       isQuestioner: /議\s*員/.test(speaker),
+      isChair: /議\s*長/.test(speaker),
     };
     turns.push(current);
   }
 
-  return turns;
+  // 議長の発言は議事進行の定型句だけのものを落とし、実質的な発言だけ残す
+  return turns.filter(
+    (turn) =>
+      !turn.isChair || isSubstantiveChairRemark(turn.paragraphs.join(""))
+  );
 }
 
 // トピックの raw_question 先頭テキストでターン位置を特定する。

@@ -77,15 +77,31 @@ describe("parseSpeakerTurns", () => {
     expect(joined).toContain("愛着を持って広く呼称されております。");
   });
 
-  it("議長の発言は除外する", () => {
+  it("議事進行の定型句だけの議長の発言は除外する", () => {
     const text = [
-      "◯議 長  日程第2、一般質問を行います。",
+      "◯石 飛 議 長  ただいまの質問に対し、答弁を求めます。",
+      "◯藤 本 市 長  お答えいたします。",
+      "◯石 飛 議 長  以上で答弁を終わります。新田議員。",
       "◯新 田 議 員  8番、新田和明でございます。",
     ].join("\n");
     const turns = parseSpeakerTurns(text);
 
-    expect(turns).toHaveLength(1);
-    expect(turns[0].displayName).toBe("新田議員");
+    expect(turns.map((t) => t.displayName)).toEqual(["藤本市長", "新田議員"]);
+  });
+
+  it("中身のある議長の発言は議長ターンとして残す", () => {
+    const text = [
+      "◯山 本 議 員  ふれあいセンター甲田の老人介護事業がなくなる。",
+      "◯石 飛 議 長  山本議員に申し上げます。一般質問の通告とおりにやっていただきたいと思います。簡潔にお願いいたします。",
+      "◯山 本 議 員  分かりました。",
+    ].join("\n");
+    const turns = parseSpeakerTurns(text);
+
+    expect(turns).toHaveLength(3);
+    expect(turns[1].isChair).toBe(true);
+    expect(turns[1].isQuestioner).toBe(false);
+    expect(turns[1].displayName).toBe("石飛議長");
+    expect(turns[1].paragraphs[0]).toContain("通告とおりにやっていただきたい");
   });
 
   // 折り返し判定が働かない（＝段落ごとに1行の）テキストにするための長い段落

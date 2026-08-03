@@ -1,84 +1,25 @@
 import "server-only";
 import { MessageCircle, User } from "lucide-react";
 import type { GeneralQuestionTopic } from "../../shared/types";
+import {
+  findTopicBoundaries,
+  parseSpeakerTurns,
+  type SpeakerTurn,
+} from "../../shared/utils/parse-transcript";
 
-type SpeakerTurn = {
-  speaker: string;
-  displayName: string;
-  text: string;
-  isQuestioner: boolean;
-};
-
-// "新 田 議 員" → "新田議員"（CJK文字間のスペースを除去）
-function normalizeDisplayName(speaker: string): string {
-  return speaker.replace(
-    /(?<=[　-鿿（）〔〕【】])\s+(?=[　-鿿（）〔〕【】])/g,
-    ""
+function TurnParagraphs({ paragraphs }: { paragraphs: string[] }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {paragraphs.map((paragraph, i) => (
+        <p
+          key={`${i}-${paragraph.slice(0, 12)}`}
+          className="text-sm leading-relaxed"
+        >
+          {paragraph}
+        </p>
+      ))}
+    </div>
   );
-}
-
-function parseSpeakerTurns(rawText: string): SpeakerTurn[] {
-  const turns: SpeakerTurn[] = [];
-  const segments = rawText.split("◯").filter((s) => s.trim().length > 0);
-
-  for (const seg of segments) {
-    // 話者名と発言は 2文字以上の空白で区切られる。
-    // 名前自体は "新 田 議 員" のようにCJK文字間に単一スペースを含む。
-    const match = seg.match(/^(.+?)\s{2,}([\s\S]*)$/);
-    if (!match) continue;
-
-    const speaker = match[1].trim();
-    const text = match[2]
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
-      .join("\n");
-
-    if (!speaker || /議\s*長/.test(speaker)) continue;
-    turns.push({
-      speaker,
-      displayName: normalizeDisplayName(speaker),
-      text,
-      isQuestioner: /議\s*員/.test(speaker),
-    });
-  }
-  return turns;
-}
-
-// トピックの raw_question 先頭テキストでターン位置を特定する。
-// AI生成の raw_question は議事録と微妙に異なる表現になる場合があるため、
-// キー長を 15→12→9→6 と段階的に短縮して最初にマッチしたターンを採用する。
-function findTopicBoundaries(
-  turns: SpeakerTurn[],
-  topics: GeneralQuestionTopic[]
-): Map<number, string> {
-  const boundaries = new Map<number, string>();
-  let searchFrom = 0;
-
-  for (const topic of topics) {
-    if (!topic.raw_question) continue;
-    const q = topic.raw_question.replace(/\s/g, "");
-
-    for (const keyLen of [15, 12, 9, 6]) {
-      if (q.length < keyLen) continue;
-      const key = q.slice(0, keyLen);
-
-      let found = false;
-      for (let i = searchFrom; i < turns.length; i++) {
-        if (
-          turns[i].isQuestioner &&
-          turns[i].text.replace(/\s/g, "").includes(key)
-        ) {
-          boundaries.set(i, topic.title);
-          searchFrom = i + 1;
-          found = true;
-          break;
-        }
-      }
-      if (found) break;
-    }
-  }
-  return boundaries;
 }
 
 function TurnBubble({ turn }: { turn: SpeakerTurn }) {
@@ -86,9 +27,7 @@ function TurnBubble({ turn }: { turn: SpeakerTurn }) {
     return (
       <div className="flex items-end justify-end gap-2">
         <div className="max-w-[85%] bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-3">
-          <p className="text-sm leading-relaxed whitespace-pre-wrap">
-            {turn.text}
-          </p>
+          <TurnParagraphs paragraphs={turn.paragraphs} />
         </div>
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <User className="h-4 w-4" />
@@ -106,10 +45,8 @@ function TurnBubble({ turn }: { turn: SpeakerTurn }) {
         <p className="mb-1 text-xs text-mirai-text-secondary">
           {turn.displayName}
         </p>
-        <div className="rounded-2xl rounded-bl-sm bg-card border border-border px-4 py-3">
-          <p className="text-sm leading-relaxed whitespace-pre-wrap text-mirai-text">
-            {turn.text}
-          </p>
+        <div className="rounded-2xl rounded-bl-sm bg-card border border-border px-4 py-3 text-mirai-text">
+          <TurnParagraphs paragraphs={turn.paragraphs} />
         </div>
       </div>
     </div>

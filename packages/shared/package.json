@@ -38,6 +38,10 @@
     "./content-richness/instructions": {
       "types": "./src/content-richness/content-richness-instructions.ts",
       "default": "./src/content-richness/content-richness-instructions.ts"
+    },
+    "./transcript/unwrap": {
+      "types": "./src/transcript/unwrap-transcript.ts",
+      "default": "./src/transcript/unwrap-transcript.ts"
     }
   },
   "peerDependencies": {

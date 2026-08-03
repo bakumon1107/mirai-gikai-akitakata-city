@@ -1,6 +1,10 @@
 import "server-only";
 import { createAdminClient } from "@mirai-gikai/supabase";
 import type { CouncilSession } from "@/features/council-sessions/shared/types";
+import {
+  countQuestionersBySession,
+  type QuestionerRow,
+} from "../../shared/utils/count-questioners-by-session";
 
 export type QuestionSessionSummary = {
   session: CouncilSession;
@@ -17,18 +21,15 @@ export async function getQuestionSessionSummaries(): Promise<
 
   const { data: rows, error: qErr } = await supabase
     .from("general_questions")
-    .select("council_session_id")
+    .select("council_session_id, questioner_name")
     .eq("publish_status", "published");
 
-  if (qErr || !rows?.length) return [];
-
-  const countBySession = new Map<string, number>();
-  for (const row of rows as { council_session_id: string }[]) {
-    countBySession.set(
-      row.council_session_id,
-      (countBySession.get(row.council_session_id) ?? 0) + 1
-    );
+  if (qErr) {
+    throw new Error(`Failed to fetch general questions: ${qErr.message}`);
   }
+  if (!rows?.length) return [];
+
+  const countBySession = countQuestionersBySession(rows as QuestionerRow[]);
 
   const { data: sessions, error: sErr } = await supabase
     .from("council_sessions")
@@ -36,7 +37,9 @@ export async function getQuestionSessionSummaries(): Promise<
     .in("id", [...countBySession.keys()])
     .order("start_date", { ascending: false });
 
-  if (sErr) return [];
+  if (sErr) {
+    throw new Error(`Failed to fetch council sessions: ${sErr.message}`);
+  }
 
   return ((sessions ?? []) as CouncilSession[]).map((session) => ({
     session,

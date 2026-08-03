@@ -1,5 +1,5 @@
 import "server-only";
-import { MessageCircle, User } from "lucide-react";
+import { Gavel, MessageCircle, User } from "lucide-react";
 import type { GeneralQuestionTopic } from "../../shared/types";
 import {
   findTopicBoundaries,
@@ -22,7 +22,26 @@ function TurnParagraphs({ paragraphs }: { paragraphs: string[] }) {
   );
 }
 
+// 議長の発言は質疑応答ではなく議事進行なので、中央寄せの注釈として表示する
+function ChairRemark({ turn }: { turn: SpeakerTurn }) {
+  return (
+    <div className="mx-auto max-w-[90%] rounded-xl border border-border border-dashed bg-mirai-surface-muted px-4 py-3 text-center">
+      <p className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-mirai-text-secondary">
+        <Gavel className="h-3 w-3" />
+        {turn.displayName}
+      </p>
+      <div className="text-mirai-text-secondary">
+        <TurnParagraphs paragraphs={turn.paragraphs} />
+      </div>
+    </div>
+  );
+}
+
 function TurnBubble({ turn }: { turn: SpeakerTurn }) {
+  if (turn.isChair) {
+    return <ChairRemark turn={turn} />;
+  }
+
   if (turn.isQuestioner) {
     return (
       <div className="flex items-end justify-end gap-2">

@@ -58,11 +58,13 @@ function upsertViaCurl(record: Record<string, unknown>): void {
 async function main() {
   const args = process.argv.slice(2);
   const isDryRun = args.includes("--dry-run");
+  // レビュー前に公開されないよう、既定は draft。--publish で published にする。
+  const publishStatus = args.includes("--publish") ? "published" : "draft";
   const nonFlagArgs = args.filter((a) => !a.startsWith("--"));
 
   if (nonFlagArgs.length < 2) {
     console.error(
-      "使い方: tsx akitakata/ingest-gq-outputs.ts <outputs_dir> <session_slug> [sections_dir] [--dry-run]"
+      "使い方: tsx akitakata/ingest-gq-outputs.ts <outputs_dir> <session_slug> [sections_dir] [--dry-run] [--publish]"
     );
     console.error("  例: tsx --env-file=../../.env akitakata/ingest-gq-outputs.ts /tmp/gq-outputs r8-1 /tmp/gq-sections");
     process.exit(1);
@@ -71,7 +73,7 @@ async function main() {
   const [outputsDir, sessionSlug, sectionsDir] = nonFlagArgs;
 
   console.log(isDryRun ? "🔍 DRY RUN モード" : "🚀 ingest-gq-outputs 開始");
-  console.log(`  セッション: ${sessionSlug}  出力ディレクトリ: ${outputsDir}`);
+  console.log(`  セッション: ${sessionSlug}  出力ディレクトリ: ${outputsDir}  publish_status: ${publishStatus}`);
 
   const supabase = createAdminClient();
 
@@ -168,7 +170,7 @@ async function main() {
         questioner_party: parsed.questioner_party ?? null,
         summary: parsed.summary ?? "",
         topics,
-        publish_status: "published",
+        publish_status: publishStatus,
         ...(rawText !== null ? { raw_text: rawText } : {}),
       };
 

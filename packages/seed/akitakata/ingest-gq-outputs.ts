@@ -16,6 +16,7 @@ import { execSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { normalizeTranscriptText } from "@mirai-gikai/shared/transcript/unwrap";
 import { createAdminClient } from "../shared/helper";
 
 type GeneratedTopic = {
@@ -146,8 +147,12 @@ async function main() {
         );
         if (fs.existsSync(txtPath)) {
           // ○ (U+25CB) を ◯ (U+25EF) に正規化して RawTranscriptView の split と合わせる
-          rawText = fs.readFileSync(txtPath, "utf-8").replace(/○/g, "◯");
-          console.log(`    raw_text: ${txtPath.split("/").slice(-1)[0]} (${rawText.length}文字)`);
+          const source = fs.readFileSync(txtPath, "utf-8").replace(/○/g, "◯");
+          // PDF由来の折り返し改行を除去して1段落1行にする
+          rawText = normalizeTranscriptText(source);
+          console.log(
+            `    raw_text: ${txtPath.split("/").slice(-1)[0]} (${source.length}文字 → 正規化後 ${rawText.length}文字 / ${rawText.split("\n").length}段落)`
+          );
         } else {
           console.warn(`    ⚠️ セクションファイル未発見: ${txtPath}`);
         }

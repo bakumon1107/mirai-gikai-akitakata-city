@@ -4,7 +4,6 @@ import {
   findTopicBoundaries,
   normalizeDisplayName,
   parseSpeakerTurns,
-  unwrapTranscriptLines,
 } from "./parse-transcript";
 
 // 議事録PDFの実データを模した固定幅折り返しテキスト（全角換算で約72幅で折り返す）。
@@ -40,76 +39,6 @@ const WRAPPED_TRANSCRIPT = [
   "           されております。",
   "             以上です。",
 ].join("\n");
-
-describe("unwrapTranscriptLines", () => {
-  it("折り返し行を連結し、インデントが深い行から新しい段落を始める", () => {
-    const paragraphs = unwrapTranscriptLines(WRAPPED_TRANSCRIPT);
-
-    expect(paragraphs).toContain(
-      "それでは質問に入ります。まず最初の質問であります。ネーミングライツ導入の課題と今後の展開について。"
-    );
-    expect(paragraphs).toContain(
-      "本市では、財源確保とブランド力向上を目的として、2025年、昨年10月よりネーミングライツ制度を導入されました。"
-    );
-    expect(paragraphs).toContain(
-      "通告に基づき、大枠4点について質問いたします。"
-    );
-  });
-
-  it("5行にまたがる段落も1つに連結する", () => {
-    const paragraphs = unwrapTranscriptLines(WRAPPED_TRANSCRIPT);
-
-    expect(paragraphs).toContain(
-      "ネーミングライツ事業については、これまではイベントでは「ＮＡＮＪＯ キズナのわ 元就の里リレーマラソン2025」そして公共施設では、市民文化センターの大ホール、小ホールに「マルシン クリスタルアージョ」大ホール及び小ホール、吉田運動公園に「ＳＴＡＲＬＩＴＥ ウィクトーリアスポーツパーク」とそれぞれに愛称を命名いただいております。"
-    );
-  });
-
-  it("話者マーク行は必ず新しい段落として扱う", () => {
-    const paragraphs = unwrapTranscriptLines(WRAPPED_TRANSCRIPT);
-    const speakerLines = paragraphs.filter((p) => p.startsWith("◯"));
-
-    expect(speakerLines).toHaveLength(2);
-    expect(speakerLines[1]).toContain("◯藤 本 市 長");
-  });
-
-  it("話者マーク行の直後の折り返し行も連結する", () => {
-    const paragraphs = unwrapTranscriptLines(WRAPPED_TRANSCRIPT);
-
-    expect(paragraphs).toContain(
-      "◯藤 本 市 長     皆さんおはようございます。今日と月曜日の2日間にわたって一般質問ですけども、どうかよろしくお願いいたします。"
-    );
-  });
-
-  it("空行は段落の区切りになる", () => {
-    const paragraphs = unwrapTranscriptLines(WRAPPED_TRANSCRIPT);
-
-    expect(paragraphs).toContain(
-      "そこで以下の点について、市長の見解を伺います。"
-    );
-  });
-
-  it("折り返しではない文章（段落ごとに1行）は連結しない", () => {
-    // 行幅が大きくばらつく＝固定幅で折り返されていない文章
-    const lines = [
-      "◯新 田 議 員  おはようございます。8番、新田和明でございます。",
-      "　通告に基づき、大枠4点について質問いたします。",
-      "　本市では、財源確保とブランド力向上を目的として、2025年、昨年10月よりネーミングライツ制度を導入されました。元就の里リレーマラソンでは、イベント対象として110万円の契約金のほか、現在では二つの企業から年間272万円、5年間では1,360万円の命名権料となっています。",
-      "　今後、この制度をさらに発展させ、市全体のブランド価値を高めていくためには、より多くの企業に参画していただく仕組みづくりが重要と考えます。",
-      "　そこで以下の点について、市長の見解を伺います。",
-      "◯藤 本 市 長  お答えいたします。",
-      "　現在、いずれの名称も市民の皆様に親しまれ、愛着を持って広く呼称されております。",
-      "　以上です。",
-    ];
-
-    expect(unwrapTranscriptLines(lines.join("\n"))).toEqual(
-      lines.map((line) => line.trim())
-    );
-  });
-
-  it("空文字列は空配列を返す", () => {
-    expect(unwrapTranscriptLines("")).toEqual([]);
-  });
-});
 
 describe("normalizeDisplayName", () => {
   it("CJK文字間のスペースを除去する", () => {
@@ -157,6 +86,60 @@ describe("parseSpeakerTurns", () => {
 
     expect(turns).toHaveLength(1);
     expect(turns[0].displayName).toBe("新田議員");
+  });
+
+  // 折り返し判定が働かない（＝段落ごとに1行の）テキストにするための長い段落
+  const LONG_PARAGRAPH =
+    "　安芸高田市内の児童クラブの数は10施設で16支援あります。平日利用と長期休業期間利用を合わせた定員数は615人となっています。利用者数については時期によって若干の増減がありますが、直近2月1日時点での利用者は510人、定員に対して約83％の利用割合となっております。";
+
+  it("議長の指名行は直前の発言に混ぜない", () => {
+    const text = [
+      "◯藤 本 市 長  小松議員の質問にお答えいたします。",
+      LONG_PARAGRAPH,
+      "　以上です。",
+      "　小松議員。",
+      "◯小 松 議 員  83％とお聞きいたしました。",
+    ].join("\n");
+    const turns = parseSpeakerTurns(text);
+
+    expect(turns[0].paragraphs).toEqual([
+      "小松議員の質問にお答えいたします。",
+      LONG_PARAGRAPH.trim(),
+      "以上です。",
+    ]);
+    expect(turns[1].paragraphs).toEqual(["83％とお聞きいたしました。"]);
+  });
+
+  it("番号付きの指名行・職務代理者の指名行も除外する", () => {
+    const text = [
+      "◯藤 本 市 長  お答えいたします。",
+      LONG_PARAGRAPH,
+      "　8番、新田議員。",
+      "　迫広教育長職務代理者。",
+    ].join("\n");
+    const turns = parseSpeakerTurns(text);
+
+    expect(turns[0].paragraphs).toEqual([
+      "お答えいたします。",
+      LONG_PARAGRAPH.trim(),
+    ]);
+  });
+
+  it("指名行に似た通常の発言は除外しない", () => {
+    const text = [
+      "◯新 田 議 員  質問いたします。",
+      LONG_PARAGRAPH,
+      "　以上です。",
+      "　これで私の一般質問を終わります。",
+    ].join("\n");
+    const turns = parseSpeakerTurns(text);
+
+    expect(turns[0].paragraphs).toEqual([
+      "質問いたします。",
+      LONG_PARAGRAPH.trim(),
+      "以上です。",
+      "これで私の一般質問を終わります。",
+    ]);
   });
 
   it("話者マークより前の行は捨てる", () => {

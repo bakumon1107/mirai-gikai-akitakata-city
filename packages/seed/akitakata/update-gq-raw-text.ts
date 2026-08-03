@@ -11,8 +11,9 @@
  *   # 実際にDBを更新する
  *   tsx --env-file=../../.env akitakata/update-gq-raw-text.ts <sections_dir> <out_dir> --apply
  *
- * sections_dir は `<sections_dir>/<任意のディレクトリ>/<order>_<questioner_name>.txt`
- * の構成を想定する。ファイル名の議員名でDBのレコードと突き合わせる。
+ * sections_dir は `<sections_dir>/<...day{N}>/<question_order>_<questioner_name>.txt`
+ * の構成を想定する（例: `r8-1-day1/02_山本数博.txt`）。
+ * ディレクトリ名の日・ファイル名の順番・議員名の3つでDBのレコードと突き合わせる。
  *
  * 安全確認として、既存 raw_text の発言が新しいテキストにすべて含まれることを
  * チェックし、含まれないレコードはスキップする。
@@ -74,18 +75,46 @@ function isSafeReplacement(
   return { safe: true };
 }
 
+/** 同じ議員が別の日・別の順番で登場しても取り違えないよう、日・順番・氏名で引く */
+function sectionKey(
+  sessionDay: number,
+  questionOrder: number,
+  questionerName: string
+): string {
+  return `${sessionDay}:${questionOrder}:${questionerName}`;
+}
+
 function collectSections(sectionsDir: string): Map<string, string> {
-  const byName = new Map<string, string>();
+  const byKey = new Map<string, string>();
   for (const entry of fs.readdirSync(sectionsDir)) {
     const entryPath = path.join(sectionsDir, entry);
     if (!fs.statSync(entryPath).isDirectory()) continue;
+
+    const dayMatch = entry.match(/day(\d+)/);
+    if (!dayMatch) {
+      console.warn(`  ⚠️  ディレクトリ名から日を判別できません: ${entry}`);
+      continue;
+    }
+    const sessionDay = Number(dayMatch[1]);
+
     for (const file of fs.readdirSync(entryPath)) {
       if (!file.endsWith(".txt")) continue;
-      const name = file.replace(/^\d+_/, "").replace(/\.txt$/, "");
-      byName.set(name, path.join(entryPath, file));
+      const fileMatch = file.match(/^(\d+)_(.+)\.txt$/);
+      if (!fileMatch) {
+        console.warn(`  ⚠️  ファイル名から順番を判別できません: ${entry}/${file}`);
+        continue;
+      }
+      const key = sectionKey(sessionDay, Number(fileMatch[1]), fileMatch[2]);
+      const existing = byKey.get(key);
+      if (existing) {
+        console.warn(
+          `  ⚠️  セクションファイルが重複しています: ${key}\n      ${existing}\n      ${path.join(entryPath, file)}`
+        );
+      }
+      byKey.set(key, path.join(entryPath, file));
     }
   }
-  return byName;
+  return byKey;
 }
 
 async function main() {
@@ -124,7 +153,9 @@ async function main() {
 
   for (const q of questions) {
     const label = `第${q.session_day}日-${q.question_order} ${q.questioner_name}`;
-    const filePath = sections.get(q.questioner_name);
+    const filePath = sections.get(
+      sectionKey(q.session_day, q.question_order, q.questioner_name)
+    );
     if (!filePath) {
       console.warn(`  ⚠️  ${label}: セクションファイル未発見`);
       skipped++;

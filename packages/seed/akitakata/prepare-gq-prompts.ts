@@ -29,13 +29,17 @@ function cleanMinutesText(text: string): string {
 
 // ─── 出席議員一覧からフルネームマップを構築 ──────────────────
 
+/** 全角数字を半角に直す（議事録は全角・半角が混在する） */
+function toHalfWidthDigits(s: string): string {
+  return s.replace(/[０-９]/g, (c) => String(c.charCodeAt(0) - 0xff10));
+}
+
 function buildMemberNameMap(text: string): Map<number, string> {
   const map = new Map<number, string>();
   const startIdx = text.indexOf("出席議員は次のとおりである");
   if (startIdx < 0) return map;
   const sectionText = text.slice(startIdx, startIdx + 1000);
-  const toHalf = (s: string) =>
-    s.replace(/[０-９]/g, (c) => String(c.charCodeAt(0) - 0xff10));
+  const toHalf = toHalfWidthDigits;
   const ENTRY_RE = /([０-９]{1,2})番[ 　]{1,8}((?:[^\s０-９\d\n]+[ 　]*){1,4})/g;
   let m: RegExpExecArray | null;
   while ((m = ENTRY_RE.exec(sectionText)) !== null) {
@@ -70,6 +74,9 @@ function splitByQuestioner(text: string, fullText = text) {
     const end = i + 1 < unique.length ? unique[i + 1].pos : text.length;
     const rawText = text.slice(start, end);
 
+    // 議席番号は全角の場合があるため、半角に直してから数値にする
+    const questionerNumber = parseInt(toHalfWidthDigits(u.num), 10) || null;
+
     const fullNameByNumber = rawText.match(
       /[0-9０-９]+\s*番[、，\s][^\nの。]{2,15}でございます|[0-9０-９]+\s*番[、，\s][^\nの。]{2,15}です[。\n]/
     );
@@ -88,12 +95,13 @@ function splitByQuestioner(text: string, fullText = text) {
             .replace(/でございます.*/, "")
             .replace(/です[。\n].*/, "")
             .trim()
-        : memberNameMap.get(parseInt(u.num, 10)) ?? u.name.replace(/\s/g, "");
+        : memberNameMap.get(questionerNumber ?? -1) ??
+          u.name.replace(/\s/g, "");
 
     return {
       order: i + 1,
       questionerName: u.name.replace(/\s/g, ""),
-      questionerNumber: parseInt(u.num, 10) || null,
+      questionerNumber,
       fullName,
       rawText,
     };
@@ -111,9 +119,35 @@ function main() {
     process.exit(1);
   }
 
+  // sessionSlug は CLI 引数、氏名は議事録テキスト由来なので、
+  // どちらも出力先ディレクトリの外を書き換えないよう検証・正規化する
+  if (!/^[a-z0-9-]+$/.test(sessionSlug)) {
+    console.error(
+      `❌ session_slug は英小文字・数字・ハイフンのみです: ${sessionSlug}`
+    );
+    process.exit(1);
+  }
+
   const sessionDay = parseInt(sessionDayStr, 10);
-  const outDir = `/tmp/gq-sections/${sessionSlug}-day${sessionDay}`;
+  if (!Number.isInteger(sessionDay) || sessionDay <= 0) {
+    console.error(`❌ session_day は正の整数で指定してください: ${sessionDayStr}`);
+    process.exit(1);
+  }
+
+  const outDir = path.resolve(
+    `/tmp/gq-sections/${sessionSlug}-day${sessionDay}`
+  );
   fs.mkdirSync(outDir, { recursive: true });
+
+  /** outDir 直下であることを確認したうえで書き込む */
+  const writeInOutDir = (fileName: string, content: string) => {
+    const dest = path.resolve(outDir, fileName);
+    const rel = path.relative(outDir, dest);
+    if (rel.startsWith("..") || path.isAbsolute(rel) || rel.includes(path.sep)) {
+      throw new Error(`出力先が ${outDir} の外を指しています: ${fileName}`);
+    }
+    fs.writeFileSync(dest, content);
+  };
 
   const fullText = fs.readFileSync(minutesFile, "utf-8");
   console.log(`📄 読み込み完了: ${fullText.length} chars`);
@@ -132,6 +166,12 @@ function main() {
   const sections = splitByQuestioner(gqText, fullText);
   console.log(`👥 質問者: ${sections.length} 名`);
 
+  // 氏名はパス区切りなどを含みうるため、単一のパス要素に正規化する
+  const toFileName = (order: number, fullName: string) => {
+    const safeName = fullName.replace(/[/\\]/g, "_").replace(/^\.+/, "") || "不明";
+    return `${String(order).padStart(2, "0")}_${safeName}.txt`;
+  };
+
   const meta = {
     sessionSlug,
     sessionDay,
@@ -140,17 +180,17 @@ function main() {
       questionerName: s.questionerName,
       fullName: s.fullName,
       questionerNumber: s.questionerNumber,
-      file: `${String(s.order).padStart(2, "0")}_${s.fullName}.txt`,
+      file: toFileName(s.order, s.fullName),
       chars: s.rawText.length,
     })),
   };
 
-  fs.writeFileSync(path.join(outDir, "meta.json"), JSON.stringify(meta, null, 2));
+  writeInOutDir("meta.json", JSON.stringify(meta, null, 2));
 
   for (const s of sections) {
-    const fileName = `${String(s.order).padStart(2, "0")}_${s.fullName}.txt`;
+    const fileName = toFileName(s.order, s.fullName);
     const cleaned = cleanMinutesText(s.rawText);
-    fs.writeFileSync(path.join(outDir, fileName), cleaned);
+    writeInOutDir(fileName, cleaned);
     console.log(
       `  [${s.order}] ${s.fullName}（${s.questionerName}）: ${s.rawText.length} chars → ${cleaned.length} chars cleaned → ${fileName}`
     );

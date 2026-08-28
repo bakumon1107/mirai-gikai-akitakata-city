@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Mic, PlayCircle } from "lucide-react";
+import { ExternalLink, FileText, Mic, PlayCircle } from "lucide-react";
 import type { PressConference } from "../../shared/types";
 import { QaItem } from "./qa-item";
 
@@ -75,6 +75,22 @@ export function PressConferenceDetail({ pressConference }: Props) {
                 <p className="text-sm text-mirai-text-secondary leading-relaxed pl-9">
                   {item.summary}
                 </p>
+              )}
+              {item.resourceUrls.length > 0 && (
+                <div className="flex flex-wrap gap-2 pl-9">
+                  {item.resourceUrls.map((r) => (
+                    <a
+                      key={r.url}
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-accent border border-primary-accent/30 bg-mirai-gradient-start/40 rounded-full px-3 py-1 hover:bg-mirai-gradient-start transition-colors"
+                    >
+                      <FileText className="w-3 h-3" />
+                      {r.label}
+                    </a>
+                  ))}
+                </div>
               )}
             </div>
           ))}

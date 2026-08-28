@@ -15,12 +15,18 @@ export type PressConferenceTurn = {
   orderIndex: number;
 };
 
+export type ResourceLink = {
+  label: string;
+  url: string;
+};
+
 export type PressConferenceItem = {
   id: string;
   itemType: "announcement" | "qa";
   orderIndex: number;
   title: string;
   summary: string | null;
+  resourceUrls: ResourceLink[];
   turns: PressConferenceTurn[];
 };
 

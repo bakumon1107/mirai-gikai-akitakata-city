@@ -21,11 +21,17 @@ type TurnInput = {
   orderIndex: number;
 };
 
+type ResourceLinkInput = {
+  label: string;
+  url: string;
+};
+
 type ItemInput = {
   itemType: "announcement" | "qa";
   orderIndex: number;
   title: string;
   summary: string | null;
+  resourceUrls?: ResourceLinkInput[];
   turns: TurnInput[];
 };
 
@@ -82,6 +88,7 @@ async function ingestPressConference(jsonPath: string) {
         order_index: item.orderIndex,
         title: item.title,
         summary: item.summary,
+        resource_urls: item.resourceUrls ?? [],
       })
       .select("id")
       .single();

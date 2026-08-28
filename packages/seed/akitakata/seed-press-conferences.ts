@@ -21,11 +21,17 @@ type TurnInput = {
   orderIndex: number;
 };
 
+type ResourceLinkInput = {
+  label: string;
+  url: string;
+};
+
 type ItemInput = {
   itemType: "announcement" | "qa";
   orderIndex: number;
   title: string;
   summary: string | null;
+  resourceUrls?: ResourceLinkInput[];
   turns: TurnInput[];
 };
 
@@ -269,6 +275,307 @@ const DATA: PressConferenceInput[] = [
       },
     ],
   },
+  {
+    slug: "2026-08-24",
+    title: "令和8年8月 市長定例記者会見",
+    heldAt: "2026-08-24",
+    youtubeUrl: "https://www.youtube.com/watch?v=bdm_HliFnl4",
+    status: "published",
+    items: [
+      {
+        itemType: "announcement",
+        orderIndex: 0,
+        title: "萩市「大照院」法要への参加（冒頭報告）",
+        summary:
+          "8月13日に山口県萩市の大照院で行われた法要に参加。大照院は毛利家の菩提寺であり、毛利家歴代藩主の霊が祀られ、厳かな雰囲気の中で参列。安芸高田市と萩市は毛利氏を通じた歴史的なつながりがあり、今回の法要参加をきっかけに今後も交流を深めていきたいと考えている。",
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 1,
+        title: "NANJOキズナのわ元就の里リレーマラソン2026 ゲスト出演決定（冒頭報告）",
+        summary:
+          "10月10日（土）にスターライトビクトリアスポーツパークで開催するNANJOキズナのわ元就の里リレーマラソン2026のスターゲストとして、現在大河ドラマ「豊臣兄弟！」に出演中の俳優・濱田翔吾さんの参加が正式決定。参加募集は9月13日（日）まで。",
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 2,
+        title: "芸備線改良への公費投入報道についての見解（冒頭報告）",
+        summary:
+          "中国新聞が報道した「芸備線改良に公費投入」について、現時点では具体的に決定した事実ではない。しかし芸備線は地域の生活・経済を支える重要な資産であり、三次方・広島まちづくり交通協議会において活性化に向けた議論を進めてきた。今後も国・県・沿線自治体・JRと連携し、公共交通ネットワークの利便性向上と持続可能性確保の取り組みについてどのような支援・役割が可能か検討を続ける。",
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 3,
+        title: "TOYOTA GAZOO Racing ラリーチャレンジ2026 in安芸高田 盛況報告（冒頭報告）",
+        summary:
+          "昨日（8月23日）、高宮町のTS高田サーキットで開催し、事務局発表で5,000人が来場。4年ぶりの開催として市内外・県外から多数の来場者があった。関係人口を増やす取り組みの一つとして来年・再来年も継続していきたい方針。当日プレオープンしたスポーツミュージアムにはロードスター初代車両が展示され、ミュージアムを目当てに来場した方もいた。",
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 4,
+        title: "安芸高田市「ゼロカーボンシティ」宣言",
+        summary:
+          "2050年までに二酸化炭素排出量の実質ゼロを目指す「安芸高田市ゼロカーボンシティ」をここに宣言。市民・事業者・行政が一体となって脱炭素に向けた取り組みを推進する。2013年度基準（55万t-CO₂）から2035年度までに21.8万t（60%削減）、2050年に実質ゼロを目標に設定。今年度、環境基本計画改定・地球温暖化対策実行計画（事務事業編）策定にあわせて具体的な取り組みを検討・反映させる。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/43/8a/438a7b74-82e9-44a6-801e-dcd82c5443b6/shiryou-1_aki-takadashi-zeroka-bonshitei-sengen.pdf",
+          },
+          {
+            label: "宣言書",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/fd/de/fdde68ff-f2bf-467d-869a-fa492997d677/shiryou-1-2_aki-takadashi-zeroka-bonshitei-sengen-kaki.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 5,
+        title: "環境価値（Jクレジット）の活用に関する連携協定の締結",
+        summary:
+          "アイリス大山株式会社・株式会社バイウィルと安芸高田市の3者で、ゼロカーボンシティ実現に向けたJクレジット活用に関する連携協定を締結。アイリス大山が設置するLED照明設備の省エネ効果をJクレジット化・販売支援するほか、森林管理・空調設備更新等によるJクレジット創出ポテンシャル調査も実施。締結式は9月4日（金）15時〜、安芸高田市役所2階。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/7c/a9/7ca9e089-9ac8-49f7-bfd2-ad35b0076ce4/shiryou-2_kankyou-kachi-no-katsuyou-ni-kansu-ru-renkei-kyoutei-no-teiketsu.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 6,
+        title: "ネーミングライツパートナーの募集",
+        summary:
+          "市が所有する4施設のネーミングライツパートナーを募集。①安芸高田市サッカー公園（サンフレッチェ広島の練習拠点）：年額300万円以上・期間2027年4月〜2030年3月・公募期間9月1日〜11月30日。②緑生涯学習センター 学び・③甲田文化センター ミューズ・④向原生涯学習センター 未来の3施設：年額100万円以上・期間2027年4月〜2032年3月・公募期間9月1日〜11月27日。詳細は9月1日に市ホームページで公開。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/0f/7b/0f7b132c-38f3-42f7-9247-1d881eecb2b3/shiryou-3_ne-minguraitsupa-tona-no-boshuu.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 7,
+        title: "第7回安芸高田こども神楽発表大会",
+        summary:
+          "市内各地域で活動する子ども神楽11団体が出演する第7回安芸高田こども神楽発表大会を9月21日（日・祝）に開催。チラシのイラストは安芸高田市立緑小学校の児童が作成。入場料は大人500円・高校生以下無料（当日券のみ・全席自由）。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/a8/83/a8836845-486e-413f-9c15-0ffa65c4c45d/shiryou-4_dai-7kai-aki-takada-kodomo-kagura-happyou-taikai.pdf",
+          },
+          {
+            label: "チラシ",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/d8/11/d8111046-e635-4456-aadf-8cce788ebb21/shiryou-4-2_dai-7kai-aki-takada-kodomo-kagura-happyou-taikai-_chirashi.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 8,
+        title: "第9回佐賀県伝承芸能祭に天神神楽団が出演",
+        summary:
+          "佐賀県各地に受け継がれている伝統芸能が一堂に会する第9回佐賀県伝承芸能祭（9月6日・日、佐賀市文化会館大ホール、入場無料）に天神神楽団が特別出演。第1回から連続して安芸高田市の神楽団が特別出演しており、九州圏での広島・安芸高田神楽の認知度向上につながる取り組み。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/2f/29/2f29b828-36ad-4429-a901-dde60f98c3e2/shiryou-5_dai-9kai-sagaken-denshou-geinou-matsuri-ni-tenjin-kagura-dan-ga-shutsuen.pdf",
+          },
+          {
+            label: "チラシ",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/10/c3/10c301d9-5bae-432a-8e6d-3b9ed9ccebc2/shiryou-5-2_dai-9kai-sagaken-denshou-geinou-matsuri-_chirashi.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 9,
+        title: "ふるさと納税返礼品紹介：gallery えんがわ（アイハーブソルト）",
+        summary:
+          "今月の返礼品紹介は向原町のギャラリーえんがわ。作品展示とカフェを組み合わせた地域の交流拠点で、手作り作家のバッグ・アクセサリー・工芸作品も取り扱う。返礼品は向原町産の「アイ（藍）」と天然ハーブ・海塩をブレンドした手作り「アイハーブソルト」。古来から薬草としても親しまれ、ポリフェノールを含む藍を活用した商品。おにぎり・卵焼き・塩焼きなど様々な料理に使える上品な仕上がり。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/31/33/3133d7e4-79cb-46b2-bb8a-bc06abea5e54/shiryou-6_furusato-nouzei-no-henrei-hin-shoukai-_gallery_engawa.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "qa",
+        orderIndex: 10,
+        title: "Jクレジット活用・連携協定について",
+        summary: null,
+        turns: [
+          {
+            speaker: "reporter",
+            speakerName: "読売新聞",
+            content:
+              "Jクレジットについてもう少し説明していただけますか？活用のイメージと、創出ポテンシャル調査で何が可能になるかを教えてください。",
+            orderIndex: 0,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "今進めているLED化によって傾向灯からLEDに更新されることで二酸化炭素が削減され、その削減量がJクレジットとして創出されます。このJクレジットを他の環境政策の財源として活用することを考えています。",
+            orderIndex: 1,
+          },
+          {
+            speaker: "reporter",
+            speakerName: "読売新聞",
+            content: "ポテンシャル調査とはどのようなものですか？",
+            orderIndex: 2,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "今回の協定はLEDに特化していますが、例えば森林管理、ボイラーや空調設備の更新などによってもJクレジットが創出される可能性があります。こうした創出ポテンシャルについて調査を行っていただく内容になります。",
+            orderIndex: 3,
+          },
+          {
+            speaker: "reporter",
+            speakerName: "読売新聞",
+            content: "Jクレジットが創出されることで安芸高田市にどのようなメリットがあるのでしょうか？",
+            orderIndex: 4,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "Jクレジット自体が収入になり、そのお金を他の環境政策に回して実行していくことができます。",
+            orderIndex: 5,
+          },
+        ],
+      },
+      {
+        itemType: "qa",
+        orderIndex: 11,
+        title: "ネーミングライツの金額設定の根拠について",
+        summary: null,
+        turns: [
+          {
+            speaker: "reporter",
+            speakerName: "中国新聞",
+            content:
+              "サッカー公園と文化センター3施設で希望金額に差がありますが、その設定根拠を教えてください。",
+            orderIndex: 0,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "サッカー公園については、オープンから年数が経過し施設修繕費が年々増加しています。近年の小規模修繕だけでもかなりの費用がかかっており、それに加えてサンフレッチェのSNSや各メディアへの露出効果を総合的に勘案して金額を設定しました。文化センター3施設については、前回クリスタルジオのネーミングライツを実施した際の金額帯に合わせた形にしています。",
+            orderIndex: 1,
+          },
+        ],
+      },
+      {
+        itemType: "qa",
+        orderIndex: 12,
+        title: "向原高校の募集停止正式決定について",
+        summary: null,
+        turns: [
+          {
+            speaker: "reporter",
+            speakerName: "広島テレビ",
+            content:
+              "2029年度から向原高校の生徒募集を停止することが正式決定されましたが、市長としての受け止めをお聞かせください。",
+            orderIndex: 0,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "安芸高田市には2つの県立高等学校があります。その1つである向原高校が募集停止になるということは、素直に残念・寂しい思いがしております。同窓会の皆さんや活生会委員会の皆様が公営塾・民間塾・下宿など様々な取り組みをされましたが、入学者の増加にはなかなかつながりませんでした。厳しい現実の上にこの決定がなされたと思います。",
+            orderIndex: 1,
+          },
+          {
+            speaker: "reporter",
+            speakerName: "広島テレビ",
+            content:
+              "地域から若者が消えることへの今後の対策や考えはありますか？",
+            orderIndex: 2,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "もう1校残る吉田高校が受け皿になるようにしっかりと向原高校の伝統も受け継ぎながら、サンフレッチェのユース・今後はジュニアユースも入ってきますので、中学校・高校の連携も含めて新たな魅力を今から考えていきたいと思います。",
+            orderIndex: 3,
+          },
+        ],
+      },
+      {
+        itemType: "qa",
+        orderIndex: 13,
+        title: "防災訓練・防災の日の取り組みについて",
+        summary: null,
+        turns: [
+          {
+            speaker: "reporter",
+            speakerName: "読売新聞",
+            content:
+              "近年、水害や地震など自然災害が増えています。9月1日の防災の日に向けた訓練やイベントの予定はありますか？",
+            orderIndex: 0,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "9月1日は例年通りの取り組みを行います。それ以外に市民対象の防災フェアのような体験会も開催したいと今計画中です。",
+            orderIndex: 1,
+          },
+        ],
+      },
+      {
+        itemType: "qa",
+        orderIndex: 14,
+        title: "熊対策・緊急猟の法改正への対応について",
+        summary: null,
+        turns: [
+          {
+            speaker: "reporter",
+            speakerName: "NHK",
+            content:
+              "熊の緊急猟に関する法改正に伴い各自治体で運用ルールが課題となっています。安芸高田市として熊の緊急猟の現場での運用やルール化に向けてどのような取り組みをされていますか？",
+            orderIndex: 0,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "先般、緊急猟のマニュアルを制定しました。それに基づいて運用していきたいと思います。子どもたちへの安全対策については引き続き熊鈴の配布や学校での啓発、猟友会との連携などに力を入れていきます。猟友会・警察との連携は日々取っており、マニュアルができたことによって円滑に動けるようにしていきたいと思います。",
+            orderIndex: 1,
+          },
+          {
+            speaker: "reporter",
+            speakerName: "NHK",
+            content:
+              "マニュアルの実行性を日頃から高めるための訓練確認など、取り組まれていることはありますか？",
+            orderIndex: 2,
+          },
+          {
+            speaker: "mayor",
+            speakerName: null,
+            content:
+              "まだマニュアルを制定したばかりで具体的な訓練には至っていませんが、有事の際に迷わず対応できるよう、担当部の方で猟友会との関係をしっかり維持してもらっています。警察との連携も日々取っており、マニュアルができたことで円滑に動けるよう、今後もこれらが起こらないことに向けた対策にもしっかりと力を入れていきたいと思います。",
+            orderIndex: 3,
+          },
+        ],
+      },
+    ],
+  },
 ];
 
 async function seedPressConferences() {
@@ -313,6 +620,7 @@ async function seedPressConferences() {
           order_index: item.orderIndex,
           title: item.title,
           summary: item.summary,
+          resource_urls: item.resourceUrls ?? [],
         })
         .select("id")
         .single();

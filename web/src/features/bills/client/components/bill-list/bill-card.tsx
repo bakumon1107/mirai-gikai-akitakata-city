@@ -4,6 +4,7 @@ import { RubySafeLineClamp } from "@/components/ruby-safe-line-clamp";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateJST } from "@/lib/utils/date";
 import type { BillWithContent } from "../../../shared/types";
+import { formatBillNumber } from "../../../shared/utils/format-bill-number";
 import { BillStatusBadge } from "./bill-status-badge";
 import { BillTag } from "./bill-tag";
 
@@ -48,7 +49,7 @@ export function BillCard({ bill }: BillCardProps) {
             <div className="flex flex-col gap-3">
               {bill.bill_number && (
                 <p className="text-xs font-medium text-muted-foreground">
-                  議案第{bill.bill_number}号
+                  {formatBillNumber(bill.bill_number)}
                 </p>
               )}
               <CardTitle className="text-2xl/8 tracking-normal">

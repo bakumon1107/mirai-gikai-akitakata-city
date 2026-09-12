@@ -11,6 +11,7 @@ import { BillStatusBadge } from "../../../client/components/bill-list/bill-statu
 import { BillTag } from "../../../client/components/bill-list/bill-tag";
 import { getBillShareData } from "../../../client/utils/share";
 import type { BillWithContent } from "../../../shared/types";
+import { formatBillNumber } from "../../../shared/utils/format-bill-number";
 
 interface BillDetailHeaderProps {
   bill: BillWithContent;
@@ -48,7 +49,7 @@ export async function BillDetailHeader({
       <div className="px-4 pt-8 mb-3">
         {bill.bill_number && (
           <p className="text-xs font-medium text-muted-foreground mb-1">
-            議案第{bill.bill_number}号
+            {formatBillNumber(bill.bill_number)}
           </p>
         )}
         {displayTitle && (

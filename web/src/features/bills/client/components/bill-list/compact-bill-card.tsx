@@ -3,6 +3,7 @@ import { MessageSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formatDateJST } from "@/lib/utils/date";
 import type { BillWithContent } from "../../../shared/types";
+import { formatBillNumber } from "../../../shared/utils/format-bill-number";
 import { BillStatusBadge } from "./bill-status-badge";
 import { BillTag } from "./bill-tag";
 
@@ -28,7 +29,7 @@ export function CompactBillCard({ bill, className }: CompactBillCardProps) {
         <div className="flex-1 p-4 flex flex-col gap-2">
           {bill.bill_number && (
             <p className="text-xs font-medium text-muted-foreground">
-              議案第{bill.bill_number}号
+              {formatBillNumber(bill.bill_number)}
             </p>
           )}
           <h3 className="font-bold text-[15px] leading-[1.6] line-clamp-2">

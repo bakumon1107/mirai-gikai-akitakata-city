@@ -26,6 +26,7 @@ import {
   setsuKey,
 } from "./bills-r8-3-data";
 import {
+  buildNoPdfPrompt,
   callClaude,
   type Difficulty,
   extractPdfText,
@@ -88,34 +89,6 @@ ${billName}
 ${trimmedMain}${setsuSection}`;
 }
 
-/**
- * 議案原文PDFが公開されていない案件用のプロンプト。
- * 手続き・制度の一般論のみを書かせ、固有情報を捏造させない。
- */
-function buildNoPdfPrompt(billName: string, difficulty: Difficulty): string {
-  const audience =
-    difficulty === "normal"
-      ? "市民にわかりやすく"
-      : "法令・行政の専門知識を持つ読者向けに";
-  return `安芸高田市議会 ${SESSION_NAME}に上程された次の案件について、${audience}解説するbill_contentsをJSON形式で作成してください。
-
-## 重要な制約
-- この案件は議案原文PDFが公開されていません。**案件名と、その手続き・制度の一般的な説明のみ**を記述してください。
-- 候補者名・人数・金額・期日・任期などの具体的な固有情報は**一切記載しないでください**（推測での記載は禁止）。
-- 法令名・条番号は確実なものだけを挙げ、推測で補わないこと。
-- 詳細は市議会の公表を待つ必要がある旨を content の末尾に明記してください。
-
-## 出力形式（JSONのみ出力、説明文不要）
-{
-  "title": "短いタイトル（30文字以内）",
-  "summary": "1〜2文の概要",
-  "content": "# タイトル\\n\\n## どんな案件？\\n...\\n\\n## 手続きの仕組み\\n...\\n\\n## 市民への関わり\\n...\\n\\n## 補足\\n..."
-}
-
-## 案件名
-${billName}`;
-}
-
 function outputPath(billNumber: string, difficulty: Difficulty): string {
   return path.join(OUTPUT_DIR, `${billNumber}-${difficulty}.json`);
 }
@@ -153,7 +126,7 @@ function generateForBill(meta: BillMeta): number {
     console.log(`  🤖 ${difficulty} 生成中...`);
     const prompt = meta.pdfKey
       ? buildPrompt(meta.name, pdfText, setsuText, difficulty)
-      : buildNoPdfPrompt(meta.name, difficulty);
+      : buildNoPdfPrompt(meta.name, SESSION_NAME, difficulty);
     const result = callClaude(prompt);
     if (!result) {
       console.error(`  ❌ ${difficulty} 生成失敗`);

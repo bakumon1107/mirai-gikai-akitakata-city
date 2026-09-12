@@ -175,6 +175,35 @@ JSONの数値をPDFと突き合わせる。特に補正予算は
 - 補正予算・本予算 → 予算決算
 - **決算認定（認定第N号）は財産区分も含めてすべて予算決算**（日程表の「決算審査」が予算決算常任委員会になっている）
 
+#### タグ付けをしないとトップページに議案が1件も出ない（最重要）
+**議案とAI解説をDBに入れただけでは、トップページに何も表示されない。**
+トップの議案セクションは次の2つしか拾わないため。
+
+- 「注目の議案🔥」… `bills.is_featured = true` の議案
+- 「タグ別議案一覧」… `tags.featured_priority` が付いたタグに紐づく議案
+
+つまり **タグ未設定の議案は publish 済みでも画面に現れない**。
+令和8年第3回の登録でこれを見落とし、26件を登録したのにトップが空のままだった。
+
+登録後に必ず実行すること（セッション非依存）:
+
+```bash
+# 1. タグと注目フラグをAI評価（DB書き込みなし）
+... pnpm --filter @mirai-gikai/seed exec tsx akitakata/evaluate-bills.ts <slug>
+
+# 2. 結果をレビュー
+# 3. 反映
+... pnpm --filter @mirai-gikai/seed exec tsx akitakata/ingest-bill-evaluations.ts <slug> [--dry-run]
+```
+
+- `evaluate-bills.ts` は全議案にタグを付けさせる（除外された議案も含む）。
+  1件でも評価が欠けたら異常終了するので、取りこぼしに気付ける。
+- **意見書はスコアに関わらず注目議案にする**（`isOpinionPaper` で議案名に「意見書」を
+  含むかで判定）。発議でも「議員報酬条例の改正」等は意見書ではないため、
+  `bill_number` の `h` 接頭辞ではなく議案名で判定すること。
+- 決算認定・補正予算しかない定例会では注目議案が0件になることがある。
+  その場合「注目の議案🔥」セクションは非表示になるだけで、タグ別一覧には出る。
+
 #### bill_contents が無い議案は一覧に出ない
 リポジトリの取得クエリが `bill_contents!inner` なので、AI解説が1件も無い議案は
 議案一覧にも詳細にも出てこない。PDF未公開の案件も必ず解説を用意すること。
@@ -232,6 +261,23 @@ source .env.production && \
 NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL \
 SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY \
 pnpm --filter @mirai-gikai/seed exec tsx akitakata/ingest-bills-<session>.ts
+
+# 5-5. タグ・注目フラグを評価して反映（省略するとトップに何も出ない）
+source .env.production && \
+NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL \
+SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY \
+pnpm --filter @mirai-gikai/seed exec tsx akitakata/evaluate-bills.ts <session>
+# レビュー後
+source .env.production && \
+NEXT_PUBLIC_SUPABASE_URL=$SUPABASE_URL \
+SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY \
+pnpm --filter @mirai-gikai/seed exec tsx akitakata/ingest-bill-evaluations.ts <session>
+
+# 5-6. 取りこぼし確認
+... tsx akitakata/generate-no-pdf-contents.ts <session>   # 「欠けている議案はありません」
+
+# 5-7. 本番URLでトップページに議案が出ていることを必ず目視確認
+#      https://mirai-gikai-akitakata-city-web.vercel.app/
 ```
 
 5-1 は議案数×2回 `claude` CLI を呼ぶので30分〜1時間かかる。

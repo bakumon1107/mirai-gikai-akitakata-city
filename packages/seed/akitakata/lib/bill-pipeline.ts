@@ -106,31 +106,43 @@ export function readBillContentFile(
   }
 }
 
-/** claude CLI に投げてJSONを受け取る。検証に通らなければ null */
-export function callClaude(prompt: string): BillContentResult | null {
+/**
+ * claude CLI に投げ、応答からJSONを取り出してパースする。
+ * 応答はコードブロックで返ることも素のJSONで返ることもある。
+ * 値の検証は呼び出し側で行う。
+ */
+export function callClaudeJson(prompt: string): unknown | null {
   try {
     const escaped = prompt.replace(/'/g, "'\\''");
     const raw = execSync(`claude -p '${escaped}' --output-format text`, {
       encoding: "utf-8",
       timeout: 180_000,
     });
-    const jsonMatch =
-      raw.match(/```json\s*(\{[\s\S]*?\})\s*```/) ?? raw.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
+    const fenced = raw.match(/```json\s*([\s\S]*?)\s*```/);
+    const bare = raw.match(/[[{][\s\S]*[\]}]/);
+    const jsonStr = fenced?.[1] ?? bare?.[0];
+    if (!jsonStr) {
       console.error("  ❌ 応答からJSONを取り出せませんでした");
       return null;
     }
-    const result = toBillContentResult(JSON.parse(jsonMatch[1] ?? jsonMatch[0]));
-    if (!result) {
-      console.error(
-        "  ❌ title / summary / content が揃っていないため破棄しました"
-      );
-    }
-    return result;
+    return JSON.parse(jsonStr);
   } catch (e) {
     console.error("  Claude error:", e instanceof Error ? e.message : e);
     return null;
   }
+}
+
+/** claude CLI に投げて bill_contents を受け取る。検証に通らなければ null */
+export function callClaude(prompt: string): BillContentResult | null {
+  const parsed = callClaudeJson(prompt);
+  if (parsed === null) return null;
+  const result = toBillContentResult(parsed);
+  if (!result) {
+    console.error(
+      "  ❌ title / summary / content が揃っていないため破棄しました"
+    );
+  }
+  return result;
 }
 
 /**
@@ -376,6 +388,85 @@ export async function findBillsMissingContents(
   }
 
   return { sessionId: session.id, sessionName: session.name, bills: targets };
+}
+
+/**
+ * 意見書かどうか。
+ *
+ * 意見書は市議会が国や県に対して意思表示する議員提出議案で、市民の関心が高い。
+ * AIのスコアに関わらず必ず注目議案（is_featured）にする。
+ *
+ * 発議（bill_number が "h" で始まる）でも「議員報酬条例の改正」のように
+ * 意見書でないものがあるため、番号ではなく議案名で判定する。
+ */
+export function isOpinionPaper(billName: string): boolean {
+  return billName.includes("意見書");
+}
+
+/** 注目議案の評価結果の出力先 */
+export function evaluationOutputPath(sessionSlug: string): string {
+  return `/tmp/bill-evaluations-${sessionSlug}.json`;
+}
+
+export type BillForEval = {
+  id: string;
+  billNumber: string;
+  name: string;
+  title: string;
+  summary: string;
+  content: string;
+};
+
+/**
+ * 注目議案の評価対象（公開済み＋解説あり）をセッションslugから取得する。
+ * セッションが見つからなければ null。
+ */
+export async function findBillsForEvaluation(
+  supabase: SeedClient,
+  sessionSlug: string
+): Promise<{ sessionName: string; bills: BillForEval[] } | null> {
+  const { data: session } = await supabase
+    .from("council_sessions")
+    .select("id, name")
+    .eq("slug", sessionSlug)
+    .maybeSingle();
+  if (!session) {
+    console.error(`❌ セッションが見つかりません: ${sessionSlug}`);
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("bills")
+    .select("id, bill_number, name, bill_contents(title, summary, content)")
+    .eq("council_session_id", session.id)
+    .eq("publish_status", "published")
+    .order("bill_number");
+  if (error) {
+    console.error("❌ bills取得失敗:", error.message);
+    return null;
+  }
+
+  const bills: BillForEval[] = [];
+  for (const b of data ?? []) {
+    const contents = Array.isArray(b.bill_contents)
+      ? b.bill_contents
+      : [b.bill_contents];
+    const first = contents[0] as
+      | { title?: string; summary?: string; content?: string }
+      | null
+      | undefined;
+    if (!first?.title && !first?.summary) continue;
+    bills.push({
+      id: b.id,
+      billNumber: b.bill_number ?? "",
+      name: b.name,
+      title: first?.title ?? "",
+      summary: first?.summary ?? "",
+      content: first?.content ?? "",
+    });
+  }
+
+  return { sessionName: session.name, bills };
 }
 
 export async function hasContent(

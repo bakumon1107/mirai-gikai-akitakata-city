@@ -179,6 +179,21 @@ JSONの数値をPDFと突き合わせる。特に補正予算は
 リポジトリの取得クエリが `bill_contents!inner` なので、AI解説が1件も無い議案は
 議案一覧にも詳細にも出てこない。PDF未公開の案件も必ず解説を用意すること。
 
+同意（人事案件）・諮問は個人情報を含むため市議会HPに原文が載らない。
+取りこぼした場合はセッション非依存の以下で埋める（議案名と定例会名はDBから引くので
+引数に書き写す必要はない）。
+
+```bash
+# 解説が欠けている議案を自動検出して生成（DB書き込みなし）
+pnpm --filter @mirai-gikai/seed exec tsx akitakata/generate-no-pdf-contents.ts <slug> [議案番号...]
+
+# レビュー後に投入
+pnpm --filter @mirai-gikai/seed exec tsx akitakata/ingest-no-pdf-contents.ts <slug> [議案番号...] [--dry-run]
+```
+
+**登録後に `generate-no-pdf-contents.ts <slug>` を引数なしで実行し、
+「解説が欠けている議案はありません」と出ることを確認すること**（取りこぼし検出に使える）。
+
 #### 新セッション登録時の is_active 管理（重要）
 新しいセッションを `is_active: true` で作成する前に、**必ず既存のアクティブセッションを `is_active: false` に更新してから**新セッションを INSERT すること。
 

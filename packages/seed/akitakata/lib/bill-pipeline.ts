@@ -133,6 +133,40 @@ export function callClaude(prompt: string): BillContentResult | null {
   }
 }
 
+/**
+ * 議案原文PDFが公開されていない案件用のプロンプト。
+ *
+ * 同意（人事案件）・諮問は個人情報を含むため市議会HPに原文が載らない。
+ * 手続き・制度の一般論のみを書かせ、固有情報を捏造させないこと。
+ */
+export function buildNoPdfPrompt(
+  billName: string,
+  sessionName: string,
+  difficulty: Difficulty
+): string {
+  const audience =
+    difficulty === "normal"
+      ? "市民にわかりやすく"
+      : "法令・行政の専門知識を持つ読者向けに";
+  return `安芸高田市議会 ${sessionName}に上程された次の案件について、${audience}解説するbill_contentsをJSON形式で作成してください。
+
+## 重要な制約
+- この案件は議案原文PDFが公開されていません。**案件名と、その手続き・制度の一般的な説明のみ**を記述してください。
+- 候補者名・人数・金額・期日・任期などの具体的な固有情報は**一切記載しないでください**（推測での記載は禁止）。
+- 法令名・条番号は確実なものだけを挙げ、推測で補わないこと。
+- 詳細は市議会の公表を待つ必要がある旨を content の末尾に明記してください。
+
+## 出力形式（JSONのみ出力、説明文不要）
+{
+  "title": "短いタイトル（30文字以内）",
+  "summary": "1〜2文の概要",
+  "content": "# タイトル\\n\\n## どんな案件？\\n...\\n\\n## 手続きの仕組み\\n...\\n\\n## 市民への関わり\\n...\\n\\n## 補足\\n..."
+}
+
+## 案件名
+${billName}`;
+}
+
 export type SessionSpec = {
   slug: string;
   name: string;
@@ -258,6 +292,90 @@ export async function ensureBill(
   }
   console.log(`  ✅ INSERT: id=${inserted.id}`);
   return inserted.id;
+}
+
+/** PDF未公開案件の解説の出力先 */
+export function noPdfOutputDir(sessionSlug: string): string {
+  return `/tmp/bill-contents-${sessionSlug}`;
+}
+
+export type MissingContentBill = {
+  id: string;
+  billNumber: string;
+  name: string;
+  pdfUrl: string | null;
+};
+
+export type MissingContentTargets = {
+  sessionId: string;
+  sessionName: string;
+  bills: MissingContentBill[];
+};
+
+/**
+ * 指定セッションで bill_contents（normal / hard）が揃っていない議案を返す。
+ *
+ * `billNumbers` を渡すとその議案だけに絞る（既に解説があってもスキップ扱いにせず、
+ * 欠けている難易度だけを対象にする）。空なら欠けているものを自動検出する。
+ * セッションが見つからない、または指定した議案が存在しない場合は null。
+ */
+export async function findBillsMissingContents(
+  supabase: SeedClient,
+  sessionSlug: string,
+  billNumbers: string[] = []
+): Promise<MissingContentTargets | null> {
+  const { data: session } = await supabase
+    .from("council_sessions")
+    .select("id, name")
+    .eq("slug", sessionSlug)
+    .maybeSingle();
+  if (!session) {
+    console.error(`❌ セッションが見つかりません: ${sessionSlug}`);
+    return null;
+  }
+
+  let query = supabase
+    .from("bills")
+    .select("id, bill_number, name, pdf_url")
+    .eq("council_session_id", session.id);
+  if (billNumbers.length > 0) {
+    query = query.in("bill_number", billNumbers);
+  }
+  const { data: bills, error } = await query;
+  if (error) {
+    console.error("❌ bills取得失敗:", error.message);
+    return null;
+  }
+
+  if (billNumbers.length > 0) {
+    const found = new Set((bills ?? []).map((b) => b.bill_number));
+    const missing = billNumbers.filter((n) => !found.has(n));
+    if (missing.length > 0) {
+      console.error(
+        `❌ ${sessionSlug} に存在しない議案番号: ${missing.join(", ")}`
+      );
+      return null;
+    }
+  }
+
+  const targets: MissingContentBill[] = [];
+  for (const bill of bills ?? []) {
+    const { count } = await supabase
+      .from("bill_contents")
+      .select("id", { count: "exact", head: true })
+      .eq("bill_id", bill.id);
+    // 明示指定された議案は欠けている難易度だけを後段で埋めるので対象に含める
+    if (billNumbers.length > 0 || (count ?? 0) < 2) {
+      targets.push({
+        id: bill.id,
+        billNumber: bill.bill_number,
+        name: bill.name,
+        pdfUrl: bill.pdf_url,
+      });
+    }
+  }
+
+  return { sessionId: session.id, sessionName: session.name, bills: targets };
 }
 
 export async function hasContent(

@@ -24,13 +24,13 @@ export const siteConfig = {
     "https://www.akitakata.jp/ja/parliament/giketu/e507/u153-copy/",
   twitterHashtag: "みらい議会安芸高田市版", // # なし
   externalLinks: {
-    report: "",
-    aboutNote: "",
+    /** 問題報告フォーム（空の場合は「問題を報告する」導線を表示しない） */
+    report: "" as string,
+    /** サイト紹介記事（空の場合は紹介リンクを表示しない） */
+    aboutNote: "" as string,
+    /** 以下は features.showTeamMiraiSection が true のときのみ使用する */
     donation: "https://team-mir.ai/support/donation",
     teamAbout: "https://team-mir.ai/about",
-    terms: "https://team-mir.ai/terms",
-    privacy: "https://team-mir.ai/privacy",
-    faq: "https://team-mirai.notion.site/FAQ-28cf6f56bae180bd84e7f7ae80f806a1",
   },
   /**
    * ページを管理する政党名（空文字列の場合は政党名を省略した汎用表現を使用）

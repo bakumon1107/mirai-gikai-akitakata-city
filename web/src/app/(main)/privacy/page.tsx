@@ -22,7 +22,7 @@ export default function PrivacyPage() {
     >
       <Container className="space-y-8">
         <p className="text-sm text-mirai-text-muted">
-          最終更新日：2026年3月24日
+          最終更新日：2026年9月15日
         </p>
 
         <section className="space-y-4">
@@ -50,8 +50,8 @@ export default function PrivacyPage() {
               "ユーザーが利用する当組織のサービス（以下「当組織サービス」といいます。）の運営およびそれに伴うユーザーとのやりとり・情報提供",
               "当組織サービスの安全な運営に必要な不正対策",
               "当組織サービスの改善・新規開発",
-              "当組織における政策立案",
-              "当組織サービスに係る情報提供・広告配信",
+              "当組織サービスに係る情報提供",
+              "いただいたご意見の分析および政策検討への活用",
               "上記の各利用目的に必要な各種調査・分析",
               "「3. 第三者への情報提供について」に定める場合における第三者への開示・提供",
             ]}
@@ -100,7 +100,8 @@ export default function PrivacyPage() {
         <section className="space-y-4">
           <LegalSectionTitle>6. 保管期間と廃棄</LegalSectionTitle>
           <LegalParagraph>
-            取得した個人情報および対話ログは、法令（政治資金規正法等）に基づき必要な期間（原則7年間）保管した後、適切な方法で廃棄・削除します。
+            取得した個人情報および対話ログは、「2.
+            個人情報の収集方法と使用範囲」に定める利用目的の達成に必要な期間に限り保管し、保管の必要がなくなった後は適切な方法で廃棄・削除します。ただし、法令により保存期間が定められている情報については、当該期間が経過するまで保管します。
           </LegalParagraph>
         </section>
 

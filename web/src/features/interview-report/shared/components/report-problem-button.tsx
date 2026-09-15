@@ -1,10 +1,15 @@
 import Image from "next/image";
-import { EXTERNAL_LINKS } from "@/config/external-links";
+import { siteConfig } from "@/config/site.config";
 
 export function ReportProblemButton() {
+  // 報告フォームURLが未設定の場合は導線ごと非表示にする
+  if (!siteConfig.externalLinks.report) {
+    return null;
+  }
+
   return (
     <a
-      href={EXTERNAL_LINKS.REPORT}
+      href={siteConfig.externalLinks.report}
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center justify-center gap-1.5 py-2 text-base font-bold"

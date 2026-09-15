@@ -1,8 +1,12 @@
 import "server-only";
 
+import { siteConfig } from "@/config/site.config";
 import { DEFAULT_INTERVIEW_CHAT_MODEL } from "@/lib/ai/models";
 import { DisclosureBreadcrumb } from "../../shared/components/disclosure-breadcrumb";
 import type { InterviewConfig } from "../loaders/get-interview-config";
+
+// 空白のみの設定値は未設定として扱う
+const managingParty = siteConfig.managingParty.trim();
 
 interface InterviewDisclosurePageProps {
   billId: string;
@@ -36,7 +40,7 @@ function StaticDisclosureSection() {
           <div>
             <p className="font-bold">1. 実施目的</p>
             <p className="mt-1">
-              本インタビューを通じて収集された回答データは、今後の政策検討における基礎資料として活用いたします。個人の意見を特定の偏り（バイアス）なく集約し、客観性の高い政策立案に役立てることを目的としています。
+              本インタビューを通じて収集された回答データは、議案について考えるための基礎資料として活用いたします。個人の意見を特定の偏り（バイアス）なく集約し、客観性の高い議論に役立てることを目的としています。
             </p>
           </div>
 
@@ -62,7 +66,9 @@ function StaticDisclosureSection() {
               </li>
               <li>
                 <span className="font-bold">活用の範囲：</span>
-                回答内容は、党内における政策検討、およびAIを用いた統計的分析に限定して活用いたします。
+                {managingParty
+                  ? `回答内容は、${managingParty}の政策検討、およびAIを用いた統計的分析に限定して活用いたします。`
+                  : "回答内容は、政策検討、およびAIを用いた統計的分析に限定して活用いたします。"}
               </li>
               <li>
                 <span className="font-bold">分析プロセスの透明化：</span>

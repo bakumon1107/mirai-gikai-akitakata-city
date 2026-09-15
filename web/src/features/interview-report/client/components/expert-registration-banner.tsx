@@ -2,6 +2,13 @@
 
 import { MessageSquareMore } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { siteConfig } from "@/config/site.config";
+import { resolveContactName } from "../../shared/utils/contact-name";
+
+const contactName = resolveContactName(
+  siteConfig.managingParty,
+  siteConfig.operator.name
+);
 
 interface ExpertRegistrationBannerProps {
   onRegisterClick: () => void;
@@ -21,7 +28,8 @@ export function ExpertRegistrationBanner({
             有識者リストにご登録ください
           </h3>
           <p className="text-[15px] text-gray-800">
-            現場の知見を法案に活かすため、登録をいただいた方には、今後チームみらいから追加のインタビューをお願いする場合があります。
+            現場の知見を法案に活かすため、登録をいただいた方には、今後
+            {contactName}から追加のインタビューをお願いする場合があります。
           </p>
         </div>
       </div>

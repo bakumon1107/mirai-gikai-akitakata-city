@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { buildPrivateSubmissionNotice } from "../../shared/utils/policy-use-text";
 
 interface InterviewPublicConsentModalProps {
   open: boolean;
@@ -71,9 +72,7 @@ export function InterviewPublicConsentModal({
           </div>
 
           <p className="text-sm text-black">
-            {siteConfig.managingParty
-              ? `非公開で提出した場合でも、ご意見は${siteConfig.managingParty}の政策検討に活用させていただきます。`
-              : "非公開で提出した場合でも、ご意見は政策検討に活用させていただきます。"}
+            {buildPrivateSubmissionNotice(siteConfig.managingParty)}
           </p>
         </div>
 

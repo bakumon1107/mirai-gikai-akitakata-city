@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { buildPrivateSubmissionNotice } from "../../shared/utils/policy-use-text";
 
 interface MakePublicModalProps {
   open: boolean;
@@ -60,7 +61,7 @@ export function MakePublicModal({
             さまざまな意見が公開されることで、より深い議案議論が実現できます。
           </CheckListItem>
           <p className="text-sm text-black">
-            非公開で提出した場合でも、ご意見は党内での政策検討に活用させていただきます。
+            {buildPrivateSubmissionNotice(siteConfig.managingParty)}
           </p>
         </div>
 

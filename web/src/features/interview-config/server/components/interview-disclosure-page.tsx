@@ -5,6 +5,9 @@ import { DEFAULT_INTERVIEW_CHAT_MODEL } from "@/lib/ai/models";
 import { DisclosureBreadcrumb } from "../../shared/components/disclosure-breadcrumb";
 import type { InterviewConfig } from "../loaders/get-interview-config";
 
+// 空白のみの設定値は未設定として扱う
+const managingParty = siteConfig.managingParty.trim();
+
 interface InterviewDisclosurePageProps {
   billId: string;
   billName: string;
@@ -63,8 +66,8 @@ function StaticDisclosureSection() {
               </li>
               <li>
                 <span className="font-bold">活用の範囲：</span>
-                {siteConfig.managingParty
-                  ? `回答内容は、${siteConfig.managingParty}の政策検討、およびAIを用いた統計的分析に限定して活用いたします。`
+                {managingParty
+                  ? `回答内容は、${managingParty}の政策検討、およびAIを用いた統計的分析に限定して活用いたします。`
                   : "回答内容は、政策検討、およびAIを用いた統計的分析に限定して活用いたします。"}
               </li>
               <li>

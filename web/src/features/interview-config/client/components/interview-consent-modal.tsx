@@ -16,6 +16,9 @@ import {
 import { getInterviewChatLink } from "@/features/interview-config/shared/utils/interview-links";
 import { routes } from "@/lib/routes";
 
+// 空白のみの設定値は未設定として扱う
+const managingParty = siteConfig.managingParty.trim();
+
 interface InterviewConsentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -60,7 +63,11 @@ export function InterviewConsentModal({
 
         <div className="flex flex-col gap-6 mt-6">
           <ul className="flex flex-col gap-3 list-disc pl-5 text-sm font-bold text-gray-800 leading-[22px]">
-            <li>回答データは党内での政策検討に利用します。</li>
+            <li>
+              {managingParty
+                ? `回答データは${managingParty}の政策検討に利用します。`
+                : "回答データは政策検討に利用します。"}
+            </li>
             <li>個人情報や機密情報の記載はお控えください。</li>
             <li>
               インタビュー回答後に公開を許可するかを選択できます。公開を許可した場合、のちに

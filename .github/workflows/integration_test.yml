@@ -2,9 +2,9 @@ name: Integration Tests
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, akitakata/develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, akitakata/develop]
 
 jobs:
   integration-test:

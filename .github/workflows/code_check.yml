@@ -1,10 +1,10 @@
-name: Code Check kawasaki/develop
+name: Code Check
 
 on:
   push:
-    branches: [kawasaki/develop]
+    branches: [akitakata/develop, kawasaki/develop]
   pull_request:
-    branches: [kawasaki/develop]
+    branches: [akitakata/develop, kawasaki/develop]
 
 jobs:
   lint-and-typecheck:

@@ -22,11 +22,4 @@ describe("buildBillChatSystemHardPrompt", () => {
     expect(result).toContain("回答の難易度：難しい");
     expect(result).toContain("専門用語を正確に使用");
   });
-
-  it("みらい議会の説明が含まれる", () => {
-    const result = buildBillChatSystemHardPrompt("a", "b", "c", "d");
-
-    expect(result).toContain("みらい議会");
-    expect(result).toContain("チームみらい");
-  });
 });

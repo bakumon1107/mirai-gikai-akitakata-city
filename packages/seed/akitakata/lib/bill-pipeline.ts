@@ -497,3 +497,93 @@ export async function insertContent(
   });
   if (error) console.error("  ❌ bill_contents INSERT error:", error.message);
 }
+
+export type BillStatus = Database["public"]["Enums"]["bill_status_enum"];
+
+/**
+ * 議事録から読み取った議案の状態変化。
+ * AI生成ではなく議事録の記載をそのまま書き写す（「付託」「可決」等）。
+ */
+export type BillStatusUpdate = {
+  billNumber: string;
+  status: BillStatus;
+  /**
+   * 詳細ページのステータス表示の下に出る補足。
+   * 更新しないと「委員会審査中」の下に登録時の「本会議で上程」が残る。
+   */
+  statusNote: string;
+  /** 付託先が登録時の割り当てと違った場合に正す */
+  committeeId?: string;
+};
+
+/**
+ * 議事録の内容を議案のステータスに反映する。
+ *
+ * 反映前に全議案の存在を確認し、1件でも見つからなければ何も書き込まない。
+ * @returns 全件成功したら true
+ */
+export async function applyBillStatusUpdates(
+  supabase: SeedClient,
+  sessionSlug: string,
+  updates: BillStatusUpdate[],
+  isDryRun: boolean
+): Promise<boolean> {
+  const { data: session } = await supabase
+    .from("council_sessions")
+    .select("id")
+    .eq("slug", sessionSlug)
+    .maybeSingle();
+  if (!session) {
+    console.error(`❌ セッションが見つかりません: ${sessionSlug}`);
+    return false;
+  }
+
+  const { data: bills, error } = await supabase
+    .from("bills")
+    .select("id, bill_number, status, status_note, committee_id")
+    .eq("council_session_id", session.id)
+    .in(
+      "bill_number",
+      updates.map((u) => u.billNumber)
+    );
+  if (error) {
+    console.error("❌ bills取得失敗:", error.message);
+    return false;
+  }
+
+  const byNumber = new Map((bills ?? []).map((b) => [b.bill_number, b]));
+  const missing = updates
+    .map((u) => u.billNumber)
+    .filter((n) => !byNumber.has(n));
+  if (missing.length > 0) {
+    console.error(`❌ 存在しない議案番号: ${missing.join(", ")}。何も更新しません`);
+    return false;
+  }
+
+  let failures = 0;
+  for (const u of updates) {
+    const current = byNumber.get(u.billNumber)!;
+    const committeeChange =
+      u.committeeId && u.committeeId !== current.committee_id
+        ? `  委員会: ${current.committee_id?.slice(0, 8)} → ${u.committeeId.slice(0, 8)}`
+        : "";
+    console.log(
+      `  [${u.billNumber}] ${current.status} → ${u.status}「${u.statusNote}」${committeeChange}`
+    );
+    if (isDryRun) continue;
+
+    const { error: updateError } = await supabase
+      .from("bills")
+      .update({
+        status: u.status,
+        status_note: u.statusNote,
+        ...(u.committeeId ? { committee_id: u.committeeId } : {}),
+      })
+      .eq("id", current.id);
+    if (updateError) {
+      console.error(`    ❌ 更新失敗: ${updateError.message}`);
+      failures += 1;
+    }
+  }
+  return failures === 0;
+}

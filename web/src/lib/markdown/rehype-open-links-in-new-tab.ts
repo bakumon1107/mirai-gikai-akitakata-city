@@ -9,7 +9,7 @@ export function rehypeOpenLinksInNewTab() {
     visit(tree, "element", (node: Element) => {
       if (node.tagName === "a" && node.properties?.href) {
         node.properties.target = "_blank";
-        node.properties.rel = "noopener noreferrer";
+        node.properties.rel = ["noopener", "noreferrer"];
       }
     });
   };

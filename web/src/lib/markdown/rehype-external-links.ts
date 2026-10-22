@@ -16,7 +16,7 @@ export function rehypeExternalLinks() {
           node.properties.target = "_blank";
 
           // セキュリティのためrel属性を追加
-          node.properties.rel = "noopener noreferrer";
+          node.properties.rel = ["noopener", "noreferrer"];
         }
       }
     });

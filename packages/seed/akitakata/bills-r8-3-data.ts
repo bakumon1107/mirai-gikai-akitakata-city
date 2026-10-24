@@ -71,7 +71,8 @@ export const BILLS: BillMeta[] = [
   {
     billNumber: "50",
     name: "安芸高田市印鑑の登録及び証明に関する条例の一部を改正する条例",
-    committeeId: COM_SOUMU,
+    // 9/7 議事録で産業厚生常任委員会へ付託（市民部所管）
+    committeeId: COM_SANGYO,
     pdfKey: "gian50",
     pdfUrl: `${MEDIA_BASE}/33/82/33821701-dc79-4340-88b4-9eb86f673bbc/gian-dai-50gou-aki-takadashi-inkan-no-touroku-oyobi-shoumei-ni-kansu-ru-jourei-no-ichibu-wo-kaisei-suru-jourei.pdf`,
     setsuUrl: `${MEDIA_BASE}/4f/37/4f37067d-0ff1-4700-8f95-e57b863cc3e3/gian-dai-50gou-_gian-setsumeishiryou-hyoushi-aki-takadashi-inkan-no-touroku-oyobi-shoumei-ni-kansu-ru-jourei-no-ichibu-wo-kaisei-suru-jourei.pdf`,
@@ -79,7 +80,8 @@ export const BILLS: BillMeta[] = [
   {
     billNumber: "51",
     name: "安芸高田市手数料条例の一部を改正する条例",
-    committeeId: COM_SOUMU,
+    // 9/7 議事録で産業厚生常任委員会へ付託（市民部所管）
+    committeeId: COM_SANGYO,
     pdfKey: "gian51",
     pdfUrl: `${MEDIA_BASE}/ed/94/ed94fec8-f8ea-4139-bab0-697be9da184b/gian-dai-51gou-_aki-takadashi-tesuuryou-jourei-no-ichibu-wo-kaisei-suru-jourei.pdf`,
     setsuUrl: `${MEDIA_BASE}/7d/4b/7d4bf31b-b83d-4baa-ad1d-7060b5906179/gian-dai-51gou-_gian-setsumeishiryou-aki-takadashi-tesuuryou-jourei-wo-ichibu-kaisei-suru-jourei.pdf`,

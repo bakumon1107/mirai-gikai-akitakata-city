@@ -16,6 +16,14 @@ const WRAP_TOLERANCE = 6;
 // 折り返しのない文書（段落ごとに1行）では行幅がばらつくため、この割合は
 // 分位点の定義上おおむね 0.1〜0.15 にしかならない。
 const WRAPPED_LINE_RATIO = 0.3;
+// インデント別の折り返し幅を独立して推定するのに必要な行数。これに届かない
+// インデントはテキスト全体の折り返し幅で判定する。
+const MIN_INDENT_GROUP_LINES = 10;
+// インデント別の折り返し幅を採用する条件。その幅まで埋まっている行のうち、
+// 文末で終わる行がこの割合を超えるなら折り返しではなく箇条書き（議事日程・名簿など）
+// とみなして採用しない。実データでは折り返しの段組みは 0〜20% に収まり、
+// 箇条書きは各行が文として完結するためほぼ 100% になる。
+const MAX_SENTENCE_END_RATE = 0.5;
 
 // 全角文字を2、半角文字を1として行の表示幅を数える
 function displayWidth(text: string): number {
@@ -35,18 +43,72 @@ function displayWidth(text: string): number {
   return width;
 }
 
-// PDFの固定幅折り返しを推定する。折り返しでない文書には null を返す。
-function estimateWrapWidth(lines: string[]): number | null {
-  const widths = lines
-    .filter((line) => line.trim().length > 0)
-    .map(displayWidth)
-    .sort((a, b) => a - b);
-  if (widths.length === 0) return null;
+function indentOf(line: string): number {
+  return line.length - line.trimStart().length;
+}
 
-  const wrapWidth = widths[Math.floor(widths.length * 0.9)];
-  const filled = widths.filter((w) => w >= wrapWidth - WRAP_TOLERANCE).length;
-  if (filled / widths.length < WRAPPED_LINE_RATIO) return null;
-  return wrapWidth;
+function percentile90(sortedWidths: number[]): number {
+  return sortedWidths[Math.floor(sortedWidths.length * 0.9)];
+}
+
+/**
+ * PDFの固定幅折り返し幅を、行頭インデントごとに推定する。
+ * 折り返しでない文書には null を返す。
+ *
+ * 折り返し幅をテキスト全体で1つに決めると、話者名が長い発言（「◯高下福祉保健
+ * 部長兼福祉事務所長」など）のブロックだけ本文が右にずれて折り返し位置も右へ動く
+ * ため、分位点がそのブロックに引っ張られて本文の大半が「行末まで埋まっていない」
+ * と判定され、折り返しを検出できなくなる。インデントは段組みの左端を表すので、
+ * インデントごとの分位点も段組みの候補として扱う。
+ *
+ * ただしインデントごとの分位点をそのまま使うと、議事日程や名簿のように短い行が
+ * 同じインデントで並ぶブロックにもその幅が割り当てられ、1行ごとに完結している
+ * 行まで「行末まで埋まっている＝折り返し」とみなして連結してしまう。折り返しの
+ * 段組みは行が文の途中で切れるのが特徴なので、その幅まで埋まっている行の
+ * 文末率を見て、箇条書きらしいインデントは段組みとして採用しない。
+ */
+function estimateWrapWidths(lines: string[]): Map<number, number> | null {
+  const allWidths: number[] = [];
+  const linesByIndent = new Map<number, string[]>();
+  for (const line of lines) {
+    if (line.trim().length === 0) continue;
+    allWidths.push(displayWidth(line));
+    const group = linesByIndent.get(indentOf(line));
+    if (group) group.push(line);
+    else linesByIndent.set(indentOf(line), [line]);
+  }
+  if (allWidths.length === 0) return null;
+
+  allWidths.sort((a, b) => a - b);
+  // テキスト全体の折り返し位置。段組みが1つしかない文書ではこれがそのまま幅になる
+  const overallWidth = percentile90(allWidths);
+
+  const wrapWidths = new Map<number, number>();
+  let filled = 0;
+  for (const [indent, group] of linesByIndent) {
+    const widths = group.map(displayWidth).sort((a, b) => a - b);
+    const ownWidth = percentile90(widths);
+    const wrapWidth =
+      group.length >= MIN_INDENT_GROUP_LINES && isWrapColumn(group, ownWidth)
+        ? ownWidth
+        : overallWidth;
+    wrapWidths.set(indent, wrapWidth);
+    filled += widths.filter((w) => w >= wrapWidth - WRAP_TOLERANCE).length;
+  }
+  if (filled / allWidths.length < WRAPPED_LINE_RATIO) return null;
+  return wrapWidths;
+}
+
+/** その幅まで埋まっている行の多くが文の途中で切れていれば折り返しの段組みとみなす */
+function isWrapColumn(group: string[], wrapWidth: number): boolean {
+  const atColumn = group.filter(
+    (line) => displayWidth(line) >= wrapWidth - WRAP_TOLERANCE
+  );
+  if (atColumn.length === 0) return false;
+  const endsSentence = atColumn.filter((line) =>
+    SENTENCE_END_RE.test(line.trim())
+  ).length;
+  return endsSentence / atColumn.length <= MAX_SENTENCE_END_RATE;
 }
 
 /**
@@ -58,11 +120,12 @@ function estimateWrapWidth(lines: string[]): number | null {
  *   インデントが増えた行は連結せず新しい段落として扱う
  * - 話者マーク（◯）で始まる行は必ず段落の区切りになる
  * - 空行はページ替わりでも入るため、文が終わっている場合のみ段落の区切りとする
+ * - 折り返し幅は行頭インデント（段組みの左端）ごとに推定する
  * - 固定幅で折り返されていないテキストは連結せず、行をそのまま返す
  */
 export function unwrapTranscriptLines(rawText: string): string[] {
   const lines = rawText.split("\n");
-  const wrapWidth = estimateWrapWidth(lines);
+  const wrapWidths = estimateWrapWidths(lines);
 
   const paragraphs: string[] = [];
   let prevFilled = false;
@@ -78,10 +141,10 @@ export function unwrapTranscriptLines(rawText: string): string[] {
       continue;
     }
 
-    const indent = line.length - line.trimStart().length;
+    const indent = indentOf(line);
     const isSpeakerLine = SPEAKER_MARK_RE.test(trimmed);
     const isContinuation =
-      wrapWidth !== null &&
+      wrapWidths !== null &&
       paragraphs.length > 0 &&
       (prevFilled || !prevEndsSentence) &&
       !isSpeakerLine &&
@@ -93,8 +156,10 @@ export function unwrapTranscriptLines(rawText: string): string[] {
       paragraphs.push(trimmed);
     }
 
+    const wrapWidth = wrapWidths?.get(indent);
     prevFilled =
-      wrapWidth !== null && displayWidth(line) >= wrapWidth - WRAP_TOLERANCE;
+      wrapWidth !== undefined &&
+      displayWidth(line) >= wrapWidth - WRAP_TOLERANCE;
     prevEndsSentence = SENTENCE_END_RE.test(trimmed);
     // 話者マーク行は話者名の分だけ字下げが崩れるためインデント判定から除外する
     prevIndent = isSpeakerLine ? -1 : indent;

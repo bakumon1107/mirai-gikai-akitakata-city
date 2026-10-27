@@ -51,7 +51,7 @@ function mapToPressConference(row: PressConferenceRow): PressConference {
           .sort((a, b) => a.order_index - b.order_index)
           .map((turn) => ({
             id: turn.id,
-            speaker: turn.speaker as "mayor" | "reporter",
+            speaker: turn.speaker as "mayor" | "reporter" | "staff",
             speakerName: turn.speaker_name,
             content: turn.content,
             orderIndex: turn.order_index,

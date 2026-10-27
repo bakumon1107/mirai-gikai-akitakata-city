@@ -5,7 +5,7 @@ export type PressConferenceStatus =
   | "published"
   | "error";
 
-export type Speaker = "mayor" | "reporter";
+export type Speaker = "mayor" | "reporter" | "staff";
 
 export type PressConferenceTurn = {
   id: string;

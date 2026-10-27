@@ -683,6 +683,123 @@ const DATA: PressConferenceInput[] = [
       },
     ],
   },
+  {
+    slug: "2026-10-26",
+    title: "令和8年10月 市長定例記者会見",
+    heldAt: "2026-10-26",
+    youtubeUrl: "https://www.youtube.com/watch?v=XoTOkwLeSX0",
+    status: "published",
+    items: [
+      {
+        itemType: "announcement",
+        orderIndex: 0,
+        title: "井辻食産株式会社製造の餃子を学校給食等に提供",
+        summary:
+          "井辻食産株式会社から地域貢献事業の一環として、安芸高田市産の食材（青ねぎ・チンゲン菜・鶏肉）を使用した餃子を学校給食等に提供したいとの申し出があり、11月20日（金）に市内の幼稚園・保育園・小中学校の計18施設、約2,000人分の給食に提供する。献立は「揚げ安芸高田ぎょうざ」で、1人当たり2個を提供する。市長は、地域の食材を活用した餃子が子どもたちの給食に提供されることを大変ありがたく思うとし、同社の厚意に感謝を述べた。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/eb/ca/ebca8338-cbb7-4410-bd89-9bd2e599078d/shiryou-1_i-tsuji-shoku-san-kabushikigaisha-seizou-no-gyouza-wo-gakkoukyuushoku-nado-ni-teikyou.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 1,
+        title: "2026年度 安芸高田市生徒議会の開催",
+        summary:
+          "中学校生徒のまちづくりへの参画を目的に、11月11日（水）14時〜15時45分、安芸高田市役所本庁第2庁舎3階議場で生徒議会を開催する。生徒から見た「まちづくり」「市政運営」「地域課題の解決」を主題に、市内6中学校の生徒14名（各校議員役2名及び議長役2名）が模擬議会形式で市長に質問・提案を行う。議会の一般質問通告方式に準じ、1校1問で実施する。傍聴は自由。市長は、生徒議会を意見を聞くだけの場に終わらせず、提案を実際の取り組みにつなげ、その結果を生徒に返していく実効性のある取り組みにしたいと述べた。意見や提案を施策等に反映させ、生徒の更なる意見表明につながる好循環を創り出していく。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/65/28/652889d3-1494-4c4e-9bcb-1a1214196524/shiryou-2_2026nendo-_aki-takadashi-seito-gikai-no-kaisai.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 2,
+        title: "地域おこし協力隊 活動報告会",
+        summary:
+          "市内で活動する7名の地域おこし協力隊が、11月21日（土）10時〜12時に向原生涯学習センターみらいで活動報告会を開催する。参加費無料。報告者は岡本隊員（事業承継推進チャレンジ）、椎葉隊員（神楽門前湯治村のテナント活用チャレンジ）、松川隊員（高校魅力化推進チャレンジ・向原高校）、下林隊員（高校魅力化推進チャレンジ・吉田高校）、寺内隊員（生桑地区の地域振興チャレンジ）、長門隊員（伝統と耕作放棄地を活用したまちづくり）、中川隊員（循環型社会の実現に向けたフィールドでの実践〜起業へ）。隊員自らが、それぞれ取り組んできたことや地域との関わり、これまでの成果やこれから目指すことを発表し、11時30分からは隊員との交流会も行う。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/33/d3/33d36107-9a14-484d-a2a7-2c97070a294f/shiryou-3_chiiki-okoshi-kyouryoku-tai-_katsudouhoukoku-kai-_.pdf",
+          },
+          {
+            label: "チラシ",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/1a/1a/1a1ae7b5-4f50-4da3-a7af-420d176ed9b2/shiryou-3-2_chirashi.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 3,
+        title: "芸備線サイクルトレインの開催",
+        summary:
+          "芸備線沿線4市（広島市・安芸高田市・三次市・庄原市）で構成する芸備線対策協議会の主催で、芸備線の利用促進と沿線市町の魅力発信を目的としたサイクリングイベント「芸備線サイクルトレイン」を11月22日（日）に開催する。三次駅または狩留家駅から芸備線の貸切列車に乗り吉田口駅まで移動し、経験者向けの51.8キロコースと初心者向けの26.2キロコースに分かれて市内を走行する。初心者向けコースでは吉田口駅で電動アシスト付自転車をレンタルできる。プロ自転車ロードレースチーム「ヴィクトワール広島」の選手も参加する。参加費は3,000円（運賃・昼食代込み）、定員は50名（初心者向け20名、経験者向け30名）。申し込みの詳細は市ホームページやチラシで案内する。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/83/0a/830a310f-ad87-4340-b4ac-9027b9f06d1e/shiryou-4_geibisen-saikurutoreinno-kaisai-_.pdf",
+          },
+          {
+            label: "チラシ",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/cd/43/cd438294-96ef-4b62-9f29-ebc621638425/shiryou-4-2_chirashi.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 4,
+        title: "ハレ舞台〜広島広域都市圏〜",
+        summary:
+          "市長が会長を務める広島広域都市圏協議会「神楽」まち起こし協議会の主催で、子ども神楽を中心としたイベント「ハレ舞台〜広島広域都市圏〜」を11月28日（土）10時から（開場9時30分）広島駅南口地下広場で開催する。予約不要・鑑賞無料。神楽の後継者育成を目的に一昨年度から開催しており、子どもたちが日頃の練習の成果を披露するとともに、互いの舞を通じて刺激を受ける場となっている。出演は伊賀和志子ども神楽団（三次市）、出羽子ども神楽団（邑南町）、大塚子ども神楽団（北広島町）、比婆荒神神楽保存会（庄原市）、白谷神楽社中（吉賀町）、亀山子供神楽（広島市）、三谷神楽キッズ（益田市）。今年度から新たに庄原市が参画した。会場では広島広域都市圏内の特産品を販売する観光物産展も同時開催する。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/17/a5/17a501d0-b6ff-400f-8462-a0ac3f3a21d4/shiryou-5_hare-butai-hiroshima-kouiki-toshiken.pdf",
+          },
+          {
+            label: "チラシ",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/c4/5d/c45ddb7a-1739-4eb1-a47c-79f3bf83af42/shiryou-5-2_chirashi.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 5,
+        title: "中山間地域と都市部がつながるフェスタ ひろしま",
+        summary:
+          "中山間地域の課題解決に向けて、地域と継続的かつ多様な形で関わる都市部等の「関係人口」の拡大に向けた機運を高めるため、広島県の主催で「中山間地域と都市部がつながるフェスタ ひろしま」が11月21日（土）に開催される。屋内イベントは13時〜16時に三次市民ホールきりり大ホールで、入場無料。スペシャルトークショーには福岡ソフトバンクホークス元監督の工藤公康さんがゲストとして登場し、ソトコト編集長の指出一正さんをファシリテーターに、横田美香広島県知事と対談する。工藤さんは神奈川県に住みながら山梨県に畑を持ち、関係人口として通っている。ほかに県内の市長・町長等による地域の“宝”を紹介するプレゼンテーションや、関係人口創出の取組事例紹介も行われる。同日11時〜16時30分には同会場の駐車場で、県内各地の「食・もの・人」が集まるマルシェも開催される。安芸高田市も参加し、市長によるプレゼンテーションとマルシェへの出展を行う。",
+        resourceUrls: [
+          {
+            label: "資料",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/4e/0d/4e0dce49-e377-4f2d-a232-d1efc6795e21/shiryou-6_nakayama-kan-chiiki-to-toshibu-gatsunagarufesuta-_hiroshima-_.pdf",
+          },
+          {
+            label: "チラシ",
+            url: "https://www.akitakata.jp/akitakata-media/filer_public/d5/0c/d50c91f6-5400-40c8-b417-e727c75c3b77/shiryou-6-2_chirashi.pdf",
+          },
+        ],
+        turns: [],
+      },
+      {
+        itemType: "announcement",
+        orderIndex: 6,
+        title: "ふるさと納税返礼品紹介：株式会社八千代興産",
+        summary:
+          "寄附者から寄せられた「妊婦や乳幼児に優しいまちづくりをお願いします」というコメントに対し、市長は、妊娠届出時からネウボラあきたかたを中心に妊婦相談・母乳相談・マタニティ教室などを実施し、妊娠期から出産後まで切れ目のない支援に取り組んでいること、妊婦支援給付による経済的負担の軽減や子育てアプリ「あきたかた」を活用した情報発信にも取り組んでいることを紹介し、今後も必要な支援を必要な時に確実に受けられるよう情報発信と相談体制を一層充実させると述べた。今月の返礼品紹介は、八千代町の豊かな自然環境を生かして純国産すっぽんの養殖・加工・販売を行う株式会社八千代興産。すっぽんの産卵から飼育・商品化までを自社で管理し、できるだけ自然に近い環境で育てている。返礼品の「八千代すっぽん鍋セット」は、食べやすく加工した切り身と、甲羅を煮込んで仕上げた特製コラーゲンスープのセットで、家庭で本格的なすっぽん鍋を楽しめる。",
+        turns: [],
+      },
+    ],
+  },
 ];
 
 async function seedPressConferences() {
